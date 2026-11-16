@@ -1,0 +1,19 @@
+{% import "ui.html" as ui %}
+{% macro secondary(editor, can_write) %}
+{% for language in editor.secondary %}
+<fieldset class="content-language field-stack"><legend>{{ language.name }}</legend>
+{% for field in language.fields %}
+<label for="{{ field.id }}">{{ crate::i18n::text(field.label) }} · {{ language.name }}</label>
+{% if field.rich %}{% let rich_error = format!("{}-error", field.id) %}{{ ui::rich_editor(field.id, field.name, field.value, language.code, field.maximum, !can_write, field.invalid, rich_error.as_str()) }}
+{% else if field.multiline %}<textarea class="ui-control" lang="{{ language.code }}" id="{{ field.id }}" name="{{ field.name }}" rows="6" maxlength="{{ field.maximum }}"{% if !can_write %} readonly{% endif %}{% if field.invalid %} aria-invalid="true" aria-describedby="{{ field.id }}-error"{% endif %}>{{ field.value }}</textarea>
+{% else %}<input class="ui-control" lang="{{ language.code }}" id="{{ field.id }}" name="{{ field.name }}" value="{{ field.value }}" maxlength="{{ field.maximum }}"{% if !can_write %} readonly{% endif %}{% if field.invalid %} aria-invalid="true" aria-describedby="{{ field.id }}-error"{% endif %}>
+{% endif %}
+{% if field.invalid %}<small class="ui-field-error" id="{{ field.id }}-error">{{ crate::i18n::text("admin-content-field-error") }}</small>{% endif %}
+{% endfor %}
+</fieldset>
+{% endfor %}
+{% endmacro %}
+{% macro marker(editor) %}<input type="hidden" name="content_active_locales" value="{{ editor.active }}"><input type="hidden" name="content_primary_locale" value="{{ editor.primary }}">{% endmacro %}
+{% macro primary(editor) %}<legend>{{ editor.primary_name }} · {{ crate::i18n::text("admin-content-primary") }}</legend>{% endmacro %}
+{# Secondary-language fields as `ui-edit-list` cells; labels are visible only when the list is narrow. #}
+{% macro cells(editor, can_write) %}{% for language in editor.secondary %}{% for field in language.fields %}<div class="ui-edit-list__cell"><label class="ui-edit-list__label" for="{{ field.id }}">{{ crate::i18n::text(field.label) }} · {{ language.name }}</label>{% if field.multiline %}<textarea class="ui-control" lang="{{ language.code }}" id="{{ field.id }}" name="{{ field.name }}" rows="2" maxlength="{{ field.maximum }}"{% if !can_write %} readonly{% endif %}{% if field.invalid %} aria-invalid="true" aria-describedby="{{ field.id }}-error"{% endif %}>{{ field.value }}</textarea>{% else %}<input class="ui-control" lang="{{ language.code }}" id="{{ field.id }}" name="{{ field.name }}" value="{{ field.value }}" maxlength="{{ field.maximum }}"{% if !can_write %} readonly{% endif %}{% if field.invalid %} aria-invalid="true" aria-describedby="{{ field.id }}-error"{% endif %}>{% endif %}{% if field.invalid %}<small class="ui-field-error" id="{{ field.id }}-error">{{ crate::i18n::text("admin-content-field-error") }}</small>{% endif %}</div>{% endfor %}{% endfor %}{% endmacro %}

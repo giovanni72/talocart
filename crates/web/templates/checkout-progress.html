@@ -1,0 +1,4 @@
+<nav class="checkout-progress" aria-label="{{ crate::i18n::text("co-progress") }}"><ol>
+<li{% if !second_step %} aria-current="step"{% endif %}><span class="checkout-step-number">1</span>{% if second_step %}<a href="{{ crate::store_language::path("/checkout") }}">{{ crate::i18n::text("co-step-details") }}</a>{% else %}<strong>{{ crate::i18n::text("co-step-details") }}</strong>{% endif %}</li>
+<li{% if second_step %} aria-current="step"{% endif %}><span class="checkout-step-number">2</span>{% if second_step %}<strong>{{ crate::i18n::text("co-step-methods") }}</strong>{% else %}<span>{{ crate::i18n::text("co-step-methods") }}</span>{% endif %}</li>
+</ol></nav>

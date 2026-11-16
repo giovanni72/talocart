@@ -1,0 +1,27 @@
+/* Essential inherits default components and changes the page composition. */
+body.store-page[data-theme="essential"] .store-shell{max-width:1280px;padding:0 clamp(20px,4vw,56px)}
+body[data-theme="essential"] .site-header{grid-template-columns:minmax(0,1fr) auto;gap:20px;padding:32px 0 24px;min-height:0;border-bottom:0}
+body[data-theme="essential"] .store-header-actions{padding-top:0;align-self:center}
+body[data-theme="essential"] .essential-search{grid-column:1/-1;width:100%;max-width:720px;justify-self:start}
+body[data-theme="essential"] .header-search{max-width:none}
+body[data-theme="essential"] .category-navigation{border-top:2px solid var(--ink)}
+body[data-theme="essential"] .hero{grid-template-columns:1fr;padding:56px 0;gap:32px}
+body[data-theme="essential"] .hero-copy{max-width:760px}
+body[data-theme="essential"] .hero h1{font-size:clamp(2rem,5vw,4rem);max-width:18ch}
+body[data-theme="essential"] .hero-description{max-width:60ch}
+body[data-theme="essential"] .hero-art{height:180px}
+body[data-theme="essential"] .arch-back{width:30%;left:32%;height:160%}
+body[data-theme="essential"] .arch-front{width:26%;right:8%;height:180%}
+body[data-theme="essential"] .art-circle{left:18%;top:32px;width:90px;height:90px}
+body[data-theme="essential"] .store-products,body[data-theme="essential"] .home-featured .store-products{grid-template-columns:repeat(3,minmax(0,1fr));gap:32px 24px}
+body[data-theme="essential"] .store-product-copy{padding-bottom:22px}
+body[data-theme="essential"] .store-product-photo{aspect-ratio:4/3}
+body[data-theme="essential"] .store-product-title{font-size:1.2rem}
+body[data-theme="essential"] .catalog-layout{grid-template-columns:220px minmax(0,1fr);gap:32px}
+body[data-theme="essential"] .catalog-sidebar.store-filters{padding:20px;background:transparent;border-inline:0}
+body[data-theme="essential"] .store-detail{grid-template-columns:1fr 1fr;gap:40px}
+body[data-theme="essential"] .information-article{margin:2rem 0 0;max-width:76ch}
+body[data-theme="essential"] .essential-footer{margin-top:24px}
+@media(max-width:1000px){body[data-theme="essential"] .catalog-layout{grid-template-columns:1fr}body[data-theme="essential"] .store-products,body[data-theme="essential"] .home-featured .store-products{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){body[data-theme="essential"] .site-header{padding-top:24px;gap:20px 12px}body[data-theme="essential"] .essential-search{max-width:none}body[data-theme="essential"] .store-header-actions{max-width:220px}body[data-theme="essential"] .hero{padding:32px 0}body[data-theme="essential"] .hero-art{height:160px}body[data-theme="essential"] .store-detail{grid-template-columns:1fr;gap:24px}}
+@media(max-width:500px){body[data-theme="essential"] .store-products,body[data-theme="essential"] .home-featured .store-products{grid-template-columns:1fr}body[data-theme="essential"] .store-header-actions{max-width:190px}body[data-theme="essential"] .store-header-actions>nav{gap:8px;white-space:normal}}

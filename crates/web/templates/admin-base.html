@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% import "ui.html" as ui %}
+{% block styles %}<link rel="stylesheet" href="/assets/admin.css"><script src="/assets/product-tabs.js" defer></script><script src="/assets/media.js" defer></script>{% endblock %}
+{% block body_attributes %} class="admin-page" data-palette="{{ theme.palette }}" data-typography="{{ theme.typography }}" data-density="{{ theme.density }}"{% endblock %}
+{% block body %}
+<div class="admin-shell">
+  <aside class="admin-sidebar">
+    <a class="wordmark" href="/admin" aria-label="{{ store_name }} {{ crate::i18n::text("admin-overview-3") }}">{% include "store-brand.html" %}</a>
+    <p class="sidebar-label">{{ crate::i18n::text("admin-your-space") }}</p>
+    <nav aria-label="{{ crate::i18n::text("admin-administration-3") }}">
+      {% if nav.overview %}<a href="/admin"{% if section == "overview" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("layout-dashboard", "small") }}<span>{{ crate::i18n::text("admin-overview") }}</span></a>{% endif %}
+      {% if nav.orders %}<a href="/admin/orders"{% if section == "orders" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("shopping-cart", "small") }}<span>{{ crate::i18n::text("ord-title") }}</span></a>{% endif %}
+      {% if nav.customers %}
+      <details class="sidebar-group"{% if section == "customers" || section == "customer_groups" %} open{% endif %}>
+        <summary>{{ ui::icon("contact-round", "small") }}<span>{{ crate::i18n::text("cg-customers") }}</span></summary>
+        <div class="sidebar-submenu"><a href="/admin/customers"{% if section == "customers" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("user-round", "small") }}<span>{{ crate::i18n::text("cg-customers") }}</span></a><a href="/admin/customer-groups"{% if section == "customer_groups" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("users", "small") }}<span>{{ crate::i18n::text("cg-title") }}</span></a></div>
+      </details>
+      {% endif %}
+      {% if nav.categories || nav.brands || nav.products %}
+      <details class="sidebar-group"{% if section == "categories" || section == "brands" || section == "products" || section == "options" || section == "attributes" %} open{% endif %}>
+        <summary>{{ ui::icon("book-open", "small") }}<span>{{ crate::i18n::text("admin-catalogue-4") }}</span></summary><div class="sidebar-submenu">
+          {% if nav.products %}<a href="/admin/catalog/products"{% if section == "products" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("package", "small") }}<span>{{ crate::i18n::text("admin-products-2") }}</span></a>{% endif %}
+          {% if nav.categories %}<a href="/admin/catalog/categories"{% if section == "categories" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("folder-tree", "small") }}<span>{{ crate::i18n::text("admin-categories-2") }}</span></a>{% endif %}
+          {% if nav.brands %}<a href="/admin/catalog/brands"{% if section == "brands" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("tag", "small") }}<span>{{ crate::i18n::text("admin-brands-2") }}</span></a>{% endif %}
+          {% if nav.products %}<a href="/admin/catalog/options"{% if section == "options" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("layers", "small") }}<span>{{ crate::i18n::text("admin-options-2") }}</span></a>{% endif %}
+          {% if nav.products %}<a href="/admin/catalog/attributes"{% if section == "attributes" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("list-filter", "small") }}<span>{{ crate::i18n::text("attributes-title") }}</span></a>{% endif %}
+        </div>
+      </details>
+      {% endif %}
+      {% for link in nav.extensions %}<a data-extension-menu="{{ link.section }}" href="{{ link.href }}"{% if link.is_active(section) %} class="active" aria-current="page"{% endif %}>{{ ui::icon(link.icon, "small") }}<span>{{ link.title }}</span></a>{% endfor %}
+      {% if nav.pages || nav.settings %}
+      <details class="sidebar-group"{% if section == "pages" || section == "banners" %} open{% endif %}>
+        <summary>{{ ui::icon("panels-top-left", "small") }}<span>{{ crate::i18n::text("admin-design") }}</span></summary>
+        <div class="sidebar-submenu">
+          {% if nav.pages %}<a href="/admin/pages"{% if section == "pages" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("file-text", "small") }}<span>{{ crate::i18n::text("pages-title") }}</span></a>{% endif %}
+          {% if nav.settings %}<a href="/admin/banners"{% if section == "banners" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("panels-top-left", "small") }}<span>{{ crate::i18n::text("banners-title") }}</span></a>{% endif %}
+        </div>
+      </details>
+      {% endif %}
+      {% if nav.media %}<a href="/admin/media"{% if section == "media" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("image", "small") }}<span>{{ crate::i18n::text("admin-media") }}</span></a>{% endif %}
+      {% if nav.settings || nav.taxes || nav.overview %}
+      <details class="sidebar-group"{% if section == "settings" || section == "modules" || section == "customer_fields" || section == "tax_rates" || section == "tax_classes" || section == "tax_zones" || section == "shipping" || section == "payments" || section == "order_statuses" || section == "coupons" || section == "email" || section == "maintenance_settings" %} open{% endif %}>
+        <summary>{{ ui::icon("settings", "small") }}<span>{{ crate::i18n::text("admin-settings-3") }}</span></summary><div class="sidebar-submenu">
+          {% if nav.settings || nav.taxes %}<a href="{% if nav.settings %}/admin/settings{% else %}/admin/settings/taxes{% endif %}"{% if section == "settings" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("sliders-horizontal", "small") }}<span>{{ crate::i18n::text("admin-general") }}</span></a>{% endif %}
+          {% if nav.settings %}<a href="/admin/settings/customer-fields"{% if section == "customer_fields" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("users", "small") }}<span>{{ crate::i18n::text("cf-title") }}</span></a>{% endif %}
+          {% if nav.settings %}<a href="/admin/settings/payments"{% if section == "payments" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("credit-card", "small") }}<span>{{ crate::i18n::text("payment-title") }}</span></a>{% endif %}
+          {% if nav.settings %}<a href="/admin/settings/shipping"{% if section == "shipping" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("truck", "small") }}<span>{{ crate::i18n::text("shipping-title") }}</span></a>{% endif %}
+          {% if nav.settings %}<a href="/admin/settings/coupons"{% if section == "coupons" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("ticket-percent", "small") }}<span>{{ crate::i18n::text("coupon-title") }}</span></a>{% endif %}
+          {% if nav.settings %}<a href="/admin/settings/order-statuses"{% if section == "order_statuses" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("list-checks", "small") }}<span>{{ crate::i18n::text("order-status-title") }}</span></a>{% endif %}
+          {% if nav.settings %}<a href="/admin/settings/maintenance"{% if section == "maintenance_settings" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("sliders-horizontal", "small") }}<span>{{ crate::i18n::text("maintenance-title") }}</span></a>{% endif %}
+          {% if nav.settings %}<a href="/admin/settings/email"{% if section == "email" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("mail", "small") }}<span>{{ crate::i18n::text("mail-title") }}</span></a>{% endif %}
+          {% if nav.taxes %}<a href="/admin/settings/taxes/rates"{% if section == "tax_rates" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("percent", "small") }}<span>{{ crate::i18n::text("admin-tax-rates") }}</span></a><a href="/admin/settings/taxes/classes"{% if section == "tax_classes" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("tags", "small") }}<span>{{ crate::i18n::text("admin-tax-classes") }}</span></a><a href="/admin/settings/taxes/zones"{% if section == "tax_zones" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("map", "small") }}<span>{{ crate::i18n::text("admin-tax-zones") }}</span></a>{% endif %}
+          {% if nav.overview %}<a id="sidebar-modules-link" href="/admin/modules"{% if section == "modules" && !nav.module_page() %} class="active" aria-current="page"{% endif %}>{{ ui::icon("blocks", "small") }}<span>{{ crate::i18n::text("modules-title") }}</span></a>{% endif %}
+        </div>
+      </details>
+      {% endif %}
+      {% if nav.users || nav.roles %}
+      <details class="sidebar-group"{% if section == "users" || section == "roles" %} open{% endif %}>
+        <summary>{{ ui::icon("key-round", "small") }}<span>{{ crate::i18n::text("admin-users") }}</span></summary>
+        <div class="sidebar-submenu">
+          {% if nav.users %}<a href="/admin/users"{% if section == "users" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("user-cog", "small") }}<span>{{ crate::i18n::text("admin-user-list") }}</span></a>{% endif %}
+          {% if nav.roles %}<a href="/admin/roles"{% if section == "roles" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("shield-check", "small") }}<span>{{ crate::i18n::text("admin-roles") }}</span></a>{% endif %}
+        </div>
+      </details>
+      {% endif %}
+      {% if nav.operations || nav.updates || nav.error_logs %}
+      <details class="sidebar-group"{% if section == "operations" || section == "updates" || section == "error_logs" %} open{% endif %}>
+        <summary>{{ ui::icon("sliders-horizontal", "small") }}<span>{{ crate::i18n::text("admin-maintenance") }}</span></summary>
+        <div class="sidebar-submenu">
+          {% if nav.operations %}<a href="/admin/operations"{% if section == "operations" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("clipboard-list", "small") }}<span>{{ crate::i18n::text("ops-title") }}</span></a>{% endif %}
+          {% if nav.updates %}<a href="/admin/updates"{% if section == "updates" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("download", "small") }}<span>{{ crate::i18n::text("updates-title") }}</span></a>{% endif %}
+          {% if nav.error_logs %}<a href="/admin/error-logs"{% if section == "error_logs" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("triangle-alert", "small") }}<span>{{ crate::i18n::text("logs-title") }}</span></a>{% endif %}
+        </div>
+      </details>
+      {% endif %}
+      {% if nav.overview %}<a href="/admin/components"{% if section == "components" %} class="active" aria-current="page"{% endif %}>{{ ui::icon("eye", "small") }}<span>{{ crate::i18n::text("admin-interface-components") }}</span></a>{% endif %}
+    </nav>
+    <div class="sidebar-bottom">
+      <span class="sidebar-version" data-build-version="{{ nav.application.version }}">{{ crate::i18n::text("admin-app-version") }} <span>{{ nav.application.display }}</span></span>
+    </div>
+  </aside>
+  <div class="admin-workspace">
+    <header class="admin-topbar"><span>{{ crate::i18n::text("admin-administration-3") }} <span class="muted">/ {% block breadcrumb %}{% endblock %}</span></span><details class="account-menu">
+      <summary aria-label="{{ crate::i18n::text("admin-account-menu") }}"><span class="account-avatar" aria-hidden="true">{% include "account-avatar.html" %}</span><span class="account-menu-name">{{ account.name }}</span><span class="account-chevron" aria-hidden="true"></span></summary>
+      <div class="account-dropdown"><p class="account-identity"><strong>{{ account.name }}</strong><span>{{ account.email }}</span></p><a class="ui-with-icon" href="/admin/account"{% if section == "account" %} aria-current="page"{% endif %}>{{ ui::icon("user-round", "small") }}<span>{{ crate::i18n::text("admin-my-account-2") }}</span></a><form method="post" action="/admin/logout"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="ui-button ui-button--secondary ui-button--small" type="submit">{{ ui::icon("log-out", "normal") }}<span>{{ crate::i18n::text("admin-sign-out") }}</span></button></form></div>
+    </details></header>
+    {% block content %}{% endblock %}
+    <footer class="admin-footer">{{ store_name }} {{ crate::i18n::text("admin-local-preview") }} <span>{{ crate::i18n::text("admin-one-application-a-starting-point") }}</span></footer>
+  </div>
+</div>
+{% endblock %}

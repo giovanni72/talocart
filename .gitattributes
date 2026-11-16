@@ -1,0 +1,5 @@
+# Preserve the exact bytes of the already-applied phase-0 migration.
+migrations/0001_platform.sql whitespace=-blank-at-eof
+
+# Generated Tiptap bundle contains significant trailing spaces in Markdown strings.
+assets/vendor/tiptap/rich-text.min.js whitespace=-blank-at-eol

@@ -1,0 +1,26 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% block title %}{{ crate::i18n::text("ca-new") }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("cg-customers") }}{% endblock %}
+{% block styles %}{{ super() }}<script src="/assets/customer-admin.js" defer></script>{% endblock %}
+{% block content %}
+<main id="main" class="admin-main catalog-main customer-card" data-ca-discard="{{ crate::i18n::text("ca-discard") }}" data-ca-dirty="{{ crate::i18n::text("ca-dirty") }}">
+{{ ui::page_header(crate::i18n::text("ca-new"), "/admin/customers", crate::i18n::text("cg-customers-back")) }}
+{% if !error.is_empty() %}{{ ui::message("ca-error","error",error,true) }}{% endif %}
+<p class="ui-help" data-ca-dirty-status role="status" aria-live="polite"></p>
+<section class="editor-card"><h2>{{ crate::i18n::text("ca-profile") }}</h2>
+<form id="customer-profile-form" method="post" action="/admin/customers/new" data-ca-pending="{{ pending }}">
+<input type="hidden" name="csrf" value="{{ csrf }}">
+<fieldset class="field-stack"><legend class="visually-hidden">{{ crate::i18n::text("ca-new") }}</legend>
+<div class="field-stack"><label for="ca-customer_type">{{ crate::i18n::text("co-customer-type") }}</label><select id="ca-customer_type" name="customer_type" class="ui-control" required{% if invalid_type %} aria-invalid="true" aria-describedby="ca-customer-type-error"{% endif %}><option value="private"{% if profile.customer_type == "private" %} selected{% endif %}>{{ crate::i18n::text("co-private") }}</option><option value="business"{% if profile.customer_type == "business" %} selected{% endif %}>{{ crate::i18n::text("co-business") }}</option></select>{% if invalid_type %}<small id="ca-customer-type-error" class="ui-field-error">{{ crate::i18n::text("ca-field-error") }}</small>{% endif %}</div>
+<noscript><p class="ui-help">{{ crate::i18n::text("ca-new-no-js") }}</p></noscript>
+<div class="customer-fields-grid">{% let billing_groups = false %}{% include "customer-admin-fields.html" %}</div>
+<p class="ui-help">{{ crate::i18n::text("ca-new-password-help") }}</p>
+<div class="field-stack"><label for="customer-group">{{ crate::i18n::text("cg-group") }}</label><select class="ui-control" id="customer-group" name="group_id" required{% if invalid_group %} aria-invalid="true" aria-describedby="customer-group-error"{% endif %}>
+{% if invalid_group %}<option value="{{ selected }}" selected>{{ crate::i18n::text("cg-unavailable") }}</option>{% endif %}
+{% for group in groups %}<option value="{{ group.id }}"{% if !invalid_group && group.id == selected %} selected{% endif %}>{{ group.name(crate::i18n::locale()) }}{% if group.is_default %} · {{ crate::i18n::text("cg-default") }}{% endif %}</option>{% endfor %}
+</select>{% if invalid_group %}<small class="ui-field-error" id="customer-group-error">{{ crate::i18n::text("cg-unavailable") }}</small>{% endif %}</div>
+<label class="ui-check-label" for="ca-active"><input id="ca-active" name="active" class="ui-check" type="checkbox" value="true"{% if profile.active %} checked{% endif %}>{{ crate::i18n::text("ca-active") }}</label>
+<div class="page-actions"><button class="ui-button" type="submit" name="action" value="save">{{ ui::icon("plus") }}<span>{{ crate::i18n::text("ca-create") }}</span></button><button class="ui-button ui-button--secondary" type="submit" name="action" value="refresh" formnovalidate>{{ crate::i18n::text("ca-refresh") }}</button><a class="ui-button ui-button--secondary" href="/admin/customers">{{ crate::i18n::text("admin-cancel") }}</a></div>
+</fieldset></form></section></main>
+{% endblock %}

@@ -1,0 +1,1 @@
+{% for language in crate::store_language::languages() %}<link rel="alternate" hreflang="{{ language.0 }}" href="{{ crate::store_language::alternate(canonical, language.0) }}">{% endfor %}<link rel="alternate" hreflang="x-default" href="{{ crate::store_language::alternate(canonical, crate::store_language::primary()) }}">

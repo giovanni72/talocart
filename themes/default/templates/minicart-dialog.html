@@ -1,0 +1,8 @@
+{% import "ui.html" as ui %}
+<dialog id="minicart" class="ui-dialog minicart" aria-labelledby="minicart-title">
+  <div class="minicart-heading"><h2 id="minicart-title" class="ui-with-icon">{{ ui::icon("shopping-cart", "large") }}<span>{{ crate::i18n::text("store-minicart-title") }}</span></h2><button class="ui-button ui-button--mini ui-button--icon ui-button--secondary" type="button" data-minicart-close autofocus aria-label="{{ crate::i18n::text("store-minicart-close") }}" title="{{ crate::i18n::text("store-minicart-close") }}">{{ ui::icon("x", "small") }}</button></div>
+  <p id="minicart-loading" class="ui-message ui-message--info" role="status" hidden>{{ crate::i18n::text("store-minicart-loading") }}</p>
+  {{ ui::feedback("minicart-error", "error", crate::i18n::text("store-minicart-error"), hidden = true) }}
+  <div id="minicart-content" class="minicart-content" aria-live="polite" aria-busy="false"></div>
+  <div class="minicart-footer"><a class="ui-button ui-button--compact ui-button--secondary" href="{{ crate::store_language::path("/cart") }}">{{ ui::icon("shopping-cart", "small") }}<span>{{ crate::i18n::text("store-minicart-open") }}</span></a><a class="ui-button ui-button--compact" href="{{ crate::store_language::path("/checkout") }}">{{ crate::i18n::text("store-minicart-checkout") }}</a></div>
+</dialog>

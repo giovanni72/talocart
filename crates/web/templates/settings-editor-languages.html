@@ -1,0 +1,9 @@
+<fieldset{% if !owner %} disabled{% endif %}><legend id="store-languages-heading">{{ crate::i18n::text("admin-store-languages") }}</legend>
+<p class="settings-note">{{ crate::i18n::text("admin-store-language-routing-help") }}</p>
+<div class="field-stack"><label for="store-primary-locale">{{ crate::i18n::text("admin-store-primary-language") }}</label>
+<select class="ui-control" id="store-primary-locale" name="primary_locale"{% if errors.contains(&"primary_locale") %} aria-invalid="true" aria-describedby="primary-locale-error"{% endif %}>{% for language in crate::i18n::languages() %}<option value="{{ language.0 }}"{% if languages.primary_locale == language.0 %} selected{% endif %}>{{ language.1 }}</option>{% endfor %}</select>
+{% if errors.contains(&"primary_locale") %}<small id="primary-locale-error" class="field-error ui-field-error">{{ crate::i18n::text("admin-store-primary-language-error") }}</small>{% endif %}
+<fieldset{% if errors.contains(&"active_locales") %} aria-invalid="true" aria-describedby="active-locales-error"{% endif %}><legend>{{ crate::i18n::text("admin-store-active-languages") }}</legend>
+<div class="store-language-options">{% for language in crate::i18n::languages() %}<label class="theme-toggle"><input class="ui-check" type="checkbox" name="locale" value="{{ language.0 }}"{% if languages.selected(language.0) %} checked{% endif %}> {{ language.1 }}</label>{% endfor %}</div>
+{% if errors.contains(&"active_locales") %}<small id="active-locales-error" class="field-error ui-field-error">{{ crate::i18n::text("admin-store-active-languages-error") }}</small>{% endif %}</fieldset>
+</div></fieldset>

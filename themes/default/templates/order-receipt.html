@@ -1,0 +1,6 @@
+{% extends "storefront/layout.html" %}
+{% import "ui.html" as ui %}
+{% block title %}{{ crate::i18n::text(receipt_state.title()) }} {{ order.reference }} · {{ store_name }}{% endblock %}
+{% block metadata %}<meta name="robots" content="noindex,nofollow">{% if order.is_online() %}<script src="/assets/payment-status.js" defer></script><script src="/assets/order-receipt.js" defer></script>{% endif %}{% endblock %}
+{% block body_attributes %} class="store-page" data-palette="{{ theme.palette }}" data-typography="{{ theme.typography }}" data-density="{{ theme.density }}"{% endblock %}
+{% block store_content %}<main id="main" class="store-catalog">{% include "storefront/order-receipt-body.html" %}</main>{% endblock %}

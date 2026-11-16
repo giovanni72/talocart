@@ -1,0 +1,2 @@
+{% for pair in draft.fields %}<input type="hidden" name="{{ pair.0 }}" value="{{ pair.1 }}">{% endfor %}
+<input type="hidden" name="media_editor" value="{{ draft.editor }}"><input type="hidden" name="media_folders_page" value="{{ query.folders_page }}">{% match query.folder %}{% when Some with (id) %}<input type="hidden" name="media_folder" value="{{ id }}">{% when None %}{% endmatch %}

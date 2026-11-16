@@ -1,0 +1,18 @@
+{% macro render(product, nested, compact) %}
+<article class="store-product" role="listitem">
+  <a class="store-product-photo" href="{{ product.href }}" aria-label="{{ product.name }}">
+    {% if !product.image.is_empty() %}<img src="{{ product.image }}" srcset="{{ product.srcset }}" sizes="{% if crate::store_language::theme_id() == "essential" %}{% include "essential/templates/card-sizes.html" %}{% else %}{% include "default/templates/card-sizes.html" %}{% endif %}" alt="{{ product.name }}" loading="lazy" decoding="async">{% else %}<span class="muted">{{ crate::i18n::text("store-no-image") }}</span>{% endif %}
+  </a>
+  <div class="store-product-copy">
+    {% if product.category.is_some() || !product.brand_logo.is_empty() %}<div class="store-product-meta">
+      {% match product.category %}{% when Some with (name) %}<p class="eyebrow">{{ name }}</p>{% when None %}{% endmatch %}
+      {% if !product.brand_logo.is_empty() %}<img class="store-product-brand-logo" src="{{ product.brand_logo }}" srcset="{{ product.brand_logo_srcset }}" alt="{{ crate::i18n::text("store-logo") }} {{ product.brand_name }}" loading="lazy" decoding="async">{% endif %}
+    </div>{% endif %}
+    {% if nested %}<h3 class="store-product-title"><a href="{{ product.href }}">{{ product.name }}</a></h3>{% else %}<h2 class="store-product-title"><a href="{{ product.href }}">{{ product.name }}</a></h2>{% endif %}
+    <div class="store-product-price-row">
+      <p class="store-product-price"><span>{% if product.starting %}{{ crate::i18n::text("store-from") }} {% endif %}{{ crate::i18n::decimal(product.price) }} {{ talocart_platform::geography::currency_label(product.currency) }}</span><small>{{ crate::i18n::text("store-vat-included") }}</small></p>
+      <span class="product-availability{% if !product.available %} unavailable{% endif %}">{% if product.available %}{{ crate::i18n::text("store-available") }}{% else %}{{ crate::i18n::text("store-unavailable") }}{% endif %}</span>
+    </div>
+  </div>
+</article>
+{% endmacro %}

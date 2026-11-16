@@ -1,0 +1,14 @@
+{% import "ui.html" as ui %}
+{% if !banners.is_empty() %}
+<section class="home-banners" data-banners role="region" aria-roledescription="{{ crate::i18n::text("banners-carousel") }}" aria-label="{{ crate::i18n::text("banners-promotions") }}" data-play-label="{{ crate::i18n::text("banners-play") }}" data-pause-label="{{ crate::i18n::text("banners-pause") }}">
+<div class="home-banners-stage" aria-live="off">
+{% for banner in banners %}<div class="home-banner" data-banner role="group" aria-roledescription="{{ crate::i18n::text("banners-slide") }}" aria-label="{{ loop.index }} / {{ banners.len() }}"{% if !loop.first %} hidden{% endif %}>
+{% if !banner.href.is_empty() %}<a href="{{ banner.href }}">{% endif %}<img src="{{ banner.image }}" srcset="{{ banner.srcset }}" sizes="{% if crate::store_language::theme_id() == "essential" %}calc(min(100vw, 1280px) - clamp(40px, 8vw, 112px)){% else if theme.density == "compact" %}calc(min(100vw, 1440px) - 6vw){% else %}94vw{% endif %}" alt="{{ banner.alt }}" width="{{ banner.width }}" height="{{ banner.height }}"{% if loop.first %} loading="eager" fetchpriority="high"{% else %} loading="lazy"{% endif %} decoding="async">{% if !banner.href.is_empty() %}</a>{% endif %}</div>{% endfor %}
+</div>
+{% if banners.len() > 1 %}<div class="home-banners-controls" data-banner-controls hidden>
+<button class="ui-button ui-button--plain" type="button" data-banner-prev aria-label="{{ crate::i18n::text("banners-previous") }}">{{ ui::icon("arrow-up") }}</button>
+<div class="home-banners-dots">{% for banner in banners %}<button class="ui-button ui-button--plain home-banner-dot" type="button" data-banner-index="{{ loop.index0 }}" aria-label="{{ crate::i18n::text("banners-slide") }} {{ loop.index }}"{% if loop.first %} aria-current="true"{% endif %}><span aria-hidden="true"></span></button>{% endfor %}</div>
+<button class="ui-button ui-button--plain" type="button" data-banner-next aria-label="{{ crate::i18n::text("banners-next") }}">{{ ui::icon("arrow-up") }}</button>
+<button class="ui-button ui-button--plain" type="button" data-banner-toggle>{{ crate::i18n::text("banners-pause") }}</button>
+</div>{% endif %}
+</section>{% endif %}

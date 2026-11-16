@@ -1,0 +1,24 @@
+# Copy to /etc/talocart/talocart.toml, chmod 600, owner talocart.
+# Replace database credentials and public_origin. No live payments enabled.
+# Install the Nginx authentication rate limits with this HTTPS configuration.
+[server]
+listen = "127.0.0.1:3000"
+public_origin = "https://shop.example.com"
+secure_cookies = true
+[database]
+url = "postgres://talocart:CHANGE_ME@127.0.0.1:5432/talocart"
+max_connections = 5
+timeout_seconds = 3
+[media]
+root = "/var/lib/talocart/media"
+[packages]
+# Native installation/update is CLI-only by default. Explicitly opt in to panel + password confirmation.
+install = "cli"
+root = "/var/lib/talocart/packages"
+[store]
+name = "Talocart"
+
+# Private error journal: UTC daily rotation, at most 30 daily files.
+[logging]
+root = "/var/lib/talocart/logs"
+max_files = 30

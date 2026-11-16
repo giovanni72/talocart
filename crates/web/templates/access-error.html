@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}{{ error.title }} · {{ store_name }}{% endblock %}
+{% block styles %}<link rel="stylesheet" href="/assets/admin.css">{% endblock %}
+{% block body_attributes %} class="admin-page" data-palette="{{ theme.palette }}" data-typography="{{ theme.typography }}" data-density="{{ theme.density }}"{% endblock %}
+{% block body %}<div class="access-shell"><aside class="access-intro"><a class="wordmark" href="/" aria-label="{{ store_name }}">{% include "store-brand.html" %}</a></aside><main id="main" class="access-main" tabindex="-1"><div class="access-card">{% include "error-content.html" %}</div></main></div>{% endblock %}

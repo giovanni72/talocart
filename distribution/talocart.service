@@ -1,0 +1,29 @@
+[Unit]
+Description=Talocart
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=talocart
+Group=talocart
+WorkingDirectory=/var/lib/talocart
+ExecStart=/opt/talocart/current/bin/talocart --config /etc/talocart/talocart.toml serve
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=90
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/talocart
+ReadWritePaths=-/var/lib/talocart-update/requests
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

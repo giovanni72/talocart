@@ -1,0 +1,3 @@
+[general]
+# Order emails share the platform frame (mail-layout.html).
+dirs = ["templates", "../platform/templates"]

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% import "ui.html" as ui %}
+{% block title %}{{ crate::i18n::text("admin-access") }} {{ store_name }}{% endblock %}
+{% block styles %}<link rel="stylesheet" href="/assets/admin.css">{% endblock %}
+{% block body_attributes %} class="admin-page" data-palette="{{ theme.palette }}" data-typography="{{ theme.typography }}" data-density="{{ theme.density }}"{% endblock %}
+{% block body %}
+<div class="access-shell">
+  <aside class="access-intro"><a class="wordmark" href="/" aria-label="{{ store_name }} {{ crate::i18n::text("admin-home") }}">{% include "store-brand.html" %}</a><div><p class="eyebrow">{{ crate::i18n::text("admin-your-store-starts-here") }}</p><h1>{% if kind == "setup" %}{{ crate::i18n::text("admin-a-fresh-start") }}{% else if kind == "reset" %}{{ crate::i18n::text("admin-reclaim-your-space") }}{% else %}{{ crate::i18n::text("admin-welcome-back-to-your-space") }}{% endif %}</h1><p>{{ crate::i18n::text("admin-good-things-grow") }}<br>{{ crate::i18n::text("admin-one-step-at-a-time") }}</p></div></aside>
+  <main id="main" class="access-main"><div class="access-card">
+    <p class="eyebrow">{% if kind == "setup" %}{{ crate::i18n::text("admin-01-first-start") }}{% else %}{{ crate::i18n::text("admin-administration-2") }}{% endif %}</p>
+    <h2>{% if kind == "setup" %}{{ crate::i18n::text("admin-create-your-store") }}{% else if kind == "reset" %}{{ crate::i18n::text("admin-new-password") }}{% else %}{{ crate::i18n::text("admin-sign-in-to") }} {{ store_name }}{% endif %}</h2>
+    <p class="muted">{% if kind == "setup" %}{{ crate::i18n::text("admin-choose-a-name-and-create-the-first-administrator") }}{% else if kind == "reset" %}{{ crate::i18n::text("admin-ask-the-server-operator-for-a-recovery-code-it-is-valid-for-30-minutes-a") }}{% else %}{{ crate::i18n::text("admin-enter-your-account-credentials") }}{% endif %}</p>
+    {% if error != "" %}{{ ui::feedback("form-error", "error", error) }}{% endif %}
+    <form method="post" action="{% if kind == "setup" %}/setup{% else if kind == "reset" %}/admin/reset{% else %}/admin/login{% endif %}" class="field-stack" {% if error != "" %}aria-describedby="form-error"{% endif %}>
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      {% if kind == "reset" %}<label for="token">{{ crate::i18n::text("admin-code") }} {{ crate::i18n::text("admin-for-recovery") }}</label><input class="ui-control" id="token" name="token" type="password" required minlength="64" maxlength="64" autocomplete="off" aria-describedby="token-help"><small class="ui-help" id="token-help">{{ crate::i18n::text("admin-use-the-code-provided-by-the-server-operator") }}</small>{% endif %}
+      {% if kind == "setup" %}<label for="name">{{ crate::i18n::text("admin-store-name") }}</label><input class="ui-control" id="name" name="name" required maxlength="80" autocomplete="organization">{% endif %}
+      {% if kind == "setup" %}<label for="display-name">{{ crate::i18n::text("admin-display-name") }}</label><input class="ui-control" id="display-name" name="display_name" maxlength="80" autocomplete="name" aria-describedby="display-name-help{% if error != "" %} form-error{% endif %}"><small class="ui-help" id="display-name-help">{{ crate::i18n::text("admin-optional-up-to-80-characters-without-a-name-we-show-your-email") }}</small>{% endif %}
+      {% if kind != "reset" %}<label for="email">{{ crate::i18n::text("admin-administrator-email") }}</label><input class="ui-control" id="email" name="email" type="email" required maxlength="254" autocomplete="username">{% endif %}
+      <label for="password">{{ crate::i18n::text("admin-password") }}</label><input class="ui-control" id="password" name="password" type="password" required {% if kind != "login" %}minlength="12"{% endif %} maxlength="128" autocomplete="{% if kind == "login" %}current-password{% else %}new-password{% endif %}" aria-describedby="password-help"><small class="ui-help" id="password-help">{% if kind == "login" %}{{ crate::i18n::text("admin-your-administrator-account-password") }}{% else %}{{ crate::i18n::text("admin-from-12-to-128-characters-choose-a-long-unique-phrase") }}{% endif %}</small>
+      {% if kind == "setup" %}
+      <fieldset class="setup-languages"><legend>{{ crate::i18n::text("admin-store-languages") }}</legend>
+        <p class="ui-help" id="setup-languages-help">{{ crate::i18n::text("admin-setup-languages-help") }}</p>
+        <label for="setup-primary-locale">{{ crate::i18n::text("admin-store-primary-language") }}</label>
+        <select class="ui-control" id="setup-primary-locale" name="primary_locale" required aria-describedby="setup-languages-help{% if language_errors.contains(&"primary_locale") %} setup-primary-error{% endif %}"{% if language_errors.contains(&"primary_locale") %} aria-invalid="true"{% endif %}>
+          {% for language in crate::i18n::languages() %}<option value="{{ language.0 }}"{% if languages.primary_locale == language.0 %} selected{% endif %}>{{ language.1 }}</option>{% endfor %}
+        </select>
+        {% if language_errors.contains(&"primary_locale") %}<small class="ui-field-error field-error" id="setup-primary-error">{{ crate::i18n::text("admin-store-primary-language-error") }}</small>{% endif %}
+        <fieldset{% if language_errors.contains(&"active_locales") %} aria-invalid="true" aria-describedby="setup-active-error"{% endif %}><legend>{{ crate::i18n::text("admin-store-active-languages") }}</legend>
+        <div class="store-language-options">{% for language in crate::i18n::languages() %}<label class="ui-check-label"><input class="ui-check" type="checkbox" name="locale" value="{{ language.0 }}"{% if languages.selected(language.0) %} checked{% endif %}> {{ language.1 }}</label>{% endfor %}</div>
+        {% if language_errors.contains(&"active_locales") %}<small class="ui-field-error field-error" id="setup-active-error">{{ crate::i18n::text("admin-store-active-languages-error") }}</small>{% endif %}</fieldset>
+      </fieldset>
+      {% endif %}
+      {% if kind == "setup" %}<label class="catalog-active" for="install-demo"><input class="ui-check" id="install-demo" name="install_demo" type="checkbox" value="true"{% if install_demo %} checked{% endif %} aria-describedby="demo-help"> {{ crate::i18n::text("admin-install-demo-data") }}</label><small class="ui-help" id="demo-help">{{ crate::i18n::text("admin-example-categories-brands-taxes-and-products-with-images-and-variants-to") }}</small>{% endif %}
+      <button class="ui-button" type="submit">{% if kind == "setup" %}{{ crate::i18n::text("admin-create-store") }}{% else if kind == "reset" %}{{ crate::i18n::text("admin-save-new-password") }}{% else %}{{ crate::i18n::text("admin-sign-in") }}{% endif %}</button>
+    </form>
+    <form method="post" action="/admin/language" class="field-stack access-language">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="hidden" name="return_to" value="{% if kind == "setup" %}/setup{% else if kind == "reset" %}/admin/reset{% else %}/admin/login{% endif %}">
+      <label for="access-language">{{ crate::i18n::text("admin-sign-in-language") }}</label>
+      <select class="ui-control" id="access-language" name="locale">
+        {% for language in crate::i18n::languages() %}<option value="{{ language.0 }}"{% if crate::i18n::locale() == language.0 %} selected{% endif %}>{{ language.1 }}</option>{% endfor %}
+      </select>
+      <button class="ui-button ui-button--secondary" type="submit">{{ crate::i18n::text("admin-apply") }}</button>
+    </form>
+    <div class="access-links">{% if kind == "login" %}<a href="/admin/reset">{{ crate::i18n::text("admin-forgot-your-password") }}</a>{% else %}<a href="/admin/login">{{ crate::i18n::text("admin-back-to-sign-in") }}</a>{% endif %}<a href="/">{{ crate::i18n::text("admin-go-to-store") }}</a></div>
+  </div></main>
+</div>
+{% endblock %}

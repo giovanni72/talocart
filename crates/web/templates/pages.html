@@ -1,0 +1,41 @@
+{% extends "admin-base.html" %}
+{% block styles %}{{ super() }}{% if editing %}<script src="/assets/rich-text.js" defer></script>{% endif %}{% endblock %}
+{% import "ui.html" as ui %}
+{% import "pagination.html" as pagination %}
+{% import "content-fields.html" as content_fields %}
+{% block title %}{{ crate::i18n::text("pages-title") }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("pages-title") }}{% endblock %}
+{% block content %}<main id="main" class="admin-main catalog-main">{{ ui::page_header(crate::i18n::text("pages-title")) }}
+{% if !error.is_empty() %}{{ ui::feedback("pages-error","error",error) }}{% endif %}
+{% if saved %}{{ ui::feedback("pages-saved","success",crate::i18n::text("pages-saved")) }}{% endif %}
+{% if editing %}<p><a href="/admin/pages">{{ crate::i18n::text("pages-back") }}</a></p><section class="editor-card information-editor"><h2>{% if id == 0 %}{{ crate::i18n::text("pages-new") }}{% else %}{{ crate::i18n::text("pages-edit") }}{% endif %}</h2>
+<form method="post" action="{% if id == 0 %}/admin/pages/new{% else %}/admin/pages/{{ id }}{% endif %}" class="field-stack">
+<input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="revision" value="{{ revision }}">{{ content_fields::marker(content) }}
+<fieldset class="field-stack">{{ content_fields::primary(content) }}
+<label for="page-name">{{ crate::i18n::text("pages-name") }}</label>
+<input class="ui-control" id="page-name" name="name" maxlength="120" lang="{{ content.primary }}"{% if invalid.contains(&"name") %} aria-invalid="true" aria-describedby="pages-error"{% endif %} required{% if !can_write %} readonly{% endif %} value="{{ input.name }}">
+<label for="page-description">{{ crate::i18n::text("pages-body") }}</label>
+{{ ui::rich_editor("page-description", "description", input.description, content.primary, 20000, !can_write, invalid.contains(&"description"), "pages-error") }}
+<label for="page-seo_title">{{ crate::i18n::text("admin-seo-title") }}</label>
+<input class="ui-control" id="page-seo_title" name="seo_title" maxlength="120" lang="{{ content.primary }}"{% if invalid.contains(&"seo_title") %} aria-invalid="true" aria-describedby="pages-error"{% endif %}{% if !can_write %} readonly{% endif %} value="{{ input.seo_title }}">
+<label for="page-seo_description">{{ crate::i18n::text("admin-seo-description") }}</label>
+<input class="ui-control" id="page-seo_description" name="seo_description" maxlength="320" lang="{{ content.primary }}"{% if invalid.contains(&"seo_description") %} aria-invalid="true" aria-describedby="pages-error"{% endif %}{% if !can_write %} readonly{% endif %} value="{{ input.seo_description }}">
+
+</fieldset>
+{{ content_fields::secondary(content,can_write) }}
+<fieldset class="field-stack"{% if !can_write %} disabled{% endif %}><legend>{{ crate::i18n::text("pages-publication") }}</legend>
+<label for="page-slug">{{ crate::i18n::text("pages-slug") }}</label><input class="ui-control" id="page-slug" name="slug" value="{{ input.slug }}" maxlength="160" required{% if invalid.contains(&"slug") %} aria-invalid="true" aria-describedby="pages-error"{% endif %}>
+<p class="ui-help">{{ crate::i18n::text("pages-slug-help") }}</p>
+<label class="ui-check-label" for="page-published"><input class="ui-check" id="page-published" name="published" value="true" type="checkbox"{% if input.published %} checked{% endif %}>{{ crate::i18n::text("pages-published") }}</label>
+<label class="ui-check-label" for="page-header"><input class="ui-check" id="page-header" name="header_menu" value="true" type="checkbox"{% if input.header_menu %} checked{% endif %}>{{ crate::i18n::text("pages-header") }}</label>
+<label class="ui-check-label" for="page-footer"><input class="ui-check" id="page-footer" name="footer_menu" value="true" type="checkbox"{% if input.footer_menu %} checked{% endif %}>{{ crate::i18n::text("pages-footer") }}</label>
+<label for="page-sort">{{ crate::i18n::text("pages-sort") }}</label><input class="ui-control" id="page-sort" name="sort_order" value="{{ input.sort_order }}" type="number" min="-999999" max="999999" required{% if invalid.contains(&"sort_order") %} aria-invalid="true" aria-describedby="pages-error"{% endif %}>
+<p class="ui-help">{{ crate::i18n::text("pages-menu-help") }}</p>
+{% if can_write %}<button class="ui-button" name="action" value="save" type="submit">{{ ui::icon("save") }}<span>{{ crate::i18n::text("pages-save") }}</span></button>{% endif %}
+</fieldset></form>
+{% if id > 0 %}{% if input.published %}<p><a class="ui-button ui-button--secondary" href="/pages/{{ input.slug }}">{{ crate::i18n::text("pages-open") }}</a></p>{% endif %}{% if can_write %}<details class="information-delete"><summary>{{ crate::i18n::text("pages-delete") }}</summary><p>{{ crate::i18n::text("pages-delete-help") }}</p><form method="post" action="/admin/pages/{{ id }}"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="revision" value="{{ revision }}"><button class="ui-button ui-button--danger" type="submit" name="action" value="delete">{{ crate::i18n::text("pages-delete-confirm") }}</button></form></details>{% endif %}{% endif %}
+</section>
+{% else %}{% if can_write %}<p><a class="ui-button" href="/admin/pages/new">{{ ui::icon("plus") }}<span>{{ crate::i18n::text("pages-new") }}</span></a></p>{% endif %}
+{% if entries.is_empty() %}{{ ui::empty(crate::i18n::text("pages-title"),crate::i18n::text("pages-empty")) }}{% endif %}
+<div class="catalog-list">{% for entry in entries %}<article class="catalog-row"><div class="catalog-row-main"><h2><a href="/admin/pages/{{ entry.id }}">{{ entry.name }}</a></h2><p>/pages/{{ entry.slug }} · {% if entry.published %}{{ crate::i18n::text("pages-published") }}{% else %}{{ crate::i18n::text("pages-draft") }}{% endif %}</p><p class="ui-help">{% if entry.header_menu %}{{ crate::i18n::text("pages-header") }} · {% endif %}{% if entry.footer_menu %}{{ crate::i18n::text("pages-footer") }} · {% endif %}{{ crate::i18n::text("pages-sort") }}: {{ entry.sort_order }}</p></div><a class="ui-button ui-button--small" href="/admin/pages/{{ entry.id }}" aria-label="{{ crate::i18n::text("pages-edit") }}: {{ entry.name }}">{{ ui::icon("pencil") }}</a></article>{% endfor %}</div>
+{{ pagination::render(pagination) }}{% endif %}</main>{% endblock %}

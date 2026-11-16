@@ -1,0 +1,18 @@
+[server]
+listen = "127.0.0.1:3300"
+secure_cookies = false
+
+[database]
+max_connections = 5
+timeout_seconds = 3
+
+[media]
+root = "/data/media"
+
+[packages]
+root = "/data/packages"
+install = "cli"
+
+[logging]
+root = "/data/logs"
+max_files = 7

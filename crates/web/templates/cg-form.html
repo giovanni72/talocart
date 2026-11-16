@@ -1,0 +1,34 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% block title %}{{ crate::i18n::text("cg-title") }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("cg-title") }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main catalog-main">
+{% if id == 0 %}{{ ui::page_header(crate::i18n::text("cg-new"), "/admin/customer-groups", crate::i18n::text("cg-back")) }}{% else %}{{ ui::page_header(crate::i18n::text("cg-edit"), "/admin/customer-groups", crate::i18n::text("cg-back")) }}{% endif %}
+{% if !error.is_empty() %}{{ ui::feedback("cg-error","error",error) }}<p><a href="{{ action }}">{{ crate::i18n::text("payment-reload") }}</a></p>{% endif %}
+<section class="editor-card"><h2>{{ crate::i18n::text("cg-details") }}</h2>
+
+<form method="post" action="{{ action }}" class="field-stack">
+<input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="revision" value="{{ revision }}">
+<fieldset class="field-stack"{% if !can_write %} disabled{% endif %}><legend>{{ crate::i18n::text("cg-details") }}</legend>{% if can_write %}<button class="ui-button" type="submit" hidden tabindex="-1" aria-hidden="true">{{ crate::i18n::text("cg-save") }}</button>{% endif %}
+{% for field in fields %}<div class="field-stack"><label for="cg-{{ field.name }}">{{ field.label }}</label><input class="ui-control" id="cg-{{ field.name }}" name="{{ field.name }}" value="{{ field.value }}" maxlength="{{ field.max }}" required{% if field.invalid %} aria-invalid="true" aria-describedby="cg-{{ field.name }}-error"{% endif %}>{% if field.invalid %}<small class="ui-field-error" id="cg-{{ field.name }}-error">{{ field.error }}</small>{% endif %}</div>{% endfor %}
+<label class="ui-check-label" for="cg-default"><input class="ui-check" type="checkbox" id="cg-default" name="is_default" value="true"{% if is_default || persisted_default %} checked{% endif %}{% if persisted_default %} disabled{% endif %}>{{ crate::i18n::text("cg-default") }}</label><p class="field-help">{{ crate::i18n::text("cg-default-help") }}</p>
+<fieldset class="field-stack" aria-describedby="cg-tiers-help"><legend>{{ crate::i18n::text("cg-tiers-title") }}</legend>
+<p class="field-help" id="cg-tiers-help">{{ crate::i18n::text("cg-tiers-help") }}</p>
+<label class="ui-check-label" for="cg-tiers-enabled"><input class="ui-check" type="checkbox" id="cg-tiers-enabled" name="quantity_discounts_enabled" value="true"{% if quantity_discounts_enabled %} checked{% endif %}>{{ crate::i18n::text("cg-tiers-enabled") }}</label>
+<label class="ui-check-label" for="cg-tiers-guests"><input class="ui-check" type="checkbox" id="cg-tiers-guests" name="quantity_discounts_for_guests" value="true"{% if quantity_discounts_for_guests %} checked{% endif %} aria-describedby="cg-tiers-guests-help">{{ crate::i18n::text("cg-tiers-guests") }}</label>
+<p class="field-help" id="cg-tiers-guests-help">{{ crate::i18n::text("cg-tiers-guests-help") }}</p>
+{% if tiers_invalid %}<p class="ui-field-error" id="cg-tiers-error" role="alert">{{ crate::i18n::text("cg-tiers-error") }}</p>{% endif %}
+{% for tier in quantity_tiers %}<fieldset class="field-stack"><legend>{{ crate::i18n::text("cg-tier") }} {{ loop.index }}</legend>
+<div class="field-stack"><label for="cg-tier-quantity-{{ loop.index0 }}">{{ crate::i18n::text("cg-tier-quantity") }}</label><input class="ui-control" id="cg-tier-quantity-{{ loop.index0 }}" name="tier_quantity_{{ loop.index0 }}" type="number" min="1" max="99999900" step="1" value="{{ tier.min_quantity }}" required{% if tiers_invalid %} aria-invalid="true" aria-describedby="cg-tiers-error"{% endif %}></div>
+<div class="field-stack"><label for="cg-tier-percent-{{ loop.index0 }}">{{ crate::i18n::text("cg-tier-percent") }}</label><input class="ui-control" id="cg-tier-percent-{{ loop.index0 }}" name="tier_percent_{{ loop.index0 }}" inputmode="decimal" maxlength="6" value="{{ tier.percent }}" required{% if tiers_invalid %} aria-invalid="true" aria-describedby="cg-tiers-error"{% endif %}></div>
+{% if can_write %}<button class="ui-button ui-button--compact ui-button--secondary" type="submit" name="action" value="remove_tier_{{ loop.index0 }}" formnovalidate aria-label="{{ crate::i18n::text("cg-tier-remove") }} {{ loop.index }}">{{ ui::icon("trash", "small") }}<span>{{ crate::i18n::text("cg-tier-remove") }}</span></button>{% endif %}
+</fieldset>{% endfor %}
+{% if quantity_tiers.is_empty() %}<p class="field-help">{{ crate::i18n::text("cg-tiers-empty") }}</p>{% endif %}
+{% if can_write && can_add_tier %}<button class="ui-button ui-button--compact ui-button--secondary" type="submit" name="action" value="add_tier" formnovalidate>{{ ui::icon("plus", "small") }}<span>{{ crate::i18n::text("cg-tier-add") }}</span></button>{% endif %}
+<p class="field-help">{{ crate::i18n::text("cg-tiers-draft") }}</p>
+</fieldset>
+{% if can_write %}<button class="ui-button" type="submit" name="action" value="save">{{ ui::icon("save") }}<span>{{ crate::i18n::text("cg-save") }}</span></button>{% endif %}
+</fieldset></form></section>
+{% if id != 0 && can_write %}<section class="editor-card"><h2>{{ crate::i18n::text("cg-delete") }}</h2><p>{{ crate::i18n::text("cg-delete-help") }}</p><form method="post" action="{{ action }}/delete" class="field-stack"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="revision" value="{{ revision }}"><label class="ui-check-label" for="cg-confirm"><input class="ui-check" type="checkbox" name="confirm" id="cg-confirm" value="true" required>{{ crate::i18n::text("cg-confirm") }}</label><button class="ui-button ui-button--danger" type="submit">{{ ui::icon("trash") }}<span>{{ crate::i18n::text("cg-delete") }}</span></button></form></section>{% endif %}
+</main>{% endblock %}

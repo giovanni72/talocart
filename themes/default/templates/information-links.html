@@ -1,0 +1,1 @@
+{% for link in category_menu.pages %}{% if (footer && link.footer_menu) || (!footer && link.header_menu) %}<a href="{{ link.href }}"{% if link.current %} aria-current="page"{% endif %}>{{ link.name }}</a>{% endif %}{% endfor %}

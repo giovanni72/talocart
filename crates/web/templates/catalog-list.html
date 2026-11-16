@@ -1,0 +1,36 @@
+{% extends "admin-base.html" %}
+{% import "pagination.html" as pagination %}
+{% import "ui.html" as ui %}
+{% block title %}{{ crate::i18n::text(title) }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("admin-catalogue") }} {{ crate::i18n::text(title) }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main catalog-main taxonomy-main">
+  {% call ui::page_header(crate::i18n::text(title)) %}{% if can_write %}<a class="ui-button" href="{{ path }}/new">{{ ui::icon("plus", "normal") }}<span>{% if category %}{{ crate::i18n::text("admin-new-category") }}{% else %}{{ crate::i18n::text("admin-new-brand") }}{% endif %}</span></a>{% endif %}{% endcall %}
+  <p class="taxonomy-total">{% if category %}{{ crate::i18n::count("admin-count-categories", pagination.total) }}{% else %}{{ crate::i18n::count("admin-count-brands", pagination.total) }}{% endif %}</p>
+  {% if saved %}{{ ui::feedback("catalog-saved", "success", crate::i18n::text("admin-changes-saved")) }}{% endif %}{% if deleted %}{{ ui::feedback("catalog-deleted", "success", crate::i18n::text("admin-entry-deleted")) }}{% endif %}
+  <form method="get" action="{{ path }}" class="catalog-filters" role="search" aria-label="{{ crate::i18n::text("admin-search") }} {{ crate::i18n::text(title) }}">
+    <div class="ui-field"><label for="catalog-search">{{ crate::i18n::text("admin-search-by-name-or-slug") }}</label><input class="ui-control" id="catalog-search" type="search" name="q" value="{{ q }}" maxlength="120"></div>
+    <div class="ui-field"><label for="catalog-status">{{ crate::i18n::text("admin-status") }}</label><select class="ui-control" id="catalog-status" name="status"><option value=""{% if filter.is_empty() %} selected{% endif %}>{{ crate::i18n::text("admin-all") }}</option><option value="active"{% if filter == "active" %} selected{% endif %}>{{ crate::i18n::text("admin-active") }}</option><option value="inactive"{% if filter == "inactive" %} selected{% endif %}>{{ crate::i18n::text("admin-inactive") }}</option></select></div>
+    <button class="ui-button ui-button--small" type="submit">{{ ui::icon("list-filter", "normal") }}<span>{{ crate::i18n::text("admin-filter") }}</span></button><a class="ui-button ui-button--secondary ui-button--small" href="{{ path }}">{{ ui::icon("rotate-ccw", "normal") }}<span>{{ crate::i18n::text("admin-reset-filters") }}</span></a>
+  </form>
+  {% if rows.is_empty() %}
+  {% let empty_title %}{% if q.is_empty() && filter.is_empty() %}{% if category %}{{ crate::i18n::text("admin-the-first-category") }}{% else %}{{ crate::i18n::text("admin-the-first-brand") }}{% endif %}{% else %}{{ crate::i18n::text("admin-no-results") }}{% endif %}{% endlet %}
+  {% call ui::empty(empty_title, eyebrow="UNO SPAZIO DA ORGANIZZARE") %}<p>{% if q.is_empty() && filter.is_empty() %}{{ crate::i18n::text("admin-start-with-an-entry-you-can-edit-and-complete-it-later") }}{% else %}{{ crate::i18n::text("admin-try-another-name-or-remove-the-filters") }}{% endif %}</p>{% endcall %}{% else %}
+  {% if category %}{% include "category-tree-list.html" %}{% else %}
+  <div class="catalog-list taxonomy-grid" role="list" aria-label="{{ crate::i18n::text(title) }}">
+    {% for row in rows %}<article class="catalog-row taxonomy-card" role="listitem">
+      <div class="taxonomy-card-heading">
+        <div class="taxonomy-mark" aria-hidden="true">
+          {% if row.entry.logo_key.is_some() %}<img class="catalog-row-logo" src="{{ path }}/{{ row.entry.id }}/logo" alt="" loading="lazy">{% else %}<span class="taxonomy-monogram">{{ row.initial }}</span>{% endif %}
+        </div>
+        <div class="catalog-row-main"><h2><a href="{{ path }}/{{ row.entry.id }}">{{ row.entry.name }}</a></h2></div>
+      </div>
+      <dl class="taxonomy-card-details"><div><dt>{{ crate::i18n::text("admin-slug") }}</dt><dd class="catalog-slug">{{ row.entry.slug }}</dd></div></dl>
+      <div class="taxonomy-card-footer">
+        <div class="catalog-row-meta"><span class="catalog-status{% if !row.entry.active %} inactive{% endif %}">{% if row.entry.active %}{{ crate::i18n::text("admin-active-2") }}{% else %}{{ crate::i18n::text("admin-inactive-2") }}{% endif %}</span><span class="muted">{{ crate::i18n::text("admin-sort-order") }} {{ row.entry.sort_order }}</span></div>
+        <a class="catalog-edit{% if can_write %} ui-button--icon{% endif %} ui-button ui-button--secondary ui-button--compact" href="{{ path }}/{{ row.entry.id }}" aria-label="{% if can_write %}{{ crate::i18n::text("admin-edit") }}{% else %}{{ crate::i18n::text("admin-view") }}{% endif %} {{ row.entry.name }}" title="{% if can_write %}{{ crate::i18n::text("admin-edit") }}{% else %}{{ crate::i18n::text("admin-view") }}{% endif %} {{ row.entry.name }}"{% if can_write %} data-ui-edit{% endif %}>{% if can_write %}{{ ui::icon("pencil", "small") }}{% else %}{{ ui::icon("eye", "small") }}<span>{{ crate::i18n::text("admin-view") }}</span>{% endif %}</a>
+      </div>
+    </article>{% endfor %}
+  </div>{% endif %}{% endif %}
+  {{ pagination::render(pagination) }}
+</main>{% endblock %}

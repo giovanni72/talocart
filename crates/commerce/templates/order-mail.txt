@@ -1,0 +1,39 @@
+{{ snapshot.store_name }}
+{% if synthetic %}
+*** {{ words.test }} ***
+{% endif %}
+{% if staff %}{{ words.staff }}
+{% endif %}{{ title }}
+{{ words.order }} {{ snapshot.reference }}
+============================================================
+
+{% if greet %}{{ words.greeting }} {{ snapshot.customer_name }},
+
+{% endif %}{{ intro }}
+{% if is_payment %}
+{{ words.recorded }}: {{ paid }}
+{% endif %}{% if show_fulfillment %}
+{{ words.shipment }}
+------------------------------------------------------------
+{{ words.carrier }}: {{ snapshot.fulfillment.carrier }}
+{% if !snapshot.fulfillment.tracking_number.is_empty() %}{{ words.tracking_number }}: {{ snapshot.fulfillment.tracking_number }}
+{% endif %}{% if !snapshot.fulfillment.tracking_url.is_empty() %}{{ words.track }}: {{ snapshot.fulfillment.tracking_url }}
+{% endif %}{% endif %}
+{{ words.customer }}: {{ snapshot.customer_name }}
+{{ words.payment }}: {{ snapshot.payment_method }}
+{% if show_instructions && !snapshot.instructions.is_empty() %}
+{{ words.instructions }}
+------------------------------------------------------------
+{{ snapshot.instructions }}
+{% endif %}
+{{ words.summary }}
+------------------------------------------------------------
+{% for row in rows %}{{ row.description }}
+  {{ words.quantity }}: {{ row.quantity }} · {{ row.amount }}
+{% endfor %}------------------------------------------------------------
+{% for line in totals %}{% if line.kind == "total" %}{{ line.label|upper }}: {{ line.amount }}
+{% else %}{{ line.label }}: {{ line.amount }}
+{% endif %}{% endfor %}
+--
+{{ words.footer }}
+{{ snapshot.store_name }}

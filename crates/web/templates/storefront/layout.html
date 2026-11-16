@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% block theme_styles %}<link rel="stylesheet" href="/assets/themes/default.css">{% if crate::store_language::theme_id() == "essential" %}<link rel="stylesheet" href="/assets/themes/essential.css">{% endif %}{% endblock %}
+{% block theme_attributes %} data-theme="{{ crate::store_language::theme_id() }}" hx-headers='{"X-Talocart-Store-Policy":"{{ crate::store_language::signature() }}"}'{% endblock %}
+{% block body %}<div class="store-shell">{% block store_header %}{% include "storefront/theme-header.html" %}{% endblock %}{% block store_content %}{% endblock %}{% block store_footer %}{% include "storefront/theme-footer.html" %}{% endblock %}</div>{% endblock %}

@@ -1,0 +1,21 @@
+{% import "ui.html" as ui %}
+<div data-minicart-count="{{ count }}">
+{% match notice %}{% when Some with ((failed, text)) %}{% if failed %}{{ ui::message("minicart-notice", "error", text) }}{% else %}<p class="visually-hidden" role="status">{{ text }}</p>{% endif %}{% when None %}{% endmatch %}
+{% if count == 0 %}{{ ui::empty(crate::i18n::text("store-cart-empty"), crate::i18n::text("store-cart-empty-help"), true) }}{% else %}
+{% match quote %}{% when Some with (quote) %}
+<ul class="minicart-items">
+{% for line in quote.lines %}<li class="minicart-item">
+<div class="minicart-thumbnail">{% match line.current %}{% when Some with (item) %}{% if let Some(id) = item.image_id %}<img src="/media/image/{{ id }}/thumbnail" alt="{{ line.name }}" width="64" height="64" decoding="async">{% else %}<span role="img" aria-label="{{ crate::i18n::text("store-no-image") }}">{{ ui::icon("image") }}</span>{% endif %}{% when None %}<span role="img" aria-label="{{ crate::i18n::text("store-no-image") }}">{{ ui::icon("image") }}</span>{% endmatch %}</div>
+<div class="minicart-item-copy"><h3>{% match line.current %}{% when Some with (item) %}<a href="{{ crate::store_language::product_path(item.slug) }}">{{ line.name }}</a>{% when None %}{{ line.name }}{% endmatch %}</h3><p class="ui-help">{{ line.code }}</p>
+{% match line.current %}{% when Some with (item) %}{% if !item.label.is_empty() %}<p class="ui-help">{{ item.label }}</p>{% endif %}{% when None %}{% endmatch %}
+<p class="minicart-quantity">{{ crate::i18n::text("store-cart-quantity") }}: {{ line.quantity }}</p></div>
+<div class="minicart-item-side">{% match line.totals %}{% when Some with (totals) %}<strong class="minicart-amount">{{ crate::i18n::decimal(totals.gross().display()) }} {{ talocart_platform::geography::currency_label(quote.currency) }}</strong>{% when None %}{% endmatch %}
+<form class="minicart-remove" method="post" action="{{ crate::store_language::path(format!("/cart/items/{}", line.id)) }}" hx-post="{{ crate::store_language::path(format!("/cart/items/{}", line.id)) }}" hx-target="#minicart-content" hx-swap="innerHTML" hx-sync="closest .minicart-items:drop" hx-disabled-elt="find button"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="revision" value="{{ quote.revision }}"><input type="hidden" name="view" value="minicart"><button class="ui-button ui-button--mini ui-button--icon ui-button--secondary" name="action" value="remove" type="submit" data-minicart-remove title="{{ crate::i18n::text("store-cart-remove") }}">{{ ui::icon("trash", "small") }}<span class="visually-hidden">{{ crate::i18n::text("store-cart-remove") }} {{ line.name }}</span></button></form></div>
+{% if line.issue.is_some() %}<div class="minicart-notice">{{ ui::message(format!("minicart-issue-{}", line.id), "error", crate::cart::issue(line.issue)) }}</div>{% endif %}
+{% if line.changed %}<div class="minicart-notice">{{ ui::message(format!("minicart-changed-{}", line.id), "info", crate::i18n::text("store-cart-price-changed")) }}</div>{% endif %}
+</li>{% endfor %}
+</ul>
+{% match quote.totals %}{% when Some with (totals) %}<dl class="minicart-totals"><div><dt>{{ crate::i18n::text("store-net") }}</dt><dd data-minicart-net>{{ crate::i18n::decimal(totals.net().display()) }} {{ talocart_platform::geography::currency_label(quote.currency) }}</dd></div><div><dt>{{ crate::i18n::text("store-minicart-tax") }}</dt><dd data-minicart-tax>{{ crate::i18n::decimal(totals.tax().display()) }} {{ talocart_platform::geography::currency_label(quote.currency) }}</dd></div><div class="minicart-total"><dt>{{ crate::i18n::text("store-cart-total") }}</dt><dd data-minicart-total>{{ crate::i18n::decimal(totals.gross().display()) }} {{ talocart_platform::geography::currency_label(quote.currency) }}</dd></div></dl>{% when None %}{% if quote.overflow %}{{ ui::message("minicart-overflow","error",crate::i18n::text("store-cart-overflow")) }}{% else %}{{ ui::message("minicart-unavailable","info",crate::i18n::text("store-cart-fix-items")) }}{% endif %}{% endmatch %}
+
+{% when None %}{% endmatch %}{% endif %}
+</div>

@@ -1,0 +1,75 @@
+{% import "ui.html" as ui %}
+{% import "pagination.html" as pagination_ui %}
+
+<p class="eyebrow">{{ crate::i18n::text("customer-area") }}</p><h1>{{ title }}</h1>
+<div class="customer-layout">
+<aside class="customer-navigation">
+{% if let Some(account) = account %}
+{% if !account.first_name.is_empty() || !account.last_name.is_empty() %}<p class="customer-name">{{ account.first_name }} {{ account.last_name }}</p>{% endif %}<p class="ui-help">{{ account.email }}</p>
+<nav aria-label="{{ crate::i18n::text("customer-navigation") }}">
+<a href="{{ crate::store_language::path("/account") }}"{% if kind.key() == "account" %} aria-current="page"{% endif %}>{{ crate::i18n::text("customer-profile") }}</a>
+<a href="{{ crate::store_language::path("/account/addresses") }}"{% if kind.key() == "addresses" || kind.key() == "address" %} aria-current="page"{% endif %}>{{ crate::i18n::text("customer-addresses") }}</a>
+<a href="{{ crate::store_language::path("/account/orders") }}"{% if kind.key() == "orders" || kind.key() == "order" %} aria-current="page"{% endif %}>{{ crate::i18n::text("customer-orders") }}</a>
+<a href="{{ crate::store_language::path("/account/password") }}"{% if kind.key() == "password" %} aria-current="page"{% endif %}>{{ crate::i18n::text("customer-change-password") }}</a>
+</nav>
+
+{% else %}
+<h2>{{ crate::i18n::text("customer-intro-title") }}</h2><p>{{ crate::i18n::text("customer-intro") }}</p>
+<nav aria-label="{{ crate::i18n::text("customer-navigation") }}"><a href="{{ crate::customers::auth_link("login",next) }}"{% if kind.key() == "login" %} aria-current="page"{% endif %}>{{ crate::i18n::text("customer-login") }}</a><a href="{{ crate::customers::auth_link("register",next) }}"{% if kind.key() == "register" %} aria-current="page"{% endif %}>{{ crate::i18n::text("customer-register") }}</a></nav>
+{% endif %}
+</aside>
+<div class="customer-content">
+{% if account.is_none() && (next == "/checkout" || next == "/checkout/methods") %}{{ ui::message("customer-checkout-login","info",crate::i18n::text("customer-checkout-auth-required")) }}{% endif %}
+{% if !error.is_empty() %}{{ ui::feedback("customer-error","error",error) }}{% endif %}
+{% if !notice.is_empty() %}{{ ui::feedback("customer-notice","success",notice) }}{% endif %}
+{% if kind.key() == "confirm" %}
+<p class="ui-help">{{ crate::i18n::text("customer-confirmation-help") }}</p>
+<form id="customer-confirmation-form" method="post" action="{{ action }}" class="checkout-section">
+<input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="token" value="{{ confirmation_token }}">
+<button class="ui-button" type="submit">{{ crate::i18n::text("customer-confirm-email") }}</button>
+</form>
+<p><a href="{{ crate::store_language::path("/account/confirmation") }}">{{ crate::i18n::text("customer-resend-confirmation") }}</a></p>
+{% endif %}
+{% if !fields.is_empty() %}
+<form data-customer-type="{{ customer_type }}" id="customer-form" method="post" action="{{ action }}" class="checkout-section" novalidate>
+<input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="revision" value="{{ revision }}"><input type="hidden" name="next" value="{{ next }}">
+{% if kind.key() == "register" %}<p class="ui-help">{% if confirmation_required %}{{ crate::i18n::text("customer-registration-confirmation") }}{% else %}{{ crate::i18n::text("customer-registration-help") }}{% endif %}</p>{% endif %}
+{% if kind.key() == "confirmation" %}<p class="ui-help">{{ crate::i18n::text("customer-resend-help") }}</p>{% endif %}
+{% if kind.key() == "register" || kind.key() == "password" || kind.key() == "reset" %}<p id="customer-password-help" class="ui-help">{{ crate::i18n::text("customer-password-help") }}</p>{% endif %}
+{% if kind.key() == "reset" %}{{ ui::message("customer-reset-help","info",crate::i18n::text("customer-reset-help")) }}{% endif %}
+{% if kind.key() == "address" %}<p class="ui-help">{{ crate::i18n::text("customer-address-help") }}</p>{% endif %}
+{% if kind.key() == "register" || kind.key() == "account" %}<div class="field-stack"><label for="customer-type">{{ crate::i18n::text("co-customer-type") }}</label><select class="ui-control" id="customer-type" name="customer_type"><option value="private"{% if customer_type == "private" %} selected{% endif %}>{{ crate::i18n::text("co-private") }}</option><option value="business"{% if customer_type == "business" %} selected{% endif %}>{{ crate::i18n::text("co-business") }}</option></select></div>{% endif %}
+<div class="checkout-fields">
+{% for field in fields %}<div class="field-stack" data-field-policy data-private-mode="{{ field.private_mode }}" data-business-mode="{{ field.business_mode }}"{% if field.hidden %} hidden{% endif %}>
+<label for="customer-{{ field.name }}">{{ field.label }} <span data-required-mark aria-hidden="true"{% if !field.required %} hidden{% endif %}>*</span></label>
+{% if field.name == "country" %}<select class="ui-control" id="customer-country" name="country" autocomplete="country" required{% if field.error %} aria-invalid="true" aria-describedby="customer-country-error"{% endif %}><option value="">{{ crate::i18n::text("co-select-country") }}</option>{% for country in countries %}<option value="{{ country.0 }}"{% if country.0 == field.value %} selected{% endif %}>{{ country.1 }}</option>{% endfor %}</select>
+{% else %}<input class="ui-control" id="customer-{{ field.name }}" name="{{ field.name }}" type="{{ field.kind }}" value="{{ field.value }}" maxlength="{{ field.max }}" autocomplete="{{ field.autocomplete }}"{% if field.hidden %} disabled{% endif %}{% if field.required %} required{% endif %}{% if field.name == "password" && kind.key() != "login" %} minlength="12" aria-describedby="customer-password-help{% if field.error %} customer-password-error{% endif %}"{% else if field.error %} aria-describedby="customer-{{ field.name }}-error"{% endif %}{% if field.error %} aria-invalid="true"{% endif %}>{% endif %}
+{% if field.error %}<p id="customer-{{ field.name }}-error" class="ui-field-error">{{ field.error_text }}</p>{% endif %}
+</div>{% endfor %}
+</div>
+{% if kind.key() == "address" %}<p><label class="ui-check-label"><input class="ui-check" type="checkbox" id="customer-is_default" name="is_default" value="true" aria-describedby="customer-default-help"{% if address_default %} checked{% endif %}> {{ crate::i18n::text("customer-address-default") }}</label></p><p class="ui-help" id="customer-default-help">{{ crate::i18n::text("customer-address-default-help") }}</p>{% endif %}
+{% if kind.key() == "account" %}{% if let Some(account) = account %}<p class="customer-email">{{ account.email }} · <a href="{{ crate::store_language::path("/account/email") }}">{{ crate::i18n::text("customer-change-email") }}</a></p>{% endif %}{% endif %}
+{% if kind.key() == "email" %}<p class="ui-help">{{ crate::i18n::text("customer-email-help") }}</p>{% endif %}
+<div class="checkout-actions"><button class="ui-button" type="submit">{% if kind.key() == "confirmation" %}{{ crate::i18n::text("customer-resend-confirmation") }}{% else if kind.key() == "login" %}{{ crate::i18n::text("customer-login") }}{% else if kind.key() == "register" %}{{ crate::i18n::text("customer-register") }}{% else if kind.key() == "reset" || kind.key() == "password" %}{{ crate::i18n::text("customer-change-password") }}{% else %}{{ crate::i18n::text("customer-save") }}{% endif %}</button>{% if kind.key() == "register" || kind.key() == "account" %}<noscript><button class="ui-button ui-button--secondary" name="action" value="refresh" type="submit" formnovalidate>{{ crate::i18n::text("cf-refresh") }}</button></noscript>{% endif %}{% if kind.key() == "email" %}<a href="{{ crate::store_language::path("/account") }}">{{ crate::i18n::text("customer-back-profile") }}</a>{% endif %}{% if kind.key() == "address" %}<a href="{{ crate::store_language::path("/account/addresses") }}">{{ crate::i18n::text("customer-back-addresses") }}</a>{% endif %}</div>
+</form>
+{% if kind.key() == "login" %}<p><a href="{{ crate::store_language::path("/account/reset") }}">{{ crate::i18n::text("customer-forgot-password") }}</a></p><p><a href="{{ crate::store_language::path("/account/confirmation") }}">{{ crate::i18n::text("customer-resend-confirmation") }}</a></p>{% endif %}
+{% endif %}
+{% if kind.key() == "addresses" %}
+<div class="customer-toolbar"><p>{{ crate::i18n::text("customer-address-help") }}</p><a class="ui-button" href="{{ crate::store_language::path("/account/addresses/new") }}">{{ ui::icon("plus") }}{{ crate::i18n::text("customer-new-address") }}</a></div>
+{% if addresses.is_empty() %}{{ ui::empty(crate::i18n::text("customer-no-addresses"), "", true) }}{% endif %}
+<div class="customer-addresses">{% for address in addresses %}<section class="checkout-section" data-customer-address="{{ address.id }}"><h2>{{ address.label }}</h2>{% if address.is_default %}<p class="ui-help" data-address-default><strong>{{ crate::i18n::text("customer-address-default-tag") }}</strong></p>{% endif %}<p>{{ address.first_name }} {{ address.last_name }}<br>{% if !address.company.is_empty() %}{{ address.company }}<br>{% endif %}{{ address.street }} {{ address.number }}<br>{% if !address.extra.is_empty() %}{{ address.extra }}<br>{% endif %}{{ address.postal }} {{ address.city }} {{ address.region }} · {{ address.country }}<br>{{ address.phone }}</p>
+<div class="checkout-actions"><a class="ui-button ui-button--secondary" href="{{ crate::store_language::path(format!("/account/addresses/{}",address.id)) }}">{{ crate::i18n::text("customer-edit") }}</a><form method="post" action="{{ crate::store_language::path(format!("/account/addresses/{}/use",address.id)) }}"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="cart_csrf" value="{{ crate::store_presentation::cart_csrf() }}"><input type="hidden" name="cart_revision" value="{{ crate::store_presentation::cart_revision() }}"><button class="ui-button" type="submit">{{ crate::i18n::text("customer-use-address") }}</button></form></div>
+<details class="customer-delete"><summary>{{ crate::i18n::text("customer-delete") }}</summary><form method="post" action="{{ crate::store_language::path(format!("/account/addresses/{}/delete",address.id)) }}"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="revision" value="{{ address.revision }}"><label><input class="ui-check" type="checkbox" name="confirm" value="yes" required> {{ crate::i18n::text("customer-confirm-delete") }}</label><button class="ui-button ui-button--danger" type="submit">{{ crate::i18n::text("customer-delete") }}</button></form></details>
+</section>{% endfor %}</div>
+{% endif %}
+{% if kind.key() == "orders" %}
+{{ ui::message("customer-orders-help","info",crate::i18n::text("customer-orders-help")) }}
+{% if history.is_empty() %}{{ ui::empty(crate::i18n::text("customer-no-orders"), "", true) }}{% endif %}
+<div class="customer-history">{% for item in history %}<article class="checkout-section"><div><h2><a href="{{ crate::store_language::path(format!("/account/orders/{}",item.reference)) }}">{{ item.reference }}</a></h2><p>{{ item.created_at }}</p><p>{{ ui::status_badge(item.status(crate::i18n::locale()),item.status_color) }} · {% if item.refunded %}{{ crate::i18n::text("online-payment-state-refunded") }}{% else if item.paid %}{{ crate::i18n::text("ord-paid") }}{% else %}{{ crate::i18n::text("ord-unpaid") }}{% endif %}</p></div><strong>{{ crate::i18n::decimal(item.amount()) }} {{ item.currency }}</strong></article>{% endfor %}</div>
+{{ pagination_ui::render(pagination) }}
+{% endif %}
+{% if let Some(order) = order %}<p><a href="{{ crate::store_language::path("/account/orders") }}">{{ crate::i18n::text("customer-back-orders") }}</a></p>
+{% if receipt_available %}<p><a id="customer-order-receipt" class="ui-button ui-button--compact" href="{{ crate::store_language::path(format!("/checkout/orders/{}",order.reference)) }}">{{ crate::i18n::text("customer-open-receipt") }}</a></p>{% else %}{{ ui::message("customer-history-readonly","info",crate::i18n::text("customer-history-readonly")) }}{% endif %}
+{% let payment_pending = order.payment_verifying() %}{% let show_initial_status = !order.is_paid() && !order.is_refunded() %}{% include "order-summary.html" %}
+{% endif %}
+{% if account.is_some() %}<div class="customer-signout"><form method="post" action="{{ crate::store_language::path("/account/logout") }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="ui-button ui-button--secondary" type="submit">{{ ui::icon("log-out") }}{{ crate::i18n::text("customer-logout") }}</button><p class="ui-help">{{ crate::i18n::text("customer-logout-help") }}</p></form></div>{% endif %}</div></div>

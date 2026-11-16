@@ -1,0 +1,5 @@
+{% import "ui.html" as ui %}
+  <form action="{{ crate::store_language::status_path(panel.endpoint) }}" method="get" hx-get="{{ crate::store_language::status_path(panel.endpoint) }}" hx-target="#status-result" hx-swap="innerHTML" hx-sync="this:drop">
+    <button id="check-status" class="ui-button ui-button--small" type="submit">{{ ui::icon("refresh-cw", "normal") }}<span>{{ crate::i18n::text("admin-check-now") }}</span></button>
+    <span class="htmx-indicator" role="status">{{ crate::i18n::text("admin-checking") }}</span>
+  </form>

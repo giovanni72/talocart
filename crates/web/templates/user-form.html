@@ -1,0 +1,25 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% block title %}{% if id == 0 %}{{ crate::i18n::text("admin-new-administrator") }}{% else %}{{ crate::i18n::text("admin-manage-administrator") }}{% endif %} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("admin-administrators") }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main">
+  {% if id == 0 %}{{ ui::page_header(crate::i18n::text("admin-new-administrator"), "/admin/users", crate::i18n::text("admin-all-administrators")) }}{% else %}{{ ui::page_header(email, "/admin/users", crate::i18n::text("admin-all-administrators")) }}{% endif %}
+  <section class="editor-card" aria-labelledby="account-title"><h2 id="account-title">{% if id == 0 %}{{ crate::i18n::text("admin-new-administrator") }}{% else %}{{ crate::i18n::text("admin-role-and-status") }}{% endif %}</h2>
+    {% if !error.is_empty() %}{{ ui::feedback("user-error", "error", error) }}{% endif %}
+    {% if owner %}<form method="post" action="{% if id == 0 %}/admin/users/new{% else %}/admin/users/{{ id }}{% endif %}" class="field-stack">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      {% if id == 0 %}
+      <label for="email">{{ crate::i18n::text("admin-administrator-email") }}</label><input class="ui-control" id="email" type="email" name="email" value="{{ email }}" required maxlength="254" autocomplete="off"{% if !error.is_empty() %} aria-describedby="user-error"{% endif %}>
+      <label for="password">{{ crate::i18n::text("admin-initial-password") }}</label><input class="ui-control" id="password" type="password" name="password" required minlength="12" maxlength="128" autocomplete="new-password" aria-describedby="password-help{% if !error.is_empty() %} user-error{% endif %}"><small class="ui-help" id="password-help">{{ crate::i18n::text("admin-from-12-to-128-characters-share-it-with-the-account-holder-through-a-pri") }}</small>
+      {% endif %}
+      <label for="role">{{ crate::i18n::text("admin-role-2") }}</label><select class="ui-control" id="role" name="role" required aria-describedby="role-help{% if !error.is_empty() %} user-error{% endif %}"><option value="">{{ crate::i18n::text("admin-select-a-role") }}</option>{% for item in roles %}<option value="{{ item.key }}"{% if role == item.key %} selected{% endif %}>{{ item.name }}</option>{% endfor %}</select><small class="ui-help" id="role-help">{{ crate::i18n::text("admin-permissions-depend-on-the-assigned-role-you-can-only-assign-privileges-y") }}</small>
+      {% if id != 0 %}
+      <label for="active">{{ crate::i18n::text("admin-account-status") }}</label><select class="ui-control" id="active" name="active" aria-describedby="state-help"><option value="true"{% if active %} selected{% endif %}>{{ crate::i18n::text("admin-active-2") }}</option><option value="false"{% if !active %} selected{% endif %}>{{ crate::i18n::text("admin-inactive-2") }}</option></select><small class="ui-help" id="state-help">{{ crate::i18n::text("admin-an-inactive-account-cannot-sign-in-reactivation-keeps-the-previous-passw") }}</small>
+      <p class="muted">{{ crate::i18n::text("admin-changing-role-or-status-closes-all-account-sessions-at-least-one-active") }}</p>
+      {% endif %}
+      <button class="ui-button" type="submit">{% if id == 0 %}{{ ui::icon("plus", "normal") }}{% else %}{{ ui::icon("save", "normal") }}{% endif %}<span>{% if id == 0 %}{{ crate::i18n::text("admin-create-administrator") }}{% else %}{{ crate::i18n::text("admin-save-access") }}{% endif %}</span></button>
+    </form>{% else %}<dl class="detail-list"><dt>{{ crate::i18n::text("admin-role-2") }}</dt><dd>{{ role_name }}</dd><dt>{{ crate::i18n::text("admin-status") }}</dt><dd>{% if active %}{{ crate::i18n::text("admin-active-2") }}{% else %}{{ crate::i18n::text("admin-inactive-2") }}{% endif %}</dd></dl><p class="muted">{{ crate::i18n::text("admin-you-do-not-have-permission-to-edit-this-account") }}</p>{% endif %}
+  </section>
+</main>
+{% endblock %}

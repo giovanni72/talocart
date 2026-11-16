@@ -1,0 +1,10 @@
+{% extends "admin-base.html" %}{% import "ui.html" as ui %}{% import "pagination.html" as pagination %}
+{% block title %}{{ crate::i18n::text("oe-drafts") }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("ord-title") }}{% endblock %}
+{% block content %}<main id="main" class="admin-main catalog-main">
+{% call ui::page_header(crate::i18n::text("oe-drafts"), "/admin/orders", crate::i18n::text("ord-back")) %}<form method="post" action="/admin/orders/new"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="ui-button" type="submit">{{ ui::icon("plus") }} {{ crate::i18n::text("oe-new") }}</button></form>{% endcall %}
+<p class="ui-help">{{ crate::i18n::text("oe-drafts-help") }}</p>
+<div class="ui-table-region" role="region" aria-label="{{ crate::i18n::text("oe-drafts") }}" tabindex="0"><table class="ui-table"><thead><tr><th scope="col">{{ crate::i18n::text("oe-draft") }}</th><th scope="col">{{ crate::i18n::text("oe-target") }}</th><th scope="col">{{ crate::i18n::text("oe-updated") }}</th></tr></thead><tbody>
+{% for entry in entries %}<tr><th scope="row"><a href="/admin/orders/drafts/{{ entry.id }}">{{ crate::i18n::text("oe-draft") }} #{{ entry.id }}</a></th><td>{% if let Some(id) = entry.target_order_id %}<a href="/admin/orders/{{ id }}">#{{ id }}</a>{% else %}{{ crate::i18n::text("oe-new") }}{% endif %}</td><td>{{ entry.updated_at }}</td></tr>
+{% else %}<tr><td colspan="3"><p class="ui-empty">{{ crate::i18n::text("oe-drafts-empty") }}</p></td></tr>{% endfor %}
+</tbody></table></div>{{ pagination::render(pagination) }}</main>{% endblock %}

@@ -1,0 +1,66 @@
+{% if fulfillment_form.saved %}{{ ui::feedback("fulfillment-saved","success",crate::i18n::text("fulfillment-saved")) }}{% endif %}
+{% if can_write %}
+<section class="editor-card" aria-labelledby="fulfillment-manage">
+  <h2 id="fulfillment-manage">{{ crate::i18n::text("fulfillment-manage") }}</h2>
+  <p class="ui-help">{{ crate::i18n::text("fulfillment-help") }}</p>
+  {% if order.state == "open" && !order.is_refunded() && !order.fulfillment.sent() %}
+  <form method="post" action="/admin/orders/{{ order.id }}/status" class="field-stack" aria-describedby="status-change-help">
+    <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="revision" value="{{ order.status_revision }}">
+    <label for="current-order-status">{{ crate::i18n::text("ord-state") }}</label>
+    <select id="current-order-status" name="status_id" class="ui-control"{% if status_error %} aria-invalid="true" aria-describedby="order-error status-change-help" autofocus{% endif %}>{% for status in statuses %}<option value="{{ status.id }}"{% if status.id == order.current_status.id %} selected{% endif %}{% if !status.initial_allowed() %} disabled{% endif %}>{{ status.name(crate::i18n::locale()) }}</option>{% endfor %}</select>
+    <p id="status-change-help" class="ui-help">{{ crate::i18n::text("status-change-help") }}</p>
+    <button class="ui-button" type="submit">{{ crate::i18n::text("status-change") }}</button>
+  </form>
+  {% endif %}
+  {% if fulfillment_form.stale %}
+    {{ ui::message("fulfillment-stale","info",crate::i18n::text("fulfillment-stale")) }}
+    <details id="fulfillment-submitted"><summary>{{ crate::i18n::text("fulfillment-submitted") }}</summary>
+      <p class="checkout-instructions">{{ fulfillment_form.input.body }}
+{{ fulfillment_form.input.carrier }}
+{{ fulfillment_form.input.tracking_number }}
+{{ fulfillment_form.input.tracking_url }}</p>
+    </details>
+    <p><a href="/admin/orders/{{ order.id }}#fulfillment-manage">{{ crate::i18n::text("store-cart-reload") }}</a></p>
+  {% else %}
+    <form id="fulfillment-form" method="post" action="/admin/orders/{{ order.id }}/fulfillment" class="field-stack">
+      {% include "order-fulfillment-fields.html" %}
+      {% if order.state == "open" && !order.is_refunded() && !order.fulfillment.sent() %}
+        <div id="fulfillment-transition" class="field-stack">
+          {% if order.fulfillment.state == "pending" %}
+            <button class="ui-button" name="action" value="preparing" type="submit" formnovalidate>{{ crate::i18n::text("fulfillment-start") }}</button>
+          {% else %}
+            {% include "order-tracking-fields.html" %}
+            <p class="ui-help">{{ crate::i18n::text("fulfillment-payment") }}</p>
+            <button class="ui-button" name="action" value="shipped" type="submit">{{ crate::i18n::text("fulfillment-ship") }}</button>
+          {% endif %}
+        </div>
+      {% endif %}
+      {% if order.state == "open" && order.fulfillment.sent() %}
+        <p class="checkout-instructions">{{ order.fulfillment.carrier }}{% if !order.fulfillment.tracking_number.is_empty() %} · {{ order.fulfillment.tracking_number }}{% endif %}</p>
+        <details id="fulfillment-tracking-editor"{% if fulfillment_form.editing_tracking %} open{% endif %}>
+          <summary>{{ crate::i18n::text("fulfillment-edit-tracking") }}</summary>
+          <div id="fulfillment-tracking" class="field-stack">
+            {% include "order-tracking-fields.html" %}
+            <button class="ui-button ui-button--secondary" name="action" value="tracking" type="submit">{{ crate::i18n::text("fulfillment-update-tracking") }}</button>
+          </div>
+        </details>
+        {% if order.fulfillment.state == "shipped" %}
+          <div id="fulfillment-delivery"><button class="ui-button" name="action" value="delivered" type="submit" formnovalidate>{{ crate::i18n::text("fulfillment-deliver") }}</button></div>
+        {% endif %}
+      {% endif %}
+      <details id="fulfillment-note-editor"{% if fulfillment_form.editing_note %} open{% endif %}>
+        <summary>{{ crate::i18n::text("fulfillment-add-note") }}</summary>
+        <div id="fulfillment-note" class="field-stack">
+          <label for="fulfillment-body">{{ crate::i18n::text("fulfillment-note") }}</label>
+          <textarea class="ui-control" id="fulfillment-body" name="body" maxlength="2000"{% if fulfillment_form.invalid.contains(&"body") %} aria-invalid="true" aria-describedby="fulfillment-body-error"{% endif %}>{{ fulfillment_form.input.body }}</textarea>
+          <p class="ui-help">{{ crate::i18n::text("fulfillment-note-help") }}</p>
+          {% if fulfillment_form.invalid.contains(&"body") %}<p class="ui-field-error" id="fulfillment-body-error">{{ crate::i18n::text("fulfillment-error-body") }}</p>{% endif %}
+          <button class="ui-button ui-button--secondary" name="action" value="note" type="submit" formnovalidate>{{ crate::i18n::text("fulfillment-add-note") }}</button>
+        </div>
+      </details>
+    </form>
+  {% endif %}
+  {% if order.fulfillment.sent() %}<p class="ui-help">{{ crate::i18n::text("fulfillment-return-required") }}</p>{% endif %}
+  <p><a href="#fulfillment-history">{{ crate::i18n::text("fulfillment-history") }}</a></p>
+</section>
+{% endif %}

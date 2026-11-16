@@ -1,0 +1,14 @@
+{% macro render(p, form = "", previous_action = "media_previous", next_action = "media_next") %}
+<nav class="pagination shared-pagination" aria-label="{{ p.aria_label }}">
+  <div class="pagination-summary"><span>{% if p.total == 0 %}{{ p.label }} {{ crate::i18n::text("admin-0-of-0") }}{% else %}{{ p.label }} {{ p.first }}–{{ p.last }} {{ crate::i18n::text("admin-of") }} {{ p.total }}{% endif %}</span><span>{{ crate::i18n::text("admin-page") }} {{ p.page }} {{ crate::i18n::text("admin-of") }} {{ p.pages }}</span></div>
+  <div class="pagination-actions">
+    {% if !form.is_empty() %}
+    <button class="pagination-button ui-button" type="submit" form="{{ form }}" name="action" value="{{ previous_action }}" formnovalidate{% if p.previous.is_empty() %} disabled{% endif %}><span aria-hidden="true">←</span> {{ crate::i18n::text("admin-previous") }}</button>
+    <button class="pagination-button ui-button" type="submit" form="{{ form }}" name="action" value="{{ next_action }}" formnovalidate{% if p.next.is_empty() %} disabled{% endif %}>{{ crate::i18n::text("admin-next") }} <span aria-hidden="true">→</span></button>
+    {% else %}
+    {% if !p.previous.is_empty() %}<a class="pagination-button ui-button" rel="prev" href="{{ p.previous }}"><span aria-hidden="true">←</span> {{ crate::i18n::text("admin-previous") }}</a>{% else %}<span class="pagination-button ui-button is-disabled" aria-disabled="true"><span aria-hidden="true">←</span> {{ crate::i18n::text("admin-previous") }}</span>{% endif %}
+    {% if !p.next.is_empty() %}<a class="pagination-button ui-button" rel="next" href="{{ p.next }}">{{ crate::i18n::text("admin-next") }} <span aria-hidden="true">→</span></a>{% else %}<span class="pagination-button ui-button is-disabled" aria-disabled="true">{{ crate::i18n::text("admin-next") }} <span aria-hidden="true">→</span></span>{% endif %}
+    {% endif %}
+  </div>
+</nav>
+{% endmacro %}

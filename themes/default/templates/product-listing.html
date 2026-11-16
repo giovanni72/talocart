@@ -1,0 +1,35 @@
+{% extends "storefront/layout.html" %}
+{% import "storefront/product-card.html" as product_card %}
+{% import "pagination.html" as pagination %}
+{% import "ui.html" as ui %}
+{% block body_attributes %}  class="store-page" data-palette="{{ list.theme.palette }}" data-typography="{{ list.theme.typography }}" data-density="{{ list.theme.density }}"{% endblock %}
+{% block title %}{{ list.meta_title }}{% endblock %}
+{% block metadata %}<meta name="description" content="{{ list.meta_description }}"><link rel="canonical" href="{{ list.canonical }}">{% let canonical = list.canonical %}{% include "store-alternates.html" %}{% endblock %}
+{% block store_header %}{% let store_name = list.store_name %}{% let logo = list.logo %}{% let search_query = list.search_query %}{% let search_action = list.search_action %}{% let search_filters = list.search_filters %}{% let category_menu = list.category_menu %}{% include "storefront/theme-header.html" %}{% endblock %}
+{% block store_footer %}{% let store_name = list.store_name %}{% let logo = list.logo %}{% let category_menu = list.category_menu %}{% include "storefront/theme-footer.html" %}{% endblock %}
+{% block store_content %}<main id="main" class="store-catalog">
+<form id="store-filters-form" method="get" action="{{ list.filter_action }}"></form>
+<header class="catalog-heading">
+  <p class="eyebrow">{% block listing_eyebrow %}{% endblock %}</p>
+  <div class="catalog-title-row">
+    {% block listing_heading %}<h1>{% block listing_title %}{% endblock %}</h1>{% endblock %}
+    <div class="catalog-toolbar">
+  {% include "storefront/listing-page-size.html" %}
+</div>
+  </div>
+  <p class="catalog-result-count muted">{{ crate::i18n::count("store-product-count", list.pagination.total) }}</p>
+  {% block listing_description %}{% endblock %}
+</header>
+<div class="catalog-layout">
+<aside class="catalog-sidebar store-filters" aria-labelledby="catalog-filters-title">
+  <h2 id="catalog-filters-title">{{ list.filter_title }}</h2>
+{% include "storefront/listing-filters.html" %}
+  {% if list.has_filters %}<a href="{{ list.reset }}">{{ list.reset_label }}</a>{% endif %}
+</aside>
+<section class="catalog-results" aria-label="{{ crate::i18n::text("store-catalog-products") }}">
+{% if list.rows.is_empty() %}{% let empty_title %}{% if list.q.is_empty() && list.category.is_empty() && list.brand.is_empty() && !list.available %}{{ crate::i18n::text("store-empty-catalog") }}{% else %}{{ crate::i18n::text("store-no-results") }}{% endif %}{% endlet %}<section class="ui-empty store-empty">{{ ui::empty_heading(empty_title) }}<p>{% block empty_message %}{% if list.q.is_empty() && list.category.is_empty() && list.brand.is_empty() && !list.available %}{{ crate::i18n::text("store-products-coming") }}{% else %}{{ crate::i18n::text("store-refine") }}{% endif %}{% endblock %}</p></section>{% else %}<div class="store-products" role="list" aria-label="{{ crate::i18n::text("store-products") }}">{% for product in list.rows %}{{ product_card::render(product, false, list.theme.density == "compact") }}{% endfor %}</div>{% endif %}
+{{ pagination::render(list.pagination) }}
+</section>
+</div>
+<script src="/assets/catalog-pagination.js" defer></script>
+</main>{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% import "pagination.html" as pagination %}
+{% import "content-fields.html" as content_fields %}
+{% block title %}{{ crate::i18n::text("banners-title") }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("banners-title") }}{% endblock %}
+{% block content %}<main id="main" class="admin-main catalog-main">
+{{ ui::page_header(crate::i18n::text("banners-title")) }}
+{% if !error.is_empty() %}{{ ui::feedback("banners-error","error",error) }}{% endif %}
+{% if saved %}{{ ui::feedback("banners-saved","success",crate::i18n::text("banners-saved")) }}{% endif %}
+{% if editing %}<p><a href="/admin/banners">{{ crate::i18n::text("banners-back") }}</a></p>
+<section class="editor-card banner-editor"><h2>{% if id == 0 %}{{ crate::i18n::text("banners-new") }}{% else %}{{ crate::i18n::text("banners-edit") }}{% endif %}</h2>
+<form method="post" action="{% if id == 0 %}/admin/banners/new{% else %}/admin/banners/{{ id }}{% endif %}" class="field-stack" id="banner-editor">
+{# Native implicit submission uses the first submit button, including without JS. #}
+{% if can_write %}<button class="ui-button" type="submit" name="action" value="save" hidden></button>{% endif %}
+<input type="hidden" name="media_editor" value="banner:{{ id }}"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="revision" value="{{ revision }}">{{ content_fields::marker(content) }}
+<fieldset class="field-stack"{% if !can_write %} disabled{% endif %}><legend>{{ crate::i18n::text("banners-publication") }}</legend>
+<label for="banner-label">{{ crate::i18n::text("banners-label") }}</label><input class="ui-control" id="banner-label" name="label" maxlength="120" value="{{ input.label }}" required{% if invalid.contains(&"label") %} aria-invalid="true" aria-describedby="banners-error"{% endif %}>
+<label for="banner-sort">{{ crate::i18n::text("banners-sort") }}</label><input class="ui-control" id="banner-sort" name="sort_order" type="number" min="0" max="9999" value="{{ input.sort_order }}" required{% if invalid.contains(&"sort_order") %} aria-invalid="true" aria-describedby="banners-error"{% endif %}>
+<label class="ui-check-label" for="banner-active"><input class="ui-check" id="banner-active" name="active" type="checkbox" value="true"{% if input.active %} checked{% endif %}>{{ crate::i18n::text("banners-active") }}</label></fieldset>
+<fieldset class="field-stack"><legend>{{ crate::i18n::text("banners-image") }}</legend>
+<input type="hidden" id="banner-image" name="image_id" value="{{ input.image_id }}">
+{% if !input.image_id.is_empty() %}<img class="banner-preview" src="/media/image/{{ input.image_id }}/detail" alt="{{ input.name }}">{% endif %}
+{{ ui::message("banner-image-help","info",crate::i18n::text("banners-image-help")) }}
+{% if invalid.contains(&"image_id") %}<p id="banner-image-error" class="ui-field-error">{{ crate::i18n::text("banners-image-required") }}</p>{% endif %}
+{% if can_write && nav.media %}<button class="ui-button ui-button--secondary" name="action" value="browse" formaction="/admin/media" type="submit" formnovalidate{% if invalid.contains(&"image_id") %} aria-describedby="banner-image-error" aria-invalid="true"{% endif %}>{{ ui::icon("image") }}<span>{{ crate::i18n::text("banners-choose") }}</span></button>{% endif %}
+</fieldset>
+<div class="content-language-grid"><fieldset class="field-stack">{{ content_fields::primary(content) }}
+<label for="banner-name">{{ crate::i18n::text("banners-alt") }}</label><input class="ui-control" id="banner-name" name="name" lang="{{ content.primary }}" maxlength="250" required value="{{ input.name }}"{% if !can_write %} readonly{% endif %}{% if invalid.contains(&"name") %} aria-invalid="true" aria-describedby="banners-error"{% endif %}>
+<label for="banner-description">{{ crate::i18n::text("banners-link") }}</label><input class="ui-control" id="banner-description" name="description" lang="{{ content.primary }}" maxlength="2048" value="{{ input.description }}"{% if !can_write %} readonly{% endif %}{% if invalid.contains(&"description") %} aria-invalid="true" aria-describedby="banners-error"{% endif %}>
+<p class="ui-help">{{ crate::i18n::text("banners-link-help") }}</p></fieldset>
+{{ content_fields::secondary(content,can_write) }}</div>
+{% if can_write %}<button class="ui-button" name="action" value="save" type="submit">{{ ui::icon("save") }}<span>{{ crate::i18n::text("banners-save") }}</span></button>{% endif %}
+</form>
+{% if id > 0 && can_write %}<details class="information-delete"><summary>{{ crate::i18n::text("banners-delete") }}</summary><p>{{ crate::i18n::text("banners-delete-help") }}</p><form method="post" action="/admin/banners/{{ id }}"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="revision" value="{{ revision }}"><button class="ui-button ui-button--danger" name="action" value="delete" type="submit">{{ crate::i18n::text("banners-delete") }}</button></form></details>{% endif %}
+</section>
+{% else %}{% if can_write %}<p><a class="ui-button" href="/admin/banners/new">{{ ui::icon("plus") }}<span>{{ crate::i18n::text("banners-new") }}</span></a></p>{% endif %}
+{% if entries.is_empty() %}{{ ui::empty(crate::i18n::text("banners-title"),crate::i18n::text("banners-empty")) }}{% endif %}
+<div class="catalog-list">{% for entry in entries %}<article class="catalog-row"><img class="banner-list-preview" src="/media/image/{{ entry.image_id }}/card" alt="" loading="lazy" width="210" height="70"><div class="catalog-row-main"><h2><a href="/admin/banners/{{ entry.id }}">{{ entry.label }}</a></h2><p>{% if entry.active %}{{ crate::i18n::text("banners-active") }}{% else %}{{ crate::i18n::text("banners-inactive") }}{% endif %} · {{ crate::i18n::text("banners-sort") }}: {{ entry.sort_order }}</p></div><a class="ui-button ui-button--small" href="/admin/banners/{{ entry.id }}">{% if can_write %}{{ crate::i18n::text("banners-edit") }}{% else %}{{ crate::i18n::text("banners-view") }}{% endif %}</a></article>{% endfor %}</div>
+{{ pagination::render(pagination) }}{% endif %}</main>{% endblock %}

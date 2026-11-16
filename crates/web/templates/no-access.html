@@ -1,0 +1,4 @@
+{% extends "admin-base.html" %}
+{% block title %}{{ crate::i18n::text("admin-access") }} {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("admin-access-2") }}{% endblock %}
+{% block content %}<main id="main" class="admin-main">{{ ui::page_header(crate::i18n::text("admin-access-needs-configuration")) }}{{ ui::message("no-access-message", "info", crate::i18n::text("admin-your-role-has-no-permissions-for-administration-areas-yet-ask-an-owner-t")) }}</main>{% endblock %}

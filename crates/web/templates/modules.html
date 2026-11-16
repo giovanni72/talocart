@@ -1,0 +1,153 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% block title %}{{ crate::i18n::text("modules-title") }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("modules-title") }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main modules-page">
+  {{ ui::page_header(crate::i18n::text("modules-title")) }}
+  {% if !error.is_empty() %}{{ ui::feedback("package-error", "error", error) }}{% endif %}
+  {% call ui::stats("modules-overview", crate::i18n::text("modules-overview"), "blocks") %}<li>{{ ui::stat(crate::i18n::text("modules-extensions"), installed) }}</li><li>{{ ui::stat(crate::i18n::text("modules-stat-active"), active) }}</li><li>{{ ui::stat(crate::i18n::text("modules-stat-components"), areas.len()) }}</li>{% endcall %}
+  <div class="modules-layout{% if packages_available %} modules-layout--tools{% endif %}">
+  <section class="modules-section module-extensions" aria-labelledby="modules-extensions-title">
+    <div class="modules-section__header"><h2 id="modules-extensions-title">{{ crate::i18n::text("modules-extensions") }}</h2><span class="ui-tag">{{ installed }}</span></div>
+    {% if extensions.is_empty() && packages.is_empty() %}{{ ui::empty(crate::i18n::text("modules-none-installed"), crate::i18n::text("modules-none-installed-help")) }}{% else %}
+    <div class="module-cards">
+    {% for package in packages %}
+    <article class="ui-card package-installed" data-package="{{ package.manifest.id }}" data-enabled="{{ package.enabled }}" data-critical="{{ package.critical }}" data-runtime="{{ package.runtime_key() }}" data-state="{% if package.damaged() %}damaged{% else if package.incomplete() %}incomplete{% else if !package.compatible() %}incompatible{% else %}ready{% endif %}"{% if package.damaged() || package.incomplete() || !package.compatible() %} data-tone="error"{% endif %} aria-labelledby="package-{{ package.manifest.id }}-title">
+      <div class="ui-card__head">
+        <span class="ui-card__glyph">{{ ui::icon("package", "normal") }}</span>
+        <div class="ui-card__heading"><p class="ui-card__kind">{{ crate::i18n::text("modules-package") }}</p><h3 class="ui-card__title" id="package-{{ package.manifest.id }}-title">{{ package.manifest.title.get(locale) }} <span class="ui-tag">{{ package.manifest.version }}</span></h3></div>
+        <p class="ui-card__state">{% if package.damaged() %}{{ ui::state(crate::i18n::text("modules-state-damaged"), "error") }}{% else if package.incomplete() %}{{ ui::state(crate::i18n::text("modules-state-incomplete"), "error") }}{% else if !package.compatible() %}{{ ui::state(crate::i18n::text("modules-state-incompatible"), "error") }}{% else if package.enabled %}{{ ui::state(crate::i18n::text("modules-enabled"), "on") }}{% else %}{{ ui::state(crate::i18n::text("modules-disabled")) }}{% endif %}</p>
+      </div>
+      <div class="ui-card__body">
+        <p>{{ package.manifest.description.get(locale) }}</p>
+        {% if package.damaged() %}{{ ui::message("package-{}-damaged"|format(package.manifest.id), "error", crate::i18n::text("packages-state-damaged")) }}
+        {% else if package.incomplete() %}{{ ui::message("package-{}-incomplete"|format(package.manifest.id), "error", crate::i18n::text("packages-state-incomplete")) }}
+        {% else if !package.compatible() %}{{ ui::message("package-{}-incompatible"|format(package.manifest.id), "error", crate::i18n::text("packages-state-incompatible")) }}{% endif %}
+        {% if package.enabled && package.available() %}
+        <dl class="ui-facts">
+          <div><dt>{{ crate::i18n::text("packages-runtime") }}</dt><dd>{{ package.runtime_label() }}</dd></div>
+          {% if owner && !package.runtime_error().is_empty() %}<div class="ui-facts__wide"><dt>{{ crate::i18n::text("packages-runtime-error") }}</dt><dd>{{ package.runtime_error() }}</dd></div><div><dt>{{ crate::i18n::text("packages-runtime-failures") }}</dt><dd>{{ package.failures() }} / 3</dd></div>{% endif %}
+        </dl>
+        {% if package.runtime_key() == "failed" %}<p class="ui-help">{{ crate::i18n::text("packages-runtime-help") }}</p>{% endif %}
+        {% endif %}
+        <dl class="ui-facts">
+          {% if package.incomplete() %}<div><dt>{{ crate::i18n::text("packages-update-to") }}</dt><dd>{{ package.pending_version().unwrap_or_default() }}</dd></div>{% endif %}
+          {% if !package.incomplete() && !package.compatible() %}<div class="ui-facts__wide"><dt>{{ crate::i18n::text("packages-sdk-package") }}</dt><dd>{{ package.manifest.sdk_version }} · {{ package.manifest.os }} / {{ package.manifest.arch }}</dd></div><div><dt>{{ crate::i18n::text("packages-sdk-required") }}</dt><dd>{{ sdk }}</dd></div>{% endif %}
+          <div><dt>{{ crate::i18n::text("packages-base-version") }}</dt><dd>{{ package.manifest.sdk_version }}</dd></div>
+          <div><dt>{{ crate::i18n::text("packages-protocol") }}</dt><dd>{{ package.manifest.protocol }}</dd></div>
+          <div><dt>{{ crate::i18n::text("packages-database-contract") }}</dt><dd>{{ package.manifest.database.version }}</dd></div>
+        </dl>
+        {% if owner %}
+        <form method="post" action="/admin/modules/critical" class="ui-field">
+          <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="id" value="{{ package.manifest.id }}">
+          <label for="package-{{ package.manifest.id }}-critical">{{ crate::i18n::text("packages-critical-label") }}</label>
+          <select class="ui-control" id="package-{{ package.manifest.id }}-critical" name="critical" aria-describedby="package-{{ package.manifest.id }}-critical-help"><option value="true"{% if package.critical %} selected{% endif %}>{{ crate::i18n::text("packages-critical-required") }}</option><option value="false"{% if !package.critical %} selected{% endif %}>{{ crate::i18n::text("packages-critical-optional") }}</option></select>
+          <p class="ui-help" id="package-{{ package.manifest.id }}-critical-help">{{ crate::i18n::text("packages-critical-help") }}</p>
+          <button class="ui-button ui-button--secondary ui-button--compact" type="submit">{{ crate::i18n::text("packages-critical-save") }}</button>
+        </form>
+        {% else %}<p class="ui-help">{% if package.critical %}{{ crate::i18n::text("packages-critical-required") }}{% else %}{{ crate::i18n::text("packages-critical-optional") }}{% endif %}</p>{% endif %}
+        {% match package.previous_version() %}{% when Some with (v) %}<p class="ui-help">{{ crate::i18n::text("packages-previous") }} <span data-previous>{{ v }}</span></p>{% when None %}{% endmatch %}
+      </div>
+      {% if (package.enabled && package.available()) || owner %}
+      <div class="ui-card__footer package-actions">
+        {% if package.enabled && package.available() %}<a class="ui-button ui-button--secondary ui-button--compact" href="{{ package.manifest.menu }}">{{ ui::icon("external-link", "small") }}<span>{{ crate::i18n::text("modules-open") }}</span></a>{% endif %}
+        {% if owner %}
+        {% if package.enabled && package.available() %}<form method="post" action="/admin/modules/restart"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="id" value="{{ package.manifest.id }}"><button class="ui-button ui-button--secondary ui-button--compact" type="submit">{{ ui::icon("rotate-ccw", "small") }}<span>{{ crate::i18n::text("packages-runtime-restart") }}</span></button></form>{% endif %}
+        {% if package.incomplete() && !package.damaged() && panel_install %}<form method="post" action="/admin/modules/retry"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="id" value="{{ package.manifest.id }}"><div class="ui-field"><label for="package-{{ package.manifest.id }}-password">{{ crate::i18n::text("packages-password") }}</label><input class="ui-control" id="package-{{ package.manifest.id }}-password" type="password" name="password" autocomplete="current-password" required maxlength="512"></div><button class="ui-button ui-button--compact" type="submit">{{ ui::icon("rotate-ccw", "small") }}<span>{{ crate::i18n::text("packages-retry") }}</span></button></form>{% endif %}
+        {% if package.enabled || package.available() %}<form method="post" action="/admin/modules/toggle"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="id" value="{{ package.manifest.id }}"><input type="hidden" name="enabled" value="{% if package.enabled %}false{% else %}true{% endif %}"><button class="ui-button ui-button--compact{% if package.enabled %} ui-button--secondary{% endif %}" type="submit">{% if package.enabled %}{{ crate::i18n::text("packages-disable") }}{% else %}{{ crate::i18n::text("packages-enable") }}{% endif %}</button></form>{% endif %}
+        {% if !package.enabled %}<div class="package-uninstall">{% call ui::confirm(crate::i18n::text("packages-uninstall")) %}
+          <p id="package-{{ package.manifest.id }}-uninstall-help" class="ui-help">{{ crate::i18n::text("packages-uninstall-help") }}</p>
+          <form method="post" action="/admin/modules/uninstall"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="id" value="{{ package.manifest.id }}"><button class="ui-button ui-button--danger" type="submit" aria-describedby="package-{{ package.manifest.id }}-uninstall-help">{{ crate::i18n::text("packages-uninstall-confirm") }}</button></form>
+        {% endcall %}</div>{% endif %}
+        {% endif %}
+      </div>
+      {% endif %}
+    </article>
+    {% endfor %}
+    {% for extension in extensions %}
+    <article class="ui-card" data-module="{{ extension.id }}" data-enabled="{{ extension.enabled }}" aria-labelledby="{{ extension.id }}-title">
+      <div class="ui-card__head">
+        <span class="ui-card__glyph">{{ ui::icon("blocks", "normal") }}</span>
+        <div class="ui-card__heading"><p class="ui-card__kind">{{ crate::i18n::text("modules-compiled") }}</p><h3 class="ui-card__title" id="{{ extension.id }}-title">{{ extension.title }}</h3></div>
+        <p id="{{ extension.id }}-status" class="ui-card__state">{% if extension.enabled %}{{ ui::state(crate::i18n::text("modules-enabled"), "on") }}{% else %}{{ ui::state(crate::i18n::text("modules-disabled")) }}{% endif %}</p>
+      </div>
+      <div class="ui-card__body">
+        <p>{{ extension.description }}</p>
+        {% if !extension.dependencies.is_empty() %}<div class="module-dependencies"><p class="ui-card__kind" id="{{ extension.id }}-dependencies">{{ crate::i18n::text("modules-dependencies") }}</p><ul class="ui-tags" aria-labelledby="{{ extension.id }}-dependencies">{% for dependency in extension.dependencies %}<li class="ui-tag" data-requires="{{ dependency.id }}">{{ dependency.title }}</li>{% endfor %}</ul></div>{% endif %}
+      </div>
+      <div class="ui-card__footer"><p class="ui-help">{{ extension.help }}</p></div>
+    </article>
+    {% endfor %}
+    </div>
+    {% endif %}
+  </section>
+  {% if packages_available %}
+  <section class="editor-card package-manager" aria-labelledby="packages-title">
+    <div class="package-heading"><span class="ui-card__glyph">{{ ui::icon("download", "normal") }}</span><div><p class="ui-card__kind">{{ crate::i18n::text("packages-eyebrow") }}</p><h2 id="packages-title">{{ crate::i18n::text("packages-title") }}</h2><p>{{ crate::i18n::text("packages-help") }}</p></div></div>
+    {% if owner && !panel_install %}{{ ui::message("packages-cli-only", "info", crate::i18n::text("packages-cli-only")) }}
+    {% else if owner %}
+    {% match preview %}{% when Some with (p) %}
+    {% match p.changes() %}{% when Some with (c) %}
+    <article class="ui-card package-preview" aria-labelledby="package-preview-title" data-preview="update">
+      <div class="ui-card__head"><div class="ui-card__heading"><p class="ui-card__kind">{{ crate::i18n::text("packages-update-preview") }}</p><h3 class="ui-card__title" id="package-preview-title">{{ p.manifest.title.get(locale) }} <span class="ui-tag">{{ c.from }} → {{ p.manifest.version }}</span></h3></div></div>
+      <div class="ui-card__body">
+        <p>{{ p.manifest.description.get(locale) }}</p>
+        {% if p.manifest.payment.is_some() %}{{ ui::message("package-payment-capability", "info", crate::i18n::text("packages-payment-capability")) }}{% endif %}
+        <dl class="ui-facts">
+          <div><dt>{{ crate::i18n::text("packages-update-from") }}</dt><dd id="package-update-from">{{ c.from }}</dd></div>
+          <div><dt>{{ crate::i18n::text("packages-update-to") }}</dt><dd id="package-update-to">{{ p.manifest.version }}</dd></div>
+          <div><dt>{{ crate::i18n::text("packages-update-migrations-label") }}</dt><dd id="package-update-migrations">{{ crate::i18n::count("packages-update-migrations", c.migrations as i64) }}</dd></div>
+          <div><dt>{{ crate::i18n::text("packages-base-version") }}</dt><dd>{{ p.manifest.sdk_version }}</dd></div>
+          {% if !c.added_permissions.is_empty() %}<div class="ui-facts__wide"><dt>{{ crate::i18n::text("packages-update-added-permissions") }}</dt><dd>{% for v in c.added_permissions %}{% if !loop.first %}, {% endif %}<code>{{ v }}</code>{% endfor %}</dd></div>{% endif %}
+          {% if !c.removed_permissions.is_empty() %}<div class="ui-facts__wide"><dt>{{ crate::i18n::text("packages-update-removed-permissions") }}</dt><dd>{% for v in c.removed_permissions %}{% if !loop.first %}, {% endif %}<code>{{ v }}</code>{% endfor %}</dd></div>{% endif %}
+          {% if !c.added_paths.is_empty() %}<div class="ui-facts__wide"><dt>{{ crate::i18n::text("packages-update-added-paths") }}</dt><dd>{% for v in c.added_paths %}{% if !loop.first %}, {% endif %}<code>{{ v }}</code>{% endfor %}</dd></div>{% endif %}
+          {% if !c.removed_paths.is_empty() %}<div class="ui-facts__wide"><dt>{{ crate::i18n::text("packages-update-removed-paths") }}</dt><dd>{% for v in c.removed_paths %}{% if !loop.first %}, {% endif %}<code>{{ v }}</code>{% endfor %}</dd></div>{% endif %}
+          <div class="ui-facts__wide"><dt>{{ crate::i18n::text("packages-integrity") }}</dt><dd>{{ ui::state(crate::i18n::text("packages-update-verified"), "on") }}</dd></div>
+        </dl>
+        {{ ui::message("package-confirm-help", "info", crate::i18n::text("packages-update-confirm-help")) }}
+      </div>
+      <form method="post" action="/admin/modules/update" class="ui-card__footer package-actions"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="preview" value="{{ p.token }}"><div class="ui-field"><label for="package-password">{{ crate::i18n::text("packages-password") }}</label><input class="ui-control" id="package-password" type="password" name="password" autocomplete="current-password" required maxlength="512"></div><button class="ui-button" type="submit">{{ crate::i18n::text("packages-update") }}</button><a class="ui-button ui-button--secondary" href="/admin/modules">{{ crate::i18n::text("packages-cancel") }}</a></form>
+    </article>
+    {% when None %}
+    <article class="ui-card package-preview" aria-labelledby="package-preview-title" data-preview="install">
+      <div class="ui-card__head"><div class="ui-card__heading"><p class="ui-card__kind">{{ crate::i18n::text("packages-preview") }}</p><h3 class="ui-card__title" id="package-preview-title">{{ p.manifest.title.get(locale) }} <span class="ui-tag">{{ p.manifest.version }}</span></h3></div></div>
+      <div class="ui-card__body">
+        <p>{{ p.manifest.description.get(locale) }}</p>
+        {% if p.manifest.payment.is_some() %}{{ ui::message("package-payment-capability", "info", crate::i18n::text("packages-payment-capability")) }}{% endif %}
+        <dl class="ui-facts">
+          <div><dt>{{ crate::i18n::text("packages-base-version") }}</dt><dd>{{ p.manifest.sdk_version }}</dd></div>
+          <div><dt>{{ crate::i18n::text("packages-platform") }}</dt><dd>{{ p.manifest.os }} / {{ p.manifest.arch }}</dd></div>
+          <div class="ui-facts__wide"><dt>{{ crate::i18n::text("packages-integrity") }}</dt><dd>{{ ui::state(crate::i18n::text("packages-verified"), "on") }}</dd></div>
+        </dl>
+        {{ ui::message("package-confirm-help", "info", crate::i18n::text("packages-confirm-help")) }}
+      </div>
+      <form method="post" action="/admin/modules/install" class="ui-card__footer package-actions"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="preview" value="{{ p.token }}"><div class="ui-field"><label for="package-password">{{ crate::i18n::text("packages-password") }}</label><input class="ui-control" id="package-password" type="password" name="password" autocomplete="current-password" required maxlength="512"></div><button class="ui-button" type="submit">{{ crate::i18n::text("packages-install") }}</button><a class="ui-button ui-button--secondary" href="/admin/modules">{{ crate::i18n::text("packages-cancel") }}</a></form>
+    </article>
+    {% endmatch %}
+    {% when None %}
+    <form method="post" action="/admin/modules/preview" enctype="multipart/form-data" class="package-upload">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <div class="ui-field"><label for="package-file">{{ crate::i18n::text("packages-file") }}</label><input id="package-file" class="ui-control" type="file" name="package" accept=".talopkg" required aria-describedby="package-file-help"><p id="package-file-help" class="ui-help">{{ crate::i18n::text("packages-file-help") }}</p></div>
+      <button class="ui-button" type="submit">{{ ui::icon("search", "small") }}<span>{{ crate::i18n::text("packages-inspect") }}</span></button>
+    </form>
+    {% endmatch %}
+    {% else %}{{ ui::message("packages-owner-only", "info", crate::i18n::text("packages-owner-only")) }}{% endif %}
+    <div class="package-contracts">
+      <p class="ui-card__kind" id="package-contracts-title">{{ crate::i18n::text("modules-compatibility") }}</p>
+      <dl class="ui-facts" data-package-contracts aria-labelledby="package-contracts-title"><div><dt>{{ crate::i18n::text("packages-sdk-required") }}</dt><dd data-sdk>{{ sdk }}</dd></div><div><dt>{{ crate::i18n::text("packages-protocol") }}</dt><dd data-protocol>{{ protocol }}</dd></div><div><dt>{{ crate::i18n::text("packages-database-contract") }}</dt><dd data-database>{{ database_contract }}</dd></div></dl>
+      <p class="ui-help">{{ crate::i18n::text("packages-contracts-help") }}</p>
+    </div>
+  </section>
+  {% endif %}
+  </div>
+  <section class="modules-section modules-base" data-module="base" aria-labelledby="base-module-title">
+    <div class="modules-section__header"><h2 id="base-module-title">{{ crate::i18n::text("modules-base") }}</h2><span class="ui-tag">{{ areas.len() }}</span></div>
+    {{ ui::message("modules-required", "info", crate::i18n::text("modules-required")) }}
+    <p class="ui-help">{{ crate::i18n::text("modules-configuration") }}</p>
+    <ol class="module-list">
+      {% for area in areas %}<li><article class="ui-card ui-card--compact" data-component="{{ area.id }}" aria-labelledby="base-area-{{ area.id }}"><h3 class="ui-card__title" id="base-area-{{ area.id }}">{{ area.title }}</h3><p>{{ area.description }}</p></article></li>{% endfor %}
+    </ol>
+  </section>
+</main>
+{% endblock %}

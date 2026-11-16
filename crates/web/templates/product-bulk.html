@@ -1,0 +1,27 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% block title %}{{ crate::i18n::text("admin-bulk-actions") }} {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("admin-catalogue-products-bulk-actions") }}{% endblock %}
+{% block content %}<main id="main" class="admin-main catalog-main product-bulk-page">
+{{ ui::page_header(crate::i18n::text("admin-bulk-actions-2"), return_to, crate::i18n::text("admin-back-to-products")) }}
+{% call ui::message("product-bulk-selection", "info") %}{{ ids.len() }} {{ crate::i18n::text("admin-products-selected") }}{% endcall %}
+{% if !error.is_empty() %}{{ ui::feedback("product-bulk-message-1", "error", error) }}{% endif %}
+{% if !ids.is_empty() %}
+<section class="settings-section" aria-labelledby="bulk-action-title"><h2 id="bulk-action-title">{{ crate::i18n::text("admin-choose-actions") }}</h2>
+<form class="field-stack" method="post" action="/admin/catalog/products/bulk/apply">
+<input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="return_to" value="{{ return_to }}">
+{% for id in ids %}<input type="hidden" name="ids" value="{{ id }}">{% endfor %}
+<fieldset class="bulk-action-options" aria-describedby="bulk-action-help"><legend>{{ crate::i18n::text("admin-bulk-actions-2") }}</legend>
+<label class="catalog-active"><input class="ui-check" type="checkbox" name="action" value="delete" data-bulk-action{% if delete %} checked{% endif %}> {{ crate::i18n::text("admin-delete") }}</label>
+<label class="catalog-active"><input class="ui-check" type="checkbox" name="action" value="publish" data-bulk-action{% if publish %} checked{% endif %}> {{ crate::i18n::text("admin-publish-product") }}</label>
+<label class="catalog-active"><input class="ui-check" type="checkbox" name="action" value="draft" data-bulk-action{% if draft %} checked{% endif %}> {{ crate::i18n::text("admin-set-product-to-draft") }}</label>
+<label class="catalog-active"><input class="ui-check" type="checkbox" name="action" value="category" data-bulk-action{% if assign_category %} checked{% endif %}> {{ crate::i18n::text("admin-assign-category") }}</label></fieldset>
+<p class="muted" id="bulk-action-help">{{ crate::i18n::text("admin-you-can-combine-publish-product-or-set-product-to-draft-with-assign-cate") }}</p>
+<fieldset id="bulk-category-panel" class="bulk-category-panel" data-bulk-category{% if category_error %} aria-invalid="true" aria-describedby="bulk-category-error"{% endif %}>
+<legend>{{ crate::i18n::text("admin-category-for-the-assign-category-action") }}</legend><p class="muted" id="bulk-category-help">{{ crate::i18n::text("admin-choose-a-category-from-the-tree-it-replaces-the-current-selection-inacti") }}</p>
+{% if categories.is_empty() %}{{ ui::message("product-bulk-message-2", "info", crate::i18n::text("admin-no-category-available")) }}{% else %}
+<div class="category-tree" role="region" aria-label="{{ crate::i18n::text("admin-category-tree") }}" tabindex="0"><ul>{% for row in categories %}<li><label class="category-tree-choice"><input class="ui-check" type="radio" name="category_id" value="{{ row.entry.id }}" aria-label="{{ row.entry.path }}{% if !row.entry.active %} {{ crate::i18n::text("admin-inactive-3") }}{% endif %}" aria-describedby="bulk-category-help"{% if row.selected %} checked{% endif %}><span>{{ row.entry.name }}{% if !row.entry.active %}<small class="muted ui-help"> {{ crate::i18n::text("admin-inactive-3") }}</small>{% endif %}</span></label>{% if row.children %}<ul>{% else %}</li>{% for _closing in row.closes %}</ul></li>{% endfor %}{% endif %}{% endfor %}</ul></div>
+{% endif %}{% if category_error %}<small id="bulk-category-error" class="field-error ui-field-error">{{ crate::i18n::text("admin-choose-an-existing-category-from-the-tree") }}</small>{% endif %}</fieldset>
+<label class="catalog-active"><input class="ui-check" type="checkbox" name="confirm" value="true" required> {{ crate::i18n::text("admin-i-confirm-the-actions-on-all") }} {{ ids.len() }} {{ crate::i18n::text("admin-selected-products") }}</label>
+<div class="product-bulk-actions"><button class="ui-button" type="submit">{{ ui::icon("check", "normal") }}<span>{{ crate::i18n::text("admin-apply-actions") }}</span></button><a class="ui-button ui-button--secondary" href="{{ return_to }}">{{ ui::icon("x", "normal") }}<span>{{ crate::i18n::text("admin-cancel") }}</span></a></div>
+</form></section>{% endif %}</main><script src="/assets/product-bulk.js" defer></script>{% endblock %}

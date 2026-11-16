@@ -1,0 +1,5 @@
+{% extends "default/templates/product-listing.html" %}
+{% block listing_eyebrow %}<a href="{{ crate::store_language::path("/catalog") }}">{{ crate::i18n::text("store-catalog") }}</a> / {{ crate::i18n::text("store-category") }}{% endblock %}
+{% block listing_title %}{{ category_info.name }}{% endblock %}
+{% block listing_description %}{% if !category_info.description.is_empty() %}<p class="muted category-description">{{ category_info.description }}</p>{% endif %}{% endblock %}
+{% block empty_message %}{% if list.q.is_empty() && list.brand.is_empty() && !list.available %}{{ crate::i18n::text("store-category-empty") }}{% else %}{{ crate::i18n::text("store-category-refine") }}{% endif %}{% endblock %}

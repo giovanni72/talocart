@@ -1,0 +1,50 @@
+<details class="category-navigation" open>
+  <summary class="category-navigation-toggle">{{ crate::i18n::text("store-categories") }} <span aria-hidden="true">⌄</span></summary>
+  <nav aria-label="{{ crate::i18n::text("store-catalog-categories") }}">
+    <ul class="category-menu">
+      <li class="category-menu-all"><a href="{{ crate::store_language::path("/catalog") }}"{% if category_menu.all_current %} aria-current="true"{% endif %}>{{ crate::i18n::text("store-all-products") }}</a></li>
+      {% for group in category_menu.groups %}
+      <li class="category-menu-item{% if group.selected %} is-selected{% endif %}">
+        {% if group.columns.is_empty() %}
+        <a href="{{ group.root.href }}"{% if group.root.current %} aria-current="true"{% endif %}>{{ group.root.name }}</a>
+        {% else %}
+        <details class="category-dropdown" name="catalog-category">
+          <summary>{{ group.root.name }} <span aria-hidden="true">⌄</span></summary>
+          <div class="category-panel category-mega-panel">
+            <p class="category-panel-label">{{ crate::i18n::text("store-explore-category") }}</p>
+            <a class="category-root-link" href="{{ group.root.href }}"{% if group.root.current %} aria-current="true"{% endif %}>{{ group.root.name }}</a>
+            <ul class="category-columns">
+              {% for column in group.columns %}
+              <li class="category-column">
+                <a class="category-column-title" href="{{ column.root.href }}"{% if column.root.current %} aria-current="true"{% endif %}>{{ column.root.name }}</a>
+                {% if !column.children.is_empty() %}
+                <ul class="category-column-links">
+                {% for child in column.children %}
+                  <li><a href="{{ child.href }}"{% if child.current %} aria-current="true"{% endif %}>{% if !child.ancestors.is_empty() %}<small class="ui-help" title="{{ child.ancestors }}">{{ child.ancestors }}</small>{% endif %}<span>{{ child.name }}</span></a></li>
+                {% endfor %}
+                </ul>
+                {% endif %}
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </details>
+        {% endif %}
+      </li>
+      {% endfor %}
+      <li class="category-menu-item brand-menu-item{% if category_menu.brands_current %} is-selected{% endif %}">
+        <details class="category-dropdown brand-dropdown" name="catalog-category">
+          <summary>{{ crate::i18n::text("store-brands") }} <span aria-hidden="true">⌄</span></summary>
+          <div class="category-panel brand-panel">
+            <p class="category-panel-label">{{ crate::i18n::text("store-explore-brands") }}</p>
+            <a class="category-root-link" href="{{ crate::store_language::path("/brands") }}">{{ crate::i18n::text("store-all-brands") }} <span aria-hidden="true">→</span></a>
+            {% if category_menu.brands.is_empty() %}<p class="muted">{{ crate::i18n::text("store-brands-coming") }}</p>{% else %}<ul class="brand-menu-list">
+              {% for brand in category_menu.brands %}<li><a href="{{ brand.href }}"{% if brand.current %} aria-current="true"{% endif %}><span class="brand-menu-media">{% if !brand.menu_logo_url.is_empty() %}<img class="brand-link-logo" src="{{ brand.menu_logo_url }}" width="64" height="40" alt="" loading="lazy" decoding="async">{% else %}<span class="brand-initial" aria-hidden="true">{{ brand.initial }}</span>{% endif %}</span><span class="brand-link-name">{{ brand.name }}</span></a></li>{% endfor %}
+            </ul>{% endif %}
+            {% if category_menu.more_brands %}<a class="brand-menu-more ui-button ui-button--secondary ui-button--small" href="{{ crate::store_language::path("/brands?page=2") }}">{{ crate::i18n::text("store-more-brands") }}</a>{% endif %}
+          </div>
+        </details>
+      </li>
+    </ul>
+  </nav>
+</details>

@@ -1,0 +1,69 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% block title %}{{ crate::i18n::text("admin-settings-4") }} {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("admin-settings-3") }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main">
+  {{ ui::page_header(crate::i18n::text("admin-general-settings")) }}
+  {% call ui::tabs(crate::i18n::text("admin-settings-sections")) %}{{ ui::tab("/admin/settings", crate::i18n::text("admin-general"), true, "settings") }}{{ ui::tab("/admin/settings/appearance", crate::i18n::text("admin-logo-and-favicon"), false, "image") }}{{ ui::tab("/admin/settings/storefront", crate::i18n::text("admin-theme-and-seo"), false, "panels-top-left") }}{% if nav.taxes %}{{ ui::tab("/admin/settings/taxes", crate::i18n::text("admin-prices-and-taxes-2"), false, "percent") }}{% endif %}{{ ui::tab("/admin/settings/countries", crate::i18n::text("admin-purchase-countries"), false, "map") }}{% endcall %}
+  {% if saved %}{{ ui::feedback("settings-message-1", "success", crate::i18n::text("admin-settings-saved")) }}{% endif %}
+  {% if !error.is_empty() %}{{ ui::feedback("settings-error", "error", error) }}{% endif %}
+  {% if owner %}<p class="settings-note">{{ crate::i18n::text("admin-only-the-store-name-is-required-you-can-complete-the-other-details-later") }}</p>
+  <form method="post" action="/admin/settings" class="general-settings" {% if !error.is_empty() %}aria-describedby="settings-error"{% endif %}>
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+  {% else %}<p class="settings-note">{{ crate::i18n::text("admin-your-access-is-read-only-editing-settings-requires-write-permission") }}</p><div class="general-settings">{% endif %}
+    {% for group in sections %}
+    <section class="settings-group" aria-labelledby="settings-group-{{ loop.index }}">
+      <div class="settings-group-intro"><span class="settings-number" aria-hidden="true">0{{ loop.index }}</span><h2 id="settings-group-{{ loop.index }}">{{ crate::i18n::text(group.title) }}</h2><p>{{ crate::i18n::text(group.description) }}</p></div>
+      {% if owner %}<div class="settings-fields">
+        {% for field in group.fields %}
+        <div class="settings-field{% if field.key == "address_line1" || field.key == "address_line2" %} settings-field-wide{% endif %}">
+          <label for="store-{{ field.key }}">{{ crate::i18n::text(field.label) }}</label>
+          <input class="ui-control" id="store-{{ field.key }}" name="{{ field.key }}" type="{{ field.input_type }}" value="{{ field.value }}" maxlength="{{ field.limit }}" autocomplete="{{ field.autocomplete }}" {% if field.required %}required{% endif %} {% if !field.error.is_empty() %}aria-invalid="true" aria-describedby="error-{{ field.key }}"{% endif %}>
+          {% if !field.error.is_empty() %}<small class="field-error ui-field-error" id="error-{{ field.key }}">{{ field.error }}</small>{% endif %}
+        </div>
+        {% endfor %}
+      </div>{% else %}<dl class="settings-readonly">
+        {% for field in group.fields %}<div><dt>{{ crate::i18n::text(field.label) }}</dt><dd>{% if field.value.is_empty() %}<span class="muted">{{ crate::i18n::text("admin-not-set") }}</span>{% else %}{{ field.value }}{% endif %}</dd></div>{% endfor %}
+      </dl>{% endif %}
+    </section>
+    {% endfor %}
+    {% if owner %}<div class="settings-actions"><span class="muted">{{ crate::i18n::text("admin-changes-are-applied-when-saved") }}</span><button class="ui-button" type="submit">{{ ui::icon("save", "normal") }}<span>{{ crate::i18n::text("admin-save-settings") }}</span></button></div></form>{% else %}</div>{% endif %}
+  <section id="date-time" class="settings-group" aria-labelledby="date-time-title">
+    <div class="settings-group-intro"><span class="settings-number" aria-hidden="true">04</span><h2 id="date-time-title">{{ crate::i18n::text("regional-title") }}</h2><p>{{ crate::i18n::text("regional-description") }}</p></div>
+    <div>
+      {% if regional_saved %}{{ ui::feedback("regional-saved", "success", crate::i18n::text("regional-saved")) }}{% endif %}
+      {% if !regional_error.is_empty() && !regional_invalid %}{{ ui::feedback("regional-conflict", "error", regional_error) }}<p><a href="/admin/settings#date-time">{{ crate::i18n::text("regional-reload") }}</a></p>{% endif %}
+      {% if owner %}
+      <form method="post" action="/admin/settings/date-time" class="settings-fields">
+        <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="revision" value="{{ regional.revision }}">
+        <div class="settings-field">
+          <label for="platform-time-zone">{{ crate::i18n::text("regional-time-zone") }}</label>
+          <select class="ui-control" id="platform-time-zone" name="time_zone" required aria-describedby="regional-help{% if regional_invalid %} regional-error{% endif %}"{% if regional_invalid %} aria-invalid="true"{% endif %}>
+            {% if !zone_known %}<option value="{{ regional.time_zone }}" selected>{{ regional.time_zone }}</option>{% endif %}
+            {% for zone in time_zones %}<option value="{{ zone }}"{% if zone.as_str() == regional.time_zone.as_str() %} selected{% endif %}>{{ zone }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="settings-field">
+          <label for="platform-date-format">{{ crate::i18n::text("regional-date-format") }}</label>
+          <select class="ui-control" id="platform-date-format" name="date_format" required aria-describedby="regional-help{% if regional_invalid %} regional-error{% endif %}"{% if regional_invalid %} aria-invalid="true"{% endif %}>
+            {% if !format_known %}<option value="{{ regional.date_format }}" selected>{{ regional.date_format }}</option>{% endif %}
+            <option value="dmy"{% if regional.date_format == "dmy" %} selected{% endif %}>{{ crate::i18n::text("regional-format-dmy") }}</option>
+            <option value="ymd"{% if regional.date_format == "ymd" %} selected{% endif %}>{{ crate::i18n::text("regional-format-ymd") }}</option>
+            <option value="mdy"{% if regional.date_format == "mdy" %} selected{% endif %}>{{ crate::i18n::text("regional-format-mdy") }}</option>
+          </select>
+        </div>
+        <p class="ui-help settings-field-wide" id="regional-help">{{ crate::i18n::text("regional-help") }}</p>
+        {% if regional_invalid %}<p class="ui-field-error settings-field-wide" id="regional-error">{{ regional_error }}</p>{% endif %}
+        <p class="settings-field-wide">{{ crate::i18n::text("regional-preview") }}: <output>{{ regional_preview }}</output></p>
+        <div class="settings-actions settings-field-wide"><span class="muted">{{ crate::i18n::text("regional-numbering-help") }}</span><button class="ui-button" type="submit">{{ ui::icon("save", "normal") }}<span>{{ crate::i18n::text("regional-save") }}</span></button></div>
+      </form>
+      {% else %}<dl class="settings-readonly"><div><dt>{{ crate::i18n::text("regional-time-zone") }}</dt><dd>{{ regional.time_zone }}</dd></div><div><dt>{{ crate::i18n::text("regional-date-format") }}</dt><dd>{{ date_format_label }}</dd></div></dl><p>{{ crate::i18n::text("regional-preview") }}: {{ regional_preview }}</p>{% endif %}
+    </div>
+  </section>
+  <section class="settings-section" aria-labelledby="defaults-title"><p class="eyebrow">{{ crate::i18n::text("admin-current-configuration") }}</p><h2 id="defaults-title">{{ crate::i18n::text("admin-store-foundations") }}</h2>
+    <dl class="defaults-grid"><div><dt>{{ crate::i18n::text("admin-currency") }}</dt><dd>{{ currency }}</dd></div><div><dt>{{ crate::i18n::text("admin-store-language") }}</dt><dd>{{ crate::i18n::text("admin-italian") }}</dd></div><div><dt>{{ crate::i18n::text("admin-theme") }}</dt><dd>{{ crate::i18n::text("admin-default") }}</dd></div></dl>
+    <p class="muted">{{ crate::i18n::text("admin-currency-settings-link") }}</p>
+  </section>
+</main>
+{% endblock %}

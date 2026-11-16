@@ -1,0 +1,1847 @@
+{
+  "version": 1,
+  "groups": [
+    {
+      "id": "fmt",
+      "suite": "rust",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--check"
+      ]
+    },
+    {
+      "id": "clippy",
+      "suite": "rust",
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "talocart",
+        "-p",
+        "talocart-platform",
+        "-p",
+        "talocart-commerce",
+        "-p",
+        "talocart-web",
+        "-p",
+        "talocart-package-fixture",
+        "-p",
+        "talocart-module-sdk",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "id": "unit",
+      "suite": "rust",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "talocart",
+        "-p",
+        "talocart-platform",
+        "-p",
+        "talocart-commerce",
+        "-p",
+        "talocart-web",
+        "-p",
+        "talocart-package-fixture",
+        "-p",
+        "talocart-module-sdk",
+        "--locked"
+      ]
+    },
+    {
+      "id": "architecture",
+      "suite": "tooling",
+      "command": [
+        "python3",
+        "scripts/check-architecture.py"
+      ]
+    },
+    {
+      "id": "python",
+      "suite": "tooling",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/release",
+        "-v"
+      ]
+    },
+    {
+      "id": "node",
+      "suite": "tooling",
+      "command": [
+        "node",
+        "--test",
+        "scripts/test-payment-status.cjs",
+        "scripts/test-catalog-benchmark.cjs",
+        "scripts/test-site-benchmark.cjs",
+        "scripts/test-checkout-benchmark.cjs"
+      ]
+    },
+    {
+      "id": "postgres",
+      "suite": "postgres",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "talocart",
+        "-p",
+        "talocart-platform",
+        "-p",
+        "talocart-commerce",
+        "-p",
+        "talocart-web",
+        "-p",
+        "talocart-package-fixture",
+        "--locked",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "error-bulk",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-error-bulk.cjs"
+      ]
+    },
+    {
+      "id": "rich-text",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-rich-text.cjs"
+      ]
+    },
+    {
+      "id": "option-deletion",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-option-deletion.cjs"
+      ]
+    },
+    {
+      "id": "option-order",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-option-order.cjs"
+      ]
+    },
+    {
+      "id": "option-search",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-option-search.cjs"
+      ]
+    },
+    {
+      "id": "product-list-controls",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-product-list-controls.cjs"
+      ]
+    },
+    {
+      "id": "error-logs",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-error-log-page.cjs"
+      ]
+    },
+    {
+      "id": "dashboard-navigation",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-dashboard-navigation.cjs"
+      ]
+    },
+    {
+      "id": "installation-languages",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-installation-languages.cjs"
+      ]
+    },
+    {
+      "id": "admin-foundation",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-admin-foundation.cjs"
+      ]
+    },
+    {
+      "id": "demo-desktop",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-demo.cjs"
+      ],
+      "env": {
+        "TALOCART_DEMO_TEST_CASE": "desktop"
+      }
+    },
+    {
+      "id": "demo-mobile",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-demo.cjs"
+      ],
+      "env": {
+        "TALOCART_DEMO_TEST_CASE": "mobile"
+      }
+    },
+    {
+      "id": "demo-no-js",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-demo.cjs"
+      ],
+      "env": {
+        "TALOCART_DEMO_TEST_CASE": "no-js"
+      }
+    },
+    {
+      "id": "demo-mobile-no-js",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-demo.cjs"
+      ],
+      "env": {
+        "TALOCART_DEMO_TEST_CASE": "mobile-no-js"
+      }
+    },
+    {
+      "id": "demo-cli",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-demo.cjs"
+      ],
+      "env": {
+        "TALOCART_DEMO_TEST_CASE": "cli"
+      }
+    },
+    {
+      "id": "media-files-desktop",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-demo.cjs"
+      ],
+      "env": {
+        "TALOCART_DEMO_TEST_CASE": "desktop",
+        "TALOCART_DEMO_MEDIA_FILES_ONLY": "1"
+      }
+    },
+    {
+      "id": "media-files-mobile",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-demo.cjs"
+      ],
+      "env": {
+        "TALOCART_DEMO_TEST_CASE": "mobile",
+        "TALOCART_DEMO_MEDIA_FILES_ONLY": "1"
+      }
+    },
+    {
+      "id": "media-files-no-js",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-demo.cjs"
+      ],
+      "env": {
+        "TALOCART_DEMO_TEST_CASE": "no-js",
+        "TALOCART_DEMO_MEDIA_FILES_ONLY": "1"
+      }
+    },
+    {
+      "id": "media-files-mobile-no-js",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-demo.cjs"
+      ],
+      "env": {
+        "TALOCART_DEMO_TEST_CASE": "mobile-no-js",
+        "TALOCART_DEMO_MEDIA_FILES_ONLY": "1"
+      }
+    },
+    {
+      "id": "media-files-cli",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-demo.cjs"
+      ],
+      "env": {
+        "TALOCART_DEMO_TEST_CASE": "cli",
+        "TALOCART_DEMO_MEDIA_FILES_ONLY": "1"
+      }
+    },
+    {
+      "id": "currency-zones",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-currency-zones.cjs"
+      ]
+    },
+    {
+      "id": "cart",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-cart.cjs"
+      ]
+    },
+    {
+      "id": "payments",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-payments.cjs"
+      ]
+    },
+    {
+      "id": "shipping",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-shipping.cjs"
+      ]
+    },
+    {
+      "id": "email",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-email.cjs"
+      ]
+    },
+    {
+      "id": "checkout-details",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-checkout-details.cjs"
+      ]
+    },
+    {
+      "id": "orders",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-orders.cjs"
+      ]
+    },
+    {
+      "id": "order-editor",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-order-editor.cjs"
+      ]
+    },
+    {
+      "id": "settings",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-settings.cjs"
+      ]
+    },
+    {
+      "id": "indexing",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-indexing.cjs"
+      ]
+    },
+    {
+      "id": "banners",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-banners.cjs"
+      ]
+    },
+    {
+      "id": "attributes",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-attributes.cjs"
+      ]
+    },
+    {
+      "id": "customer-groups",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-customer-groups.cjs"
+      ]
+    },
+    {
+      "id": "customer-fields",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-customer-fields.cjs"
+      ]
+    },
+    {
+      "id": "customer-admin",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-customer-admin.cjs"
+      ]
+    },
+    {
+      "id": "customer-registration",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-customer-registration.cjs"
+      ]
+    },
+    {
+      "id": "runtime-recovery",
+      "suite": "packages",
+      "command": [
+        "node",
+        "scripts/test-runtime-recovery.cjs"
+      ],
+      "requires_browser": false
+    },
+    {
+      "id": "smtp-recovery",
+      "suite": "packages",
+      "command": [
+        "node",
+        "scripts/release/smtp-recovery.cjs"
+      ],
+      "requires_browser": false
+    },
+    {
+      "id": "package-updates",
+      "suite": "packages",
+      "command": [
+        "node",
+        "scripts/test-package-updates.cjs"
+      ]
+    },
+    {
+      "id": "unit-app",
+      "suite": "rust",
+      "parent": "unit",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart"
+      ]
+    },
+    {
+      "id": "clippy-app",
+      "suite": "rust",
+      "parent": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "-p",
+        "talocart",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "id": "unit-platform",
+      "suite": "rust",
+      "parent": "unit",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-platform",
+        "--lib"
+      ]
+    },
+    {
+      "id": "clippy-platform",
+      "suite": "rust",
+      "parent": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "-p",
+        "talocart-platform",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "id": "unit-commerce",
+      "suite": "rust",
+      "parent": "unit",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-commerce",
+        "--lib"
+      ]
+    },
+    {
+      "id": "clippy-commerce",
+      "suite": "rust",
+      "parent": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "-p",
+        "talocart-commerce",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "id": "unit-web",
+      "suite": "rust",
+      "parent": "unit",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--lib"
+      ]
+    },
+    {
+      "id": "clippy-web",
+      "suite": "rust",
+      "parent": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "id": "unit-package-fixture",
+      "suite": "rust",
+      "parent": "unit",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-package-fixture",
+        "--lib"
+      ]
+    },
+    {
+      "id": "clippy-package-fixture",
+      "suite": "rust",
+      "parent": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "-p",
+        "talocart-package-fixture",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    {
+      "id": "postgres-content-localization",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "content_localization::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-attributes",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "attributes::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-account",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "account::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-administration",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "administration::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-authentication",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "authentication::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-brand-store",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "brand_store::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-bulk-category",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "bulk_category::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-cart",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_commerce",
+        "cart::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-catalog-pagination",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "catalog_pagination::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-category-store",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "category_store::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-checkout-countries",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_commerce",
+        "checkout_countries::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-currency-zones",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_commerce",
+        "currency_zones::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-default-taxes",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_commerce",
+        "default_taxes::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-demo",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "demo::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-email",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_commerce",
+        "email::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-error-pages",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "error_pages::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-gallery",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "gallery::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-library",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "library::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-localization",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "localization::",
+        "--",
+        "--ignored",
+        "--test-threads=1",
+        "--skip",
+        "store_localization::"
+      ]
+    },
+    {
+      "id": "postgres-media",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "media::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-media-consolidation",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "media_consolidation::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-media-files",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "media_files::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-media-simplification",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "media_simplification::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-media-tree",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "media_tree::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-optional-category",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "optional_category::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-product-bulk",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "product_bulk::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-products",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "products::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-search-store",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "search_store::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-settings",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "settings::",
+        "--",
+        "--ignored",
+        "--test-threads=1",
+        "--skip",
+        "regional_settings::"
+      ]
+    },
+    {
+      "id": "postgres-shared-pagination",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "shared_pagination::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-storefront",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "storefront::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-taxes",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_commerce",
+        "taxes::",
+        "--",
+        "--ignored",
+        "--test-threads=1",
+        "--skip",
+        "default_taxes::",
+        "--skip",
+        "accessory_taxes::"
+      ]
+    },
+    {
+      "id": "postgres-taxonomy",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "taxonomy::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-ui",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "ui::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-variants",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_catalog",
+        "variants::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-store-localization",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "store_localization::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-store-language-policy",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "store_language_policy::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-installation-languages",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "installation_languages::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-payments",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_commerce",
+        "payments::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-order-statuses",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_commerce",
+        "order_statuses::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-shipping",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_commerce",
+        "shipping::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-accessory-taxes",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_commerce",
+        "accessory_taxes::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-checkout-details",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_commerce",
+        "checkout_details::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-checkout-methods",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_commerce",
+        "checkout_methods::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-orders",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": true,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_commerce",
+        "orders::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-regional-settings",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "regional_settings::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-unified-settings",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_commerce",
+        "unified_settings::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-pages",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": true,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "pages::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-operations",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": true,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "operations::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-theme-presentation",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": true,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_commerce",
+        "theme_presentation::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-banners",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "banners::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-performance",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "performance::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-customer-groups",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "customer_groups::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-customer-fields",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "customer_fields::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-customer-admin",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "customer_admin::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-base-modules",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "base_modules::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-packages",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "packages::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "postgres-customer-registration",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "customer_registration::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "updates",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-updates.cjs"
+      ]
+    },
+    {
+      "id": "postgres-updates",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-web",
+        "--test",
+        "identity_platform",
+        "updates::",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "update-verification",
+      "suite": "packages",
+      "command": [
+        "node",
+        "scripts/test-update-verification.cjs"
+      ],
+      "requires_browser": false
+    },
+    {
+      "id": "postgres-package-updates",
+      "suite": "postgres",
+      "parent": "postgres",
+      "requires_browser": false,
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-package-fixture",
+        "--test",
+        "updates",
+        "--",
+        "--ignored",
+        "--test-threads=1"
+      ]
+    },
+    {
+      "id": "sales-history-dst",
+      "suite": "postgres",
+      "command": [
+        "node",
+        "scripts/verify-sales-history.cjs"
+      ]
+    },
+    {
+      "id": "maintenance",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-maintenance.cjs"
+      ]
+    },
+    {
+      "id": "storefront-images",
+      "suite": "browser",
+      "command": ["node", "scripts/browser-demo.cjs"],
+      "env": {"TALOCART_DEMO_IMAGES_ONLY": "1"}
+    },
+    {
+      "id": "related-products",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-demo.cjs"
+      ],
+      "env": {
+        "TALOCART_DEMO_RELATED_ONLY": "1"
+      }
+    },
+    {
+      "id": "variant-commerce",
+      "suite": "browser",
+      "command": [
+        "node",
+        "scripts/browser-demo.cjs"
+      ],
+      "env": {
+        "TALOCART_DEMO_VARIANT_COMMERCE_ONLY": "1",
+        "TALOCART_TEST_NO_SCREENSHOTS": "1"
+      }
+    },
+    {
+      "id": "unit-module-sdk",
+      "suite": "rust",
+      "parent": "unit",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "talocart-module-sdk",
+        "--lib"
+      ]
+    },
+    {
+      "id": "clippy-module-sdk",
+      "suite": "rust",
+      "parent": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "-p",
+        "talocart-module-sdk",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    }
+  ]
+}

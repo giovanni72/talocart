@@ -1,0 +1,9 @@
+<form id="store-search-form" method="get" action="{{ crate::store_language::path(search_action) }}" class="header-search" role="search" aria-label="{{ crate::i18n::text("store-search-catalog") }}">
+    <label class="visually-hidden" for="store-search">{{ crate::i18n::text("store-search-product") }}</label>
+    <input class="ui-control" id="store-search" name="q" type="search" value="{{ search_query }}" maxlength="120" placeholder="{{ crate::i18n::text("store-search-product") }}">
+    {% if !search_filters.category.is_empty() %}<input type="hidden" name="category" value="{{ search_filters.category }}">{% endif %}
+    {% if !search_filters.brand.is_empty() %}<input type="hidden" name="brand" value="{{ search_filters.brand }}">{% endif %}
+    {% if search_filters.available %}<input type="hidden" name="available" value="true">{% endif %}
+    {% if search_filters.per_page != 21 %}<input type="hidden" name="per_page" value="{{ search_filters.per_page }}">{% endif %}
+    <button class="ui-button" type="submit">{{ ui::icon("search") }}<span>{{ crate::i18n::text("store-search-submit") }}</span></button>
+  </form>

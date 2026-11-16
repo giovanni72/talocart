@@ -1,0 +1,39 @@
+<section class="settings-section product-related" id="panel-related" data-product-panel="related" aria-labelledby="product-related-heading">
+  <header class="related-heading"><h2 id="product-related-heading">{{ crate::i18n::text("related-title") }}</h2><p class="ui-help">{{ crate::i18n::text("related-help") }}</p></header>
+  {% if related_saved %}{{ ui::feedback("related-saved", "success", crate::i18n::text("related-saved")) }}{% endif %}
+  <div class="related-layout">
+    <section class="related-section related-selected" aria-labelledby="related-selected-heading">
+      <h3 id="related-selected-heading">{{ crate::i18n::text("related-selected") }} <span class="muted">{{ related.selected.len() }}/12</span></h3>
+      {% if related.selected.is_empty() %}<p class="ui-empty ui-empty--compact">{{ crate::i18n::text("related-empty") }}</p>{% else %}
+      <ol class="related-list">{% for item in related.selected %}
+        <li class="related-row"><div class="related-product-copy"><a href="/admin/catalog/products/{{ item.id }}">{{ item.name }}</a><small class="muted">{{ item.model }}</small></div>
+          {% if can_write %}<form method="post" action="/admin/catalog/products/{{ id }}/related"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="related_q" value="{{ related_query }}"><input type="hidden" name="target" value="{{ item.id }}"><button class="ui-button ui-button--secondary ui-button--mini" name="action" value="remove" aria-label="{{ crate::i18n::text("related-remove") }} {{ item.name }}">{{ crate::i18n::text("related-remove") }}</button></form>{% endif %}
+        </li>{% endfor %}
+      </ol>{% endif %}
+    </section>
+    <section class="related-section related-fallback" aria-labelledby="related-fallback-heading">
+      <h3 id="related-fallback-heading">{{ crate::i18n::text("related-fallback") }}</h3>
+      <div class="field-stack">
+        <label for="related-fallback">{{ crate::i18n::text("related-fallback-help") }}</label>
+        <select class="ui-control" id="related-fallback" name="related_fallback" form="product-editor-form"{% if !can_write %} disabled{% endif %}>
+          <option value="none"{% if related.fallback == "none" %} selected{% endif %}>{{ crate::i18n::text("related-none") }}</option>
+          <option value="category"{% if related.fallback == "category" %} selected{% endif %}>{{ crate::i18n::text("related-category") }}</option>
+          <option value="brand"{% if related.fallback == "brand" %} selected{% endif %}>{{ crate::i18n::text("related-brand") }}</option>
+          <option value="either"{% if related.fallback == "either" %} selected{% endif %}>{{ crate::i18n::text("related-either") }}</option>
+        </select>
+      </div>
+    </section>
+    {% if can_write && related.selected.len() < 12 %}<section class="related-section related-search" aria-labelledby="related-search-heading">
+      <h3 id="related-search-heading">{{ crate::i18n::text("related-add") }}</h3>
+      <form class="related-search-form" method="get" action="/admin/catalog/products/{{ id }}#panel-related"><input type="hidden" name="tab" value="related">
+        <div class="field-stack"><label for="related-search">{{ crate::i18n::text("related-search") }}</label><input class="ui-control" id="related-search" type="search" name="related_q" value="{{ related_query }}" maxlength="120" aria-describedby="related-search-help"></div>
+        <button class="ui-button ui-button--secondary ui-button--mini">{{ crate::i18n::text("related-search-button") }}</button>
+      </form>
+      <p class="ui-help" id="related-search-help">{{ crate::i18n::text("related-search-help") }}</p>
+      {% if related_query.trim().is_empty() %}<p class="ui-empty ui-empty--compact" data-related-search-idle>{{ crate::i18n::text("related-search-start") }}</p>{% else if related.candidates.is_empty() %}<p class="ui-empty ui-empty--compact">{{ crate::i18n::text("related-no-results") }}</p>{% else %}
+      <ul class="related-list">{% for item in related.candidates %}
+        <li><form class="related-row" method="post" action="/admin/catalog/products/{{ id }}/related"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="related_q" value="{{ related_query }}"><input type="hidden" name="target" value="{{ item.id }}"><div class="related-product-copy"><span>{{ item.name }}</span><small class="muted">{{ item.model }}</small></div><button class="ui-button ui-button--secondary ui-button--mini" name="action" value="add" aria-label="{{ crate::i18n::text("related-add") }} {{ item.name }}">{{ crate::i18n::text("related-add") }}</button></form></li>{% endfor %}
+      </ul>{% endif %}
+    </section>{% endif %}
+  </div>
+</section>

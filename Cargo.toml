@@ -1,0 +1,71 @@
+[workspace]
+members = ["apps/talocart", "crates/platform", "crates/commerce", "crates/web", "crates/package-fixture", "crates/module-sdk"]
+default-members = ["apps/talocart", "crates/platform", "crates/commerce", "crates/web"]
+exclude = ["vendor/askama_derive"]
+resolver = "3"
+
+[workspace.package]
+version = "24.10.0"
+edition = "2024"
+rust-version = "1.95"
+publish = false
+license = "MIT"
+
+[workspace.dependencies]
+ammonia = "=4.2.5"
+html-escape = "=0.2.15"
+ring = { version = "=0.17.14", default-features = false, features = ["alloc", "std"] }
+futures-util = { version = "=0.3.34", default-features = false, features = ["std"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+reqwest = { version = "=0.13.5", default-features = false, features = ["rustls-no-provider", "form", "query"] }
+hmac = "0.12.1"
+serde_json = "1"
+lettre = { version = "=0.11.23", default-features = false, features = ["builder", "smtp-transport", "tokio1-rustls", "ring", "webpki-roots"] }
+fluent-bundle = { version = "0.16.0", default-features = false }
+unic-langid = "0.9.6"
+url = { version = "2.5.8", default-features = false, features = ["std"] }
+argon2 = "0.5.3"
+getrandom = "0.4"
+image = { version = "0.25.10", default-features = false, features = ["jpeg", "png", "webp"] }
+sha2 = "0.10"
+subtle = "2.6"
+cookie = "0.18.1"
+askama = "0.16.1"
+axum = { version = "0.8.9", features = ["multipart"] }
+clap = { version = "4.6", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+sqlx = { version = "0.9", default-features = false, features = ["runtime-tokio", "tls-rustls", "postgres", "migrate", "macros"] }
+thiserror = "2"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "signal", "time", "sync", "fs", "io-util", "process"] }
+toml = "1"
+tower = { version = "0.5", features = ["util"] }
+tower-http = { version = "0.6", features = ["trace", "request-id", "timeout"] }
+tracing = "0.1"
+tracing-appender = "=0.2.5"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+# Keep useful backtraces without retaining full type/variable debug information.
+# The test profile inherits dev; keep incremental builds for the daily workflow.
+[profile.dev]
+debug = "line-tables-only"
+
+# Opt in only for an interactive debugger session; clean this profile afterwards.
+[profile.debug-full]
+inherits = "dev"
+debug = "full"
+
+[profile.release]
+lto = "thin"
+strip = true
+
+# macOS dyld rejects stripped proc-macro dylibs with misaligned LINKEDIT.
+# Keep build-time tools intact; the shipped executable is still stripped.
+[profile.release.build-override]
+strip = "none"
+
+# Remove RUSTSEC-2026-0374 until Askama publishes its parser replacement.
+[patch.crates-io]
+askama_derive = { path = "vendor/askama_derive" }

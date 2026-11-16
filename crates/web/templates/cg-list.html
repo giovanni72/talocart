@@ -1,0 +1,15 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% import "pagination.html" as pagination %}
+{% block title %}{{ crate::i18n::text("cg-title") }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("cg-title") }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main catalog-main">
+{% call ui::page_header(crate::i18n::text("cg-title")) %}{% if can_write %}<a class="ui-button" href="/admin/customer-groups/new">{{ ui::icon("plus") }}<span>{{ crate::i18n::text("cg-new") }}</span></a>{% endif %}{% endcall %}
+<p><a href="/admin/customers">{{ crate::i18n::text("cg-customers") }}</a></p>
+{% if entries.is_empty() %}{{ ui::empty(crate::i18n::text("cg-title"),crate::i18n::text("cg-empty")) }}{% else %}
+<div class="catalog-list" role="list" aria-label="{{ crate::i18n::text("cg-title") }}">{% for entry in entries %}
+<article class="catalog-row" role="listitem"><div class="catalog-row-main"><h2><a href="/admin/customer-groups/{{ entry.id }}">{{ entry.name(crate::i18n::locale()) }}</a></h2>{% if entry.is_default %}<p class="muted">{{ crate::i18n::text("cg-default") }}</p>{% endif %}<p class="muted">{% if entry.quantity_discounts_enabled %}{{ crate::i18n::text("cg-tiers-on") }}{% else %}{{ crate::i18n::text("cg-tiers-off") }}{% endif %}</p></div><a class="ui-button ui-button--secondary ui-button--compact{% if can_write %} ui-button--icon{% endif %}" href="/admin/customer-groups/{{ entry.id }}" aria-label="{% if can_write %}{{ crate::i18n::text("admin-edit") }}{% else %}{{ crate::i18n::text("admin-view") }}{% endif %} {{ entry.name(crate::i18n::locale()) }}" title="{{ entry.name(crate::i18n::locale()) }}">{% if can_write %}{{ ui::icon("pencil","small") }}{% else %}{{ ui::icon("eye","small") }}<span>{{ crate::i18n::text("admin-view") }}</span>{% endif %}</a></article>
+{% endfor %}</div>{% endif %}
+{{ pagination::render(pagination) }}
+</main>{% endblock %}

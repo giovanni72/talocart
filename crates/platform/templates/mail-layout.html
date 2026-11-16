@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="{{ frame.locale }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>{{ frame.heading }}</title>
+<style>
+body{margin:0;padding:0;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+table{border-collapse:collapse}
+a{color:#243e32}
+@media (max-width:620px){
+.tc-shell{padding:20px 10px!important}
+.tc-pad{padding-left:22px!important;padding-right:22px!important}
+.tc-col{display:block!important;width:100%!important;padding:0 0 18px!important}
+.tc-h1{font-size:27px!important}
+}
+</style>
+</head>
+<body style="margin:0;padding:0;background:#f6f5ef;color:#243e32">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#f6f5ef">{{ frame.preheader }}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;background:#f6f5ef">
+<tr><td class="tc-shell" align="center" style="padding:36px 16px 40px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px">
+<tr><td style="padding:0 6px 22px">
+<table role="presentation" cellpadding="0" cellspacing="0"><tr>
+<td width="38" height="38" align="center" valign="middle" style="width:38px;height:38px;border-radius:50%;background:#243e32;color:#f6f5ef;font-family:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;font-size:22px;font-style:italic;line-height:38px">{{ frame.initial }}</td>
+<td style="padding-left:12px;font-family:'Avenir Next',Avenir,'Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#243e32;overflow-wrap:anywhere">{{ frame.brand }}</td>
+</tr></table>
+</td></tr>
+{% if let Some(test) = frame.test %}<tr><td style="padding:0 0 16px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate"><tr><td style="padding:12px 18px;border:1px dashed #b88a1b;border-radius:8px;background:#fff6dc;color:#6b4e0a;font-family:'Avenir Next',Avenir,'Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;line-height:1.5">{{ test }}</td></tr></table>
+</td></tr>{% endif %}
+<tr><td>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:separate;border:1px solid #d8ddd3;border-radius:12px;background:#fffef9;overflow:hidden">
+<tr><td height="5" style="height:5px;line-height:5px;font-size:0;background:{{ frame.ink }}">&nbsp;</td></tr>
+<tr><td>{% block content %}{% endblock %}</td></tr>
+</table>
+</td></tr>
+<tr><td style="padding:26px 24px 0;text-align:center;font-family:'Avenir Next',Avenir,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;line-height:1.7;color:#687369">
+<p style="margin:0 0 10px">{{ frame.footer }}</p>
+<p style="margin:0;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#243e32;overflow-wrap:anywhere">{{ frame.brand }}</p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>

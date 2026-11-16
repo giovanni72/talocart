@@ -1,0 +1,9 @@
+.git
+.local
+target
+node_modules
+storage
+compiled-modules
+talocart.toml
+.env
+.env.*

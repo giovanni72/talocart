@@ -1,0 +1,36 @@
+{
+  "contract": {
+    "version": 4,
+    "migrations": 5,
+    "sha256": "b17dcddb9a3dc035fd5a5d09eb2447ad1c736bd302eb2c0f8634f4d66ffa75a6"
+  },
+  "surface": "All base SQL used by platform, commerce and the module-embedded web router.",
+  "review": "Contract 4 plus additive provider ownership on payment methods. Existing order snapshots and attempt/capture/refund/event shapes are preserved. Old native adapters do not depend on payment_methods code uniqueness; old host binaries must reject the extended migration ledger. Previous single-provider native modules remain conservative about pending work from other providers; qualify unchanged artifacts separately. Migration 5 adds nullable module policy; existing readers ignore the column, and server defaults remain effective until an owner saves a choice.",
+  "history": [
+    {
+      "version": 1,
+      "checksum": "37c48c5708d784ac686a91f78507ac7a46dcfd61b05867d7aa0cabd68e20d96e8d5aa4aa2b95c4c8ea41250b8d42f86b",
+      "file": "0001_initial_schema.sql"
+    },
+    {
+      "version": 2,
+      "checksum": "b92a4574ccdbb208fa586d5260e045afa6206d82cfd44bc16ba4029e8da9c96a150cee080428c98d0c819260f2a42921",
+      "file": "0002_guest_checkout.sql"
+    },
+    {
+      "version": 3,
+      "checksum": "8d1f6717dc92b40ffefed73170e8316f263e28a72c8e6a5a62a65fa5b838ed75b973c07357a9de80454c43a069dc70c7",
+      "file": "0003_related_products.sql"
+    },
+    {
+      "version": 4,
+      "checksum": "dee7e8f2249c7adfbbe11ac1998a23d549439fa4e8805e2f304154dc234b16456267b28f30faa9c9120e00b152d3fbf2",
+      "file": "0004_payment_providers.sql"
+    },
+    {
+      "version": 5,
+      "checksum": "4b4f64c24fd86c526af70070b92912694f844351eab46777b0d00f28389b1091bf8a9e5851e0e85af585a28c65af2b68",
+      "file": "0005_module_install_mode.sql"
+    }
+  ]
+}

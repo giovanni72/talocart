@@ -1,0 +1,40 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% block title %}{{ crate::i18n::text("admin-my-account") }} {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("admin-my-account-2") }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main account-main">
+  {{ ui::page_header(crate::i18n::text("admin-my-account-2")) }}
+  {% if saved %}{{ ui::feedback("account-message-1", "success", crate::i18n::text("admin-account-updated")) }}{% endif %}
+  {% if !error.is_empty() %}{{ ui::feedback("account-error", "error", error) }}{% endif %}
+  <section class="editor-card account-language" aria-labelledby="language-title">
+    <h2 id="language-title">{{ crate::i18n::text("admin-administration-language") }}</h2>
+    <form method="post" action="/admin/account/language" class="field-stack">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label for="account-language">{{ crate::i18n::text("admin-administration-language") }}</label>
+      <select class="ui-control" id="account-language" name="locale" aria-describedby="language-help">
+        {% for language in crate::i18n::languages() %}<option value="{{ language.0 }}"{% if profile.locale == language.0 %} selected{% endif %}>{{ language.1 }}</option>{% endfor %}
+      </select>
+      <small class="ui-help" id="language-help">{{ crate::i18n::text("admin-your-preference-applies-to-all-your-sessions-store-content-keeps-its-ori") }}</small>
+      <button class="ui-button" type="submit">{{ ui::icon("save", "normal") }}<span>{{ crate::i18n::text("admin-save-language") }}</span></button>
+    </form>
+  </section>
+  <div class="account-grid">
+    <section class="editor-card" aria-labelledby="profile-title"><h2 id="profile-title">{{ crate::i18n::text("admin-personal-details") }}</h2><p class="muted account-role">{{ crate::i18n::text("admin-role") }} {{ profile.role_name }}</p>
+      <form method="post" action="/admin/account" class="field-stack"><input type="hidden" name="csrf" value="{{ csrf }}">
+        <label for="display-name">{{ crate::i18n::text("admin-display-name") }}</label><input class="ui-control" id="display-name" name="display_name" value="{{ name }}" maxlength="80" autocomplete="name" aria-describedby="display-name-help{% if !error.is_empty() %} account-error{% endif %}"><small class="ui-help" id="display-name-help">{{ crate::i18n::text("admin-optional-up-to-80-characters-without-a-name-we-show-your-email") }}</small>
+        <label for="account-email">{{ crate::i18n::text("admin-email") }}</label><input class="ui-control" id="account-email" name="email" type="email" value="{{ email }}" required maxlength="254" autocomplete="email">
+        <label for="profile-password">{{ crate::i18n::text("admin-current-password-to-change-email") }}</label><input class="ui-control" id="profile-password" name="current_password" type="password" autocomplete="current-password" maxlength="128" aria-describedby="email-change-help"><small class="ui-help" id="email-change-help">{{ crate::i18n::text("admin-required-only-when-changing-email-changing-email-closes-all-your-session") }}</small>
+        <button type="submit" class="ui-button">{{ ui::icon("save", "normal") }}<span>{{ crate::i18n::text("admin-save-profile") }}</span></button>
+      </form>
+    </section>
+    <section class="editor-card avatar-card" aria-labelledby="avatar-title"><h2 id="avatar-title">{{ crate::i18n::text("admin-profile-image") }}</h2><span class="account-avatar account-avatar-large" role="img" aria-label="{{ crate::i18n::text("admin-your-avatar") }}">{% include "account-avatar.html" %}</span>
+      <a class="ui-button media-picker-link" href="/admin/media?target=avatar&amp;personal=true">{{ ui::icon("image", "normal") }}<span>{{ crate::i18n::text("admin-select-personal-image") }}</span></a><small class="ui-help">{{ crate::i18n::text("admin-images-uploaded-to-your-personal-folder-are-private-your-avatar-is-centr") }}</small>
+      {% if profile.has_avatar %}<form method="post" action="/admin/account/avatar/delete" class="avatar-remove"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="ui-button ui-button--danger" type="submit">{{ ui::icon("x", "normal") }}<span>{{ crate::i18n::text("admin-remove-image") }}</span></button></form>{% endif %}
+    </section>
+  </div>
+  <section class="editor-card password-card" aria-labelledby="password-title"><h2 id="password-title">{{ crate::i18n::text("admin-change-password") }}</h2><p class="muted">{{ crate::i18n::text("admin-changing-your-password-closes-all-your-sessions-and-cancels-previous-rec") }}</p>
+    <form method="post" action="/admin/account/password" class="field-stack"><input type="hidden" name="csrf" value="{{ csrf }}"><label for="current-password">{{ crate::i18n::text("admin-current-password") }}</label><input class="ui-control" id="current-password" name="current_password" type="password" autocomplete="current-password" required maxlength="128"><label for="new-password">{{ crate::i18n::text("admin-new-password") }}</label><input class="ui-control" id="new-password" name="new_password" type="password" autocomplete="new-password" required minlength="12" maxlength="128"><label for="confirmation">{{ crate::i18n::text("admin-confirm-new-password") }}</label><input class="ui-control" id="confirmation" name="confirmation" type="password" autocomplete="new-password" required minlength="12" maxlength="128"><small class="ui-help">{{ crate::i18n::text("admin-from-12-to-128-characters") }}</small><button class="ui-button" type="submit">{{ ui::icon("save", "normal") }}<span>{{ crate::i18n::text("admin-update-password") }}</span></button></form>
+  </section>
+</main>
+{% endblock %}

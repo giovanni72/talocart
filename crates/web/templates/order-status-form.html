@@ -1,0 +1,19 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% block title %}{{ crate::i18n::text("order-status-title") }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("order-status-title") }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main catalog-main">
+{% if id == 0 %}{{ ui::page_header(crate::i18n::text("order-status-new"), "/admin/settings/order-statuses", crate::i18n::text("order-status-back")) }}{% else %}{{ ui::page_header(crate::i18n::text("order-status-edit"), "/admin/settings/order-statuses", crate::i18n::text("order-status-back")) }}{% endif %}
+{% if !error.is_empty() %}{{ ui::feedback("order-status-error","error",error) }}<p><a href="{{ action }}">{{ crate::i18n::text("payment-reload") }}</a></p>{% endif %}
+<section class="editor-card"><h2>{{ crate::i18n::text("order-status-details") }}</h2>
+{% if id != 0 %}<p>{{ ui::status_badge(preview_name,preview_color) }}</p>{% endif %}
+<p>{{ crate::i18n::text("status-role") }}: {{ crate::i18n::text(role_key) }}</p>
+<form method="post" action="{{ action }}" class="field-stack">
+<input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="revision" value="{{ revision }}">
+<fieldset class="field-stack"{% if !can_write %} disabled{% endif %}><legend>{{ crate::i18n::text("order-status-details") }}</legend>
+{% for field in fields %}<div class="field-stack"><label for="status-{{ field.name }}">{{ field.label }}</label><input class="ui-control" id="status-{{ field.name }}" name="{{ field.name }}" value="{{ field.value }}" maxlength="{{ field.max }}" required{% if field.name == "color" && !field.invalid %} type="color"{% endif %}{% if field.name == "sort_order" %} inputmode="numeric"{% endif %}{% if field.invalid %} aria-invalid="true" aria-describedby="status-{{ field.name }}-error"{% endif %}>{% if field.invalid %}<small class="ui-field-error" id="status-{{ field.name }}-error">{{ field.error }}</small>{% endif %}</div>{% endfor %}
+{% if can_write %}<button class="ui-button" type="submit">{{ ui::icon("save") }}<span>{{ crate::i18n::text("order-status-save") }}</span></button>{% endif %}
+</fieldset></form></section>
+{% if id != 0 && can_write %}<section class="editor-card"><h2>{{ crate::i18n::text("order-status-delete") }}</h2><p>{{ crate::i18n::text("order-status-delete-help") }}</p><form method="post" action="{{ action }}/delete" class="field-stack"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="revision" value="{{ revision }}"><label class="ui-check-label" for="status-confirm"><input class="ui-check" type="checkbox" name="confirm" id="status-confirm" value="true" required>{{ crate::i18n::text("order-status-confirm") }}</label><button class="ui-button ui-button--danger" type="submit">{{ ui::icon("trash") }}<span>{{ crate::i18n::text("order-status-delete") }}</span></button></form></section>{% endif %}
+</main>{% endblock %}

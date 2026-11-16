@@ -1,0 +1,7 @@
+<section class="editor-card"><h2>{{ group.label }}</h2>
+<div class="customer-fields-grid">{% for field in group.fields %}<div class="field-stack"><label for="oe-{{ field.name }}">{{ field.label }}{% if field.required %} <span aria-hidden="true">*</span>{% endif %}</label>
+{% if field.kind == "country" %}<select class="ui-control" id="oe-{{ field.name }}" name="{{ field.name }}"{% if field.invalid %} aria-invalid="true" aria-describedby="oe-{{ field.name }}-error"{% endif %}><option value="">{{ crate::i18n::text("co-select-country") }}</option>{% for country in countries %}<option value="{{ country.code }}"{% if field.value == country.code %} selected{% endif %}>{{ country.label }}</option>{% endfor %}</select>
+{% else if field.kind == "textarea" %}<textarea class="ui-control" id="oe-{{ field.name }}" name="{{ field.name }}" rows="3" maxlength="1000"{% if field.invalid %} aria-invalid="true" aria-describedby="oe-{{ field.name }}-error"{% endif %}>{{ field.value }}</textarea>
+{% else %}<input class="ui-control" id="oe-{{ field.name }}" name="{{ field.name }}" type="{{ field.kind }}" value="{{ field.value }}" maxlength="254"{% if field.invalid %} aria-invalid="true" aria-describedby="oe-{{ field.name }}-error"{% endif %}>{% endif %}
+{% if field.invalid %}<small class="ui-field-error" id="oe-{{ field.name }}-error">{{ crate::i18n::text("oe-field-error") }}</small>{% endif %}</div>{% endfor %}</div>
+</section>

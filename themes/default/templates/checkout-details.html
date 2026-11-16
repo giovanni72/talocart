@@ -1,0 +1,6 @@
+{% extends "storefront/layout.html" %}
+{% import "ui.html" as ui %}
+{% block title %}{{ crate::i18n::text("co-open") }} · {{ store_name }}{% endblock %}
+{% block metadata %}<meta name="robots" content="noindex,nofollow"><script src="/assets/checkout-details.js" defer></script>{% endblock %}
+{% block body_attributes %} class="store-page" data-palette="{{ theme.palette }}" data-typography="{{ theme.typography }}" data-density="{{ theme.density }}"{% endblock %}
+{% block store_content %}<main id="main" class="store-catalog checkout-page">{% include "storefront/checkout-details-body.html" %}</main>{% endblock %}

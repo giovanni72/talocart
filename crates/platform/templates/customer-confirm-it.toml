@@ -1,0 +1,6 @@
+subject = "Conferma il tuo indirizzo email"
+intro = "Per attivare il tuo account, apri il collegamento e conferma il tuo indirizzo email. Fino alla conferma non puoi accedere."
+action = "Conferma email"
+expires = "Il collegamento è monouso e scade tra 24 ore. Se è scaduto puoi richiedere una nuova email dalla pagina di accesso."
+ignore = "Se non hai creato questo account, ignora questa email."
+fallback = "Se il pulsante non funziona, copia e incolla questo indirizzo nel browser:"

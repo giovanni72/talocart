@@ -1,0 +1,241 @@
+name: Operational qualification
+on:
+  workflow_dispatch:
+
+# Superseded PR checks are cancelled; main/release evidence is kept.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    # Serial PostgreSQL scenarios and complete browser profiles need room to finish.
+    timeout-minutes: 90
+    env:
+      # Bound peak compiler memory on private standard runners.
+      CARGO_BUILD_JOBS: '1'
+      CARGO_INCREMENTAL: '0'
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: talocart
+          POSTGRES_PASSWORD: ci_only_password
+          POSTGRES_DB: talocart_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U talocart -d talocart_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      mailpit:
+        image: axllent/mailpit:v1.31.6@sha256:23fe39e81bde596a918000b3135c0f85dc8bb4c9ea6be274b051143f3e300387
+        env:
+          MP_DISABLE_VERSION_CHECK: 'true'
+          MP_SMTP_DISABLE_RDNS: 'true'
+        ports:
+          - 1025:1025
+          - 8025:8025
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Compiler memory reserve
+        run: |
+          # Disposable hosted VM: these SDKs are unused by this Rust/Node workflow.
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup
+          available_kib=$(df --output=avail / | tail -1)
+          test "$available_kib" -gt 29360128
+          sudo fallocate -l 16G /swapfile-talocart-ci
+          sudo chmod 600 /swapfile-talocart-ci
+          sudo mkswap /swapfile-talocart-ci
+          sudo swapon /swapfile-talocart-ci
+          free -h
+          df -h /
+      - name: Toolchain
+        run: rustup toolchain install 1.95.0 --profile minimal --component rustfmt --component clippy
+      - name: Runner resources
+        run: |
+          uname -a
+          nproc
+          free -h
+          df -h .
+          rustc -Vv
+      - run: cargo fmt --all --check
+      - name: Clippy
+        run: |
+          diagnostics() {
+            date -u
+            free -m
+            ps -eo pid,ppid,comm,rss,args --sort=-rss | head -12
+          }
+          trap 'diagnostics; exit 143' TERM
+          (
+            while sleep 30; do diagnostics; done
+          ) &
+          monitor_pid=$!
+          trap 'kill "$monitor_pid" 2>/dev/null || true' EXIT
+          /usr/bin/time -v cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Compiler failure diagnostics
+        if: failure()
+        run: |
+          free -h
+          df -h .
+          sudo journalctl -k --no-pager -n 100
+      - run: cargo test --workspace --locked
+      - name: Base source distribution without modules
+        run: |
+          python3 scripts/release/source.py --profile base --output .local/source-base
+          cargo fmt --manifest-path .local/source-base/Cargo.toml --all --check
+          cargo clippy --manifest-path .local/source-base/Cargo.toml --workspace --all-targets --locked -- -D warnings
+      - name: Public source boundary
+        run: python3 scripts/release/source.py --check .
+      - name: Architecture boundaries
+        run: python3 scripts/check-architecture.py
+      - name: Release tooling contracts
+        run: python3 -m unittest discover -s tests/release -v
+      - name: Updater real systemd interruption and restart guards
+        run: python3 scripts/test-update-systemd.py
+      - run: cargo build --release --locked -p talocart
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run build:editor -- --check
+      - run: npm audit --audit-level=high
+      - run: node --test scripts/test-payment-status.cjs scripts/test-catalog-benchmark.cjs scripts/test-site-benchmark.cjs scripts/test-checkout-benchmark.cjs
+      - run: npx playwright install --with-deps chromium
+      - name: PostgreSQL integration
+        env:
+          TALOCART_TEST_DATABASE_URL: postgres://talocart:ci_only_password@localhost:5432/talocart_test
+        # Advisory locks are database-wide across isolated test schemas.
+        # Scenario concurrency is exercised explicitly inside integration tests.
+        run: cargo test --workspace --locked -- --ignored --test-threads=1
+      - name: Runtime database and SMTP outage recovery
+        env:
+          TALOCART_TEST_DATABASE_URL: postgres://talocart:ci_only_password@localhost:5432/talocart_test
+          TALOCART_TEST_BINARY: target/release/talocart
+        run: node scripts/test-runtime-recovery.cjs
+      - name: Read-only update verification and offline CLI
+        env:
+          TALOCART_TEST_DATABASE_URL: postgres://talocart:ci_only_password@localhost:5432/talocart_test
+          TALOCART_TEST_BINARY: target/release/talocart
+        run: node scripts/test-update-verification.cjs
+      - name: Package update and uninstall browser checks
+        env:
+          TALOCART_TEST_DATABASE_URL: postgres://talocart:ci_only_password@localhost:5432/talocart_test
+          TALOCART_BASE_TEST_BINARY: target/release/talocart
+          TALOCART_FIXTURE_DIR: target/debug
+        run: |
+          cargo build --locked -p talocart-package-fixture --bins
+          node scripts/test-package-updates.cjs
+      - name: Browser integration
+        env:
+          TALOCART_TEST_DATABASE_URL: postgres://talocart:ci_only_password@localhost:5432/talocart_test
+          TALOCART_TEST_BINARY: target/release/talocart
+        run: |
+          npm run test:browser
+      - name: Test group logs and timings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-groups
+          path: .local/test-runs
+          include-hidden-files: true
+          if-no-files-found: ignore
+      - name: Clean install, HTTPS and complete restore
+        env:
+          TALOCART_TEST_DATABASE_URL: postgres://talocart:ci_only_password@localhost:5432/talocart_test
+          RELEASE_TEST_PG_CONTAINER: ${{ job.services.postgres.id }}
+        run: node scripts/release/acceptance.cjs
+      # Assert correctness, retain measurements, avoid machine-dependent timing gates.
+      - name: Dashboard native and HTMX benchmark tool smoke
+        env:
+          TALOCART_TEST_DATABASE_URL: postgres://talocart:ci_only_password@localhost:5432/talocart_test
+          TALOCART_TEST_PREVIOUS_BINARY: target/release/talocart
+          TALOCART_TEST_BINARY: target/release/talocart
+          TALOCART_TEST_DASHBOARD_OUTPUT: .local/verification/dashboard-smoke
+        run: node scripts/benchmark-dashboard.cjs --smoke
+      - name: Dashboard tool smoke results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-smoke
+          path: .local/verification/dashboard-smoke
+          include-hidden-files: true
+          if-no-files-found: ignore
+      - name: Catalog performance smoke
+        env:
+          TALOCART_TEST_DATABASE_URL: postgres://talocart:ci_only_password@localhost:5432/talocart_test
+          TALOCART_BENCH_SAMPLES: '5'
+        run: npm run test:performance
+      - name: Site performance smoke
+        env:
+          TALOCART_TEST_DATABASE_URL: postgres://talocart:ci_only_password@localhost:5432/talocart_test
+          TALOCART_SITE_BENCH_SAMPLES: '5'
+          TALOCART_SITE_BENCH_ASSERT_QUERIES: '1'
+        run: npm run test:performance:site
+      - name: Site measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-performance
+          path: .local/verification/site-performance
+          include-hidden-files: true
+          if-no-files-found: ignore
+      - name: Product and cart performance smoke
+        env:
+          TALOCART_TEST_DATABASE_URL: postgres://talocart:ci_only_password@localhost:5432/talocart_test
+          TALOCART_SITE_BENCH_SAMPLES: '5'
+          TALOCART_SITE_BENCH_OUTPUT: .local/verification/commerce-performance
+        run: npm run test:performance:commerce
+      - name: Product and cart measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: commerce-performance
+          path: .local/verification/commerce-performance
+          include-hidden-files: true
+          if-no-files-found: ignore
+      - name: Concurrent reads smoke
+        env:
+          TALOCART_TEST_DATABASE_URL: postgres://talocart:ci_only_password@localhost:5432/talocart_test
+          TALOCART_CONCURRENCY_ITERATIONS: '3'
+        run: npm run test:performance:concurrency
+      - name: Concurrent measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: concurrency-performance
+          path: .local/verification/concurrency-performance
+          include-hidden-files: true
+          if-no-files-found: ignore
+      - name: Checkout confirmation load and invariants
+        env:
+          TALOCART_TEST_DATABASE_URL: postgres://talocart:ci_only_password@localhost:5432/talocart_test
+          TALOCART_SITE_BENCH_OUTPUT: .local/verification/checkout-performance
+        run: npm run test:performance:checkout
+      - name: Checkout measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkout-performance
+          path: .local/verification/checkout-performance
+          include-hidden-files: true
+          if-no-files-found: ignore
+      - name: Catalog measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalog-performance
+          path: .local/verification/catalog-performance
+          include-hidden-files: true
+          if-no-files-found: ignore
+      - name: Audit dependencies
+        run: |
+          cargo install cargo-audit --locked --version 0.22.2
+          python3 scripts/audit-dependencies.py

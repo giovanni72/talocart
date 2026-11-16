@@ -1,0 +1,39 @@
+<aside class="order-admin-aside">
+  <section class="editor-card" aria-labelledby="order-customer-title">
+    <h2 id="order-customer-title">{{ crate::i18n::text("admin-order-customer") }}</h2>
+    <p class="order-party-name">{{ order.frozen.customer.first_name }} {{ order.frozen.customer.last_name }}</p>
+    <dl class="order-admin-details">
+      <div><dt>{{ crate::i18n::text("co-field-email") }}</dt><dd><a href="mailto:{{ order.frozen.customer.email }}">{{ order.frozen.customer.email }}</a></dd></div>
+      {% if !order.frozen.customer.phone.is_empty() %}<div><dt>{{ crate::i18n::text("co-field-phone") }}</dt><dd>{{ order.frozen.customer.phone }}</dd></div>{% endif %}
+    </dl>
+  </section>
+  <section class="editor-card" id="order-shipping" aria-labelledby="order-shipping-title">
+    <h2 id="order-shipping-title">{{ crate::i18n::text("co-group-shipping") }}</h2>
+    <p class="order-address">{% include "order-shipping-address.html" %}</p>
+    {% if !order.frozen.customer.delivery_notes.is_empty() %}<p class="checkout-instructions order-admin-note">{{ order.frozen.customer.delivery_notes }}</p>{% endif %}
+    <dl class="order-admin-details">
+      <div><dt>{{ crate::i18n::text("cm-shipping") }}</dt><dd>{{ order.frozen.shipping.name(crate::i18n::locale()) }}</dd></div>
+      {% if order.fulfillment.sent() %}<div><dt>{{ crate::i18n::text("fulfillment-carrier") }}</dt><dd>{{ order.fulfillment.carrier }}</dd></div>
+      {% if !order.fulfillment.tracking_number.is_empty() %}<div><dt>{{ crate::i18n::text("fulfillment-tracking-label") }}</dt><dd>{% if order.fulfillment.tracking_url.is_empty() %}{{ order.fulfillment.tracking_number }}{% else %}<a href="{{ order.fulfillment.tracking_url }}" rel="noopener noreferrer">{{ order.fulfillment.tracking_number }}</a>{% endif %}</dd></div>{% endif %}{% endif %}
+    </dl>
+    {% if order.state == "open" && !order.frozen.shipping.instructions(crate::i18n::locale()).is_empty() %}<p class="ui-help checkout-instructions">{{ order.frozen.shipping.instructions(crate::i18n::locale()) }}</p>{% endif %}
+  </section>
+  {% if order.frozen.customer.invoice_requested %}<section class="editor-card" id="order-invoice" aria-labelledby="order-invoice-title">
+    <h2 id="order-invoice-title">{{ crate::i18n::text("ord-invoice") }}</h2>
+    <p class="order-address">{% include "order-billing-address.html" %}</p>
+    <dl class="order-admin-details">
+      {% if !order.frozen.customer.vat_id.is_empty() %}<div><dt>{{ crate::i18n::text("co-field-vat-id") }}</dt><dd>{{ order.frozen.customer.vat_id }}</dd></div>{% endif %}
+      {% if !order.frozen.customer.tax_id.is_empty() %}<div><dt>{{ crate::i18n::text("co-field-tax-id") }}</dt><dd>{{ order.frozen.customer.tax_id }}</dd></div>{% endif %}
+      {% if !order.frozen.customer.recipient_code.is_empty() %}<div><dt>{{ crate::i18n::text("co-field-recipient-code") }}</dt><dd>{{ order.frozen.customer.recipient_code }}</dd></div>{% endif %}
+      {% if !order.frozen.customer.pec.is_empty() %}<div><dt>{{ crate::i18n::text("co-field-pec") }}</dt><dd>{{ order.frozen.customer.pec }}</dd></div>{% endif %}
+    </dl>
+  </section>{% endif %}
+  <section class="editor-card" id="order-payment-method" aria-labelledby="order-payment-title">
+    <h2 id="order-payment-title">{{ crate::i18n::text("admin-order-payment") }}</h2>
+    <dl class="order-admin-details">
+      <div><dt>{{ crate::i18n::text("cm-payment") }}</dt><dd>{{ order.frozen.payment.name(crate::i18n::locale()) }}</dd></div>
+      {% if let Some(payment) = order.manual_payment %}<div><dt>{{ crate::i18n::text("ord-payment-recorded-at") }}</dt><dd>{{ payment.recorded_at }}</dd></div>{% endif %}
+    </dl>
+    {% if order.payment_due() && !payment_pending %}<p class="ui-help checkout-instructions" data-payment-instructions>{{ order.frozen.payment.instructions(crate::i18n::locale()) }}</p>{% endif %}
+  </section>
+</aside>

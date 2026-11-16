@@ -1,0 +1,57 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% block title %}{{ crate::i18n::text("updates-title") }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("updates-title") }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main">
+  {{ ui::page_header(crate::i18n::text("updates-title")) }}
+  <section class="editor-card field-stack" aria-labelledby="update-status-title">
+    <h2 id="update-status-title">{{ crate::i18n::text(label) }}</h2>
+    <dl><dt>{{ crate::i18n::text("updates-installed") }}</dt><dd>{{ nav.application.version }}</dd>
+    {% if let Some(candidate) = status.candidate %}<dt>{{ crate::i18n::text("updates-offered") }}</dt><dd>{{ candidate.version }}</dd>{% endif %}
+    {% if !status.checked_at.is_empty() %}<dt>{{ crate::i18n::text("updates-checked") }}</dt><dd><time>{{ status.checked_at }}</time></dd>{% endif %}</dl>
+    {% if let Some(stage) = stage_label %}<p>{{ crate::i18n::text(stage) }}</p>{% endif %}
+    {% if let Some(notice) = notice_label %}{{ ui::message("update-notice", "info", crate::i18n::text(notice)) }}{% endif %}
+    {% if status.recovery_required %}{{ ui::message("update-recovery", "error", crate::i18n::text("updates-recovery-help")) }}{% endif %}
+    {% if let Some(backup) = status.backup_id %}<p>{{ crate::i18n::text("updates-backup-id") }}: <code>{{ backup }}</code></p>{% endif %}
+    {% if status.check_queued %}{{ ui::message("update-check-queued", "info", crate::i18n::text("updates-check-queued")) }}{% endif %}
+    <p class="ui-help" id="update-schedule">{{ crate::i18n::text("updates-schedule") }}</p>
+    <div class="page-actions">
+      {% if can_check %}<form method="post" action="/admin/updates/check">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button type="submit" class="ui-button{% if available %} ui-button--secondary{% endif %}" aria-describedby="update-schedule">{{ ui::icon("search", "small") }}<span>{{ crate::i18n::text("updates-check-now") }}</span></button>
+      </form>{% endif %}
+      <a class="ui-button ui-button--secondary" href="/admin/updates">{{ ui::icon("refresh-cw", "small") }}<span>{{ crate::i18n::text("updates-refresh") }}</span></a>
+    </div>
+  </section>
+  {% if let Some(plan) = status.plan %}
+  <section class="editor-card field-stack" aria-labelledby="update-plan-title">
+    <h2 id="update-plan-title">{{ crate::i18n::text(plan_title) }}</h2>
+    <p>{{ crate::i18n::text("updates-distribution") }} <strong>{{ plan.release }}</strong></p>
+    <div class="ui-table-region" tabindex="0" role="region" aria-labelledby="update-plan-title">
+      <table class="ui-table" aria-labelledby="update-plan-title">
+        <thead><tr><th scope="col">{{ crate::i18n::text("updates-component") }}</th><th scope="col">{{ crate::i18n::text(from_label) }}</th><th scope="col">{{ crate::i18n::text(to_label) }}</th></tr></thead>
+        <tbody>{% for row in rows %}<tr>
+          <th scope="row">{{ row.id }}<small>{{ crate::i18n::text(row.action) }}{% if let Some(activation) = row.activation %} · {{ crate::i18n::text(activation) }}{% endif %}</small>{% if let Some(blocker) = row.blocker %}<small>{{ crate::i18n::text(blocker) }}</small>{% endif %}</th>
+          <td>{{ row.current }}</td><td>{{ row.target }}</td>
+        </tr>{% endfor %}</tbody>
+      </table>
+    </div>
+    <p class="ui-help">{{ crate::i18n::text("updates-plan-help") }}</p>
+    {% if plan.blocked %}{{ ui::message("update-blocked", "error", crate::i18n::text("updates-blocked-help")) }}{% endif %}
+  </section>
+  {% endif %}
+  {% if available %}{% if let Some(candidate) = status.candidate %}
+  <form method="post" action="/admin/updates" class="editor-card field-stack">
+    <h2>{{ crate::i18n::text("updates-install-title") }}</h2>
+    <p id="update-maintenance">{{ crate::i18n::text("updates-maintenance") }}</p>
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <input type="hidden" name="version" value="{{ candidate.version }}">
+    <input type="hidden" name="commit" value="{{ candidate.commit }}">
+    <input type="hidden" name="digest" value="{{ candidate.digest }}">
+    <label class="ui-check-label"><input type="checkbox" class="ui-check" name="confirm" value="yes" required aria-describedby="update-maintenance"> {{ crate::i18n::text("updates-confirm") }}</label>
+    <button type="submit" class="ui-button">{{ crate::i18n::text("updates-install") }}</button>
+  </form>
+  {% endif %}{% endif %}
+</main>
+{% endblock %}

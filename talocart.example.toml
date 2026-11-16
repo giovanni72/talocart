@@ -1,0 +1,43 @@
+# Copy to private talocart.toml, chmod 600. TALOCART_* overrides the file.
+# Local preview binds only to loopback.
+[server]
+listen = "127.0.0.1:3000"
+# Set the exact public HTTPS origin and secure cookies together behind a proxy.
+# HTTPS delegates per-client authentication limits to the proxy; install the rules
+# in distribution/nginx.conf. Account/session limits remain enforced by the app.
+# public_origin = "https://shop.example.com"
+secure_cookies = false
+
+[database]
+# Add your private PostgreSQL URL here or set TALOCART_DATABASE_URL.
+# Never commit real credentials.
+max_connections = 5
+timeout_seconds = 3
+
+[store]
+name = "Talocart"
+
+[media]
+# Persistent private storage, absolute or relative to this configuration file.
+root = "storage/media"
+# Background source discovery interval, 1..3600 seconds; cache/staging excluded.
+discovery_interval_seconds = 30
+
+[packages]
+# Native installation/update is CLI-only by default. Explicitly opt in to panel + password confirmation.
+install = "cli"
+# Generic native package state; activation/settings are managed in the panel.
+root = "storage/packages"
+
+# Configure SMTP transport, credentials and sender in Settings > Email.
+# Preserve the private encryption key stored beside media in <media-root>.secrets.
+# The base supports bank transfer and cash on delivery.
+
+[logging]
+# Private ERROR journal with daily UTC rotation.
+root = "storage/logs"
+max_files = 30
+
+# Optional OS updater; leave absent for ordinary local development.
+# [updates]
+# root = "/var/lib/talocart-update"

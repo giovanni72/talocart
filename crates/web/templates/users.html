@@ -1,0 +1,17 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% import "pagination.html" as pagination %}
+{% block title %}{{ crate::i18n::text("admin-administrators-2") }} {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("admin-administrators") }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main">
+  {% call ui::page_header(crate::i18n::text("admin-administrators")) %}{% if owner %}<a class="ui-button" href="/admin/users/new">{{ ui::icon("plus", "normal") }}<span>{{ crate::i18n::text("admin-new-user") }}</span></a>{% endif %}{% endcall %}
+  {% if saved %}{{ ui::feedback("users-message-1", "success", crate::i18n::text("admin-administrator-saved")) }}{% endif %}
+  <section class="users-list" aria-label="{{ crate::i18n::text("admin-administrator-list") }}">
+    {% for user in users %}<article class="user-row"><div><h2>{{ user.email }}</h2><p>{{ user.role_name }} <span aria-hidden="true">·</span> {% if user.active %}{{ crate::i18n::text("admin-active-2") }}{% else %}{{ crate::i18n::text("admin-inactive-2") }}{% endif %}</p></div><a class="ui-button ui-button--small ui-button--secondary" href="/admin/users/{{ user.id }}" aria-label="{{ crate::i18n::text("admin-manage") }} {{ user.email }}">{{ ui::icon("pencil", "normal") }}<span>{{ crate::i18n::text("admin-manage") }}</span></a></article>{% endfor %}
+    {% if users.is_empty() %}<p class="ui-empty">{{ crate::i18n::text("admin-no-administrators-on-this-page") }}</p>{% endif %}
+  </section>
+  {{ pagination::render(pagination) }}
+  {% if nav.roles %}<section class="settings-section"><h2>{{ crate::i18n::text("admin-roles-and-permissions") }}</h2><p class="muted">{{ crate::i18n::text("admin-configure-read-and-write-access-for-each-role") }}</p><a class="ui-button ui-button--small ui-button--secondary" href="/admin/roles">{{ ui::icon("shield-check", "normal") }}<span>{{ crate::i18n::text("admin-open-roles-and-permissions") }}</span></a></section>{% endif %}
+</main>
+{% endblock %}

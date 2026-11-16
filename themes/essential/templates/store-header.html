@@ -1,0 +1,13 @@
+{% import "ui.html" as ui %}
+<div class="essential-masthead"><header class="site-header">
+<a class="wordmark" href="{{ crate::store_language::path("/") }}" aria-label="{{ store_name }} — home">{% include "store-brand.html" %}</a>
+{% include "storefront/header-actions.html" %}
+<div class="essential-search">{% include "storefront/search-form.html" %}</div>
+</header></div>
+{% if category_menu.has_header_pages() %}<nav class="information-links information-header" aria-label="{{ crate::i18n::text("pages-header-navigation") }}">{% let footer = false %}{% include "default/templates/information-links.html" %}</nav>{% endif %}
+{% include "default/templates/category-menu.html" %}
+<script src="/assets/category-menu.js" defer></script><script src="/assets/store-language.js" defer></script>
+{% include "default/templates/minicart-dialog.html" %}<script src="/assets/minicart.js" defer></script>
+
+<script src="/assets/product-price.js" defer></script>
+<script src="/assets/product-gallery.js" defer></script>

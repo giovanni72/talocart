@@ -1,0 +1,15 @@
+{% for field in fields %}
+{% if billing_groups %}{% if field.name == "billing_first_name" %}<h3 class="customer-field-heading">{{ crate::i18n::text("ca-holder") }}</h3>{% else if field.name == "billing_country" %}<h3 class="customer-field-heading">{{ crate::i18n::text("ca-billing-address") }}</h3>{% else if field.name == "vat_id" %}<h3 class="customer-field-heading">{{ crate::i18n::text("ca-tax-data") }}</h3>{% endif %}{% endif %}
+<div class="field-stack" data-ca-field data-private-required="{{ field.private_required }}" data-business-required="{{ field.business_required }}" data-configured-required="{{ field.configured_required }}" data-condition="{{ field.condition }}">
+<label for="ca-{{ field.name }}">{{ field.label }} <span data-ca-required-mark aria-hidden="true"{% if !field.required %} hidden{% endif %}>*</span></label>
+{% if field.kind == "country" %}
+<select class="ui-control" id="ca-{{ field.name }}" name="{{ field.name }}"{% if field.required %} required{% endif %}{% if field.invalid %} aria-invalid="true" aria-describedby="ca-{{ field.name }}-error"{% endif %}>
+<option value="">{{ crate::i18n::text("co-select-country") }}</option>
+{% for country in countries %}<option value="{{ country.code }}"{% if field.value == country.code %} selected{% endif %}>{{ country.label }}</option>{% endfor %}
+</select>
+{% else %}
+<input class="ui-control" id="ca-{{ field.name }}" name="{{ field.name }}" type="{{ field.kind }}" value="{{ field.value }}" maxlength="{{ field.max }}"{% if field.kind == "password" %} minlength="12" autocomplete="new-password"{% endif %}{% if field.required %} required{% endif %}{% if field.invalid %} aria-invalid="true" aria-describedby="ca-{{ field.name }}-error"{% endif %}>
+{% endif %}
+{% if field.invalid %}<small class="ui-field-error" id="ca-{{ field.name }}-error">{{ field.error_text }}</small>{% endif %}
+</div>
+{% endfor %}

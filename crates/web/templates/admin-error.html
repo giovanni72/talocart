@@ -1,0 +1,4 @@
+{% extends "admin-base.html" %}
+{% block title %}{{ error.title }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ error.title }}{% endblock %}
+{% block content %}<main id="main" class="admin-main" tabindex="-1">{% include "error-content.html" %}</main>{% endblock %}

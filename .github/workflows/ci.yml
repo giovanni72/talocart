@@ -1,0 +1,93 @@
+name: Rust checks
+on:
+  workflow_dispatch:
+
+# Superseded PR checks are cancelled; main/release evidence is kept.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    # Source quality checks; operational suites have their own manual workflow.
+    timeout-minutes: 90
+    env:
+      # Bound peak compiler memory on private standard runners.
+      CARGO_BUILD_JOBS: '1'
+      CARGO_INCREMENTAL: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Compiler memory reserve
+        run: |
+          # Disposable hosted VM: these SDKs are unused by this Rust/Node workflow.
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup
+          available_kib=$(df --output=avail / | tail -1)
+          test "$available_kib" -gt 29360128
+          sudo fallocate -l 16G /swapfile-talocart-ci
+          sudo chmod 600 /swapfile-talocart-ci
+          sudo mkswap /swapfile-talocart-ci
+          sudo swapon /swapfile-talocart-ci
+          free -h
+          df -h /
+      - name: Toolchain
+        run: rustup toolchain install 1.95.0 --profile minimal --component rustfmt --component clippy
+      - name: Runner resources
+        run: |
+          uname -a
+          nproc
+          free -h
+          df -h .
+          rustc -Vv
+      - name: Audit dependencies
+        run: |
+          cargo install cargo-audit --locked --version 0.22.2
+          python3 scripts/audit-dependencies.py
+      - run: cargo fmt --all --check
+      - name: Clippy
+        run: |
+          diagnostics() {
+            date -u
+            free -m
+            ps -eo pid,ppid,comm,rss,args --sort=-rss | head -12
+          }
+          trap 'diagnostics; exit 143' TERM
+          (
+            while sleep 30; do diagnostics; done
+          ) &
+          monitor_pid=$!
+          trap 'kill "$monitor_pid" 2>/dev/null || true' EXIT
+          /usr/bin/time -v cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Compiler failure diagnostics
+        if: failure()
+        run: |
+          free -h
+          df -h .
+          sudo journalctl -k --no-pager -n 100
+      - run: cargo test --workspace --locked
+      - name: Base source distribution without modules
+        run: |
+          python3 scripts/release/source.py --profile base --output .local/source-base
+          python3 scripts/release/source.py --check .local/source-base --no-history
+          cargo fmt --manifest-path .local/source-base/Cargo.toml --all --check
+      - name: Public source boundary
+        run: python3 scripts/release/source.py --check .
+      - name: Architecture boundaries
+        run: python3 scripts/check-architecture.py
+      - name: Release tooling contracts
+        run: python3 -m unittest discover -s tests/release -v
+      - name: Build application
+        run: cargo build --locked -p talocart
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run build:editor -- --check
+      - run: npm audit --audit-level=high
+      - run: node --test scripts/test-payment-status.cjs scripts/test-catalog-benchmark.cjs scripts/test-site-benchmark.cjs scripts/test-checkout-benchmark.cjs

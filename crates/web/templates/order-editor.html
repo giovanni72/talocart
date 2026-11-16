@@ -1,0 +1,72 @@
+{% extends "admin-base.html" %}{% import "ui.html" as ui %}
+{% block title %}{{ title }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("ord-title") }}{% endblock %}
+{% block styles %}{{ super() }}<script src="/assets/order-editor.js" defer></script>{% endblock %}
+{% block content %}<main id="main" class="admin-main catalog-main order-admin order-editor">
+{{ ui::page_header(title, "/admin/orders/drafts", crate::i18n::text("oe-drafts")) }}
+<div class="order-admin-header">
+<dl class="order-admin-facts">
+<div><dt>{{ crate::i18n::text("oe-draft") }}</dt><dd>#{{ draft.id }}</dd></div>
+{% if let Some(id) = draft.target_order_id %}<div><dt>{{ crate::i18n::text("oe-target") }}</dt><dd><a href="/admin/orders/{{ id }}">#{{ id }}</a></dd></div>{% endif %}
+<div><dt>{{ crate::i18n::text("oe-tab-lines") }}</dt><dd>{{ draft.data.lines.len() }}</dd></div>
+<div><dt>{{ crate::i18n::text("oe-tab-customer") }}</dt><dd>{% if !draft.data.customer.first_name.is_empty() || !draft.data.customer.last_name.is_empty() %}{{ draft.data.customer.first_name }} {{ draft.data.customer.last_name }}{% else if !draft.data.customer.email.is_empty() %}{{ draft.data.customer.email }}{% else %}<span class="oe-fact-missing">{{ crate::i18n::text("oe-fact-missing") }}</span>{% endif %}</dd></div>
+<div><dt>{{ crate::i18n::text("co-group-shipping") }}</dt><dd>{% if draft.data.shipping_method_id.is_none() %}<span class="oe-fact-missing">{{ crate::i18n::text("oe-fact-missing") }}</span>{% else %}{% for method in shipping %}{% if draft.data.shipping_selected(method.id) %}{{ method.name }}{% endif %}{% endfor %}{% endif %}</dd></div>
+<div><dt>{{ crate::i18n::text("admin-order-payment") }}</dt><dd>{% if draft.data.payment_method_id.is_none() %}<span class="oe-fact-missing">{{ crate::i18n::text("oe-fact-missing") }}</span>{% else %}{% for method in payments %}{% if draft.data.payment_selected(method.id) %}{{ method.name }}{% endif %}{% endfor %}{% endif %}</dd></div>
+</dl>
+</div>
+{% if !error.is_empty() %}{{ ui::message("order-editor-error","error",error,true) }}{% endif %}
+{% if query.saved == Some(1) %}{{ ui::feedback("order-draft-saved","success",crate::i18n::text("oe-saved")) }}{% endif %}
+{% if let Some(quote) = preview %}
+{% include "order-editor-preview.html" %}
+{% else %}
+<form id="order-editor-form" method="post" action="/admin/orders/drafts/{{ draft.id }}">
+<input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="revision" value="{{ draft.revision }}"><input type="hidden" name="line_count" value="{{ draft.data.lines.len() }}">
+{% call ui::tabs(crate::i18n::text("oe-sections"), true) %}{{ ui::tab("#oe-panel-lines", crate::i18n::text("oe-tab-lines"), true, "package", draft.data.lines.len().to_string()) }}{{ ui::tab("#oe-panel-customer", crate::i18n::text("oe-tab-customer"), false, "user-round") }}{{ ui::tab("#oe-panel-addresses", crate::i18n::text("oe-tab-addresses"), false, "map") }}{{ ui::tab("#oe-panel-methods", crate::i18n::text("oe-methods"), false, "truck") }}{% endcall %}
+<div class="order-admin-layout"><div class="order-admin-primary">
+<div id="oe-panel-lines" class="oe-panel">
+<section class="editor-card" aria-labelledby="oe-lines-title"><h2 id="oe-lines-title">{{ crate::i18n::text("admin-order-lines") }}</h2>
+<div class="oe-search"><label for="oe-product-search">{{ crate::i18n::text("oe-product-search") }}</label><div class="oe-search-controls"><input id="oe-product-search" class="ui-control" name="product_search" value="{{ query.products }}" maxlength="100"><button class="ui-button ui-button--secondary" type="submit" name="action" value="search-products" formnovalidate>{{ ui::icon("search", "small") }}<span>{{ crate::i18n::text("oe-search") }}</span></button></div></div>
+{% if !query.products.is_empty() %}<ul class="oe-results">{% for product in products %}<li><span>{{ product.name }}<small>{{ product.code }}</small></span><button class="ui-button ui-button--small ui-button--secondary" name="action" value="add:{{ product.product_id }}:{{ product.variant_id }}" type="submit" formnovalidate>{{ ui::icon("plus", "small") }}<span>{{ crate::i18n::text("oe-add") }}</span> <span class="visually-hidden">{{ product.code }}</span></button></li>{% else %}<li>{{ crate::i18n::text("oe-no-results") }}</li>{% endfor %}</ul>{% endif %}
+{% if draft.data.lines.is_empty() %}<p class="ui-empty oe-lines-empty">{{ crate::i18n::text("oe-lines-empty") }}</p>{% else %}
+<div class="ui-table-region order-lines-region" role="region" aria-labelledby="oe-lines-title" tabindex="0"><table class="ui-table order-lines oe-lines" role="table"><thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">{{ crate::i18n::text("admin-order-product") }}</th><th scope="col" class="ui-table__num" role="columnheader">{{ crate::i18n::text("admin-order-quantity") }}</th><th scope="col" class="ui-table__num" role="columnheader">{{ crate::i18n::text("admin-order-unit-price") }}</th><th scope="col" role="columnheader"><span class="visually-hidden">{{ crate::i18n::text("admin-actions") }}</span></th></tr></thead><tbody role="rowgroup">
+{% for line in draft.data.lines %}<tr role="row"><th scope="row" role="rowheader"><span class="order-line-name">{{ line.name }}</span><small class="order-line-code">{{ line.code }}</small><input type="hidden" name="product_{{ loop.index0 }}" value="{{ line.product_id }}"><input type="hidden" name="variant_{{ loop.index0 }}" value="{{ line.variant_id }}"></th>
+<td class="ui-table__num" role="cell" data-label="{{ crate::i18n::text("admin-order-quantity") }}"><label class="visually-hidden" for="oe-quantity-{{ loop.index0 }}">{{ crate::i18n::text("admin-order-quantity") }} · {{ line.name }}</label><input class="ui-control" id="oe-quantity-{{ loop.index0 }}" name="quantity_{{ loop.index0 }}" type="number" min="1" max="999999" value="{{ line.quantity }}"></td>
+<td class="ui-table__num" role="cell" data-label="{{ crate::i18n::text("admin-order-unit-price") }}"><label class="visually-hidden" for="oe-price-{{ loop.index0 }}">{{ crate::i18n::text("admin-order-unit-price") }} · {{ line.name }}</label><input class="ui-control" id="oe-price-{{ loop.index0 }}" name="price_{{ loop.index0 }}" inputmode="decimal" maxlength="30" value="{{ line.unit_price }}" aria-describedby="oe-prices-help" placeholder="{{ crate::i18n::text("oe-auto") }}"></td>
+<td class="oe-line-action" role="cell"><button class="ui-button ui-button--secondary ui-button--icon ui-button--compact" name="action" value="remove:{{ loop.index0 }}" type="submit" formnovalidate title="{{ crate::i18n::text("oe-remove") }}">{{ ui::icon("trash", "small") }}<span class="visually-hidden">{{ crate::i18n::text("oe-remove") }} · {{ line.name }}</span></button></td></tr>
+{% endfor %}</tbody></table></div>{% endif %}
+<p class="ui-help oe-prices-help" id="oe-prices-help">{{ crate::i18n::text("oe-prices-help") }}</p>
+</section>
+</div>
+<div id="oe-panel-customer" class="oe-panel">
+<section class="editor-card"><h2>{{ crate::i18n::text("oe-tab-customer") }}</h2>
+{% if let Some(id) = draft.data.customer_id %}<div class="oe-linked"><p>{{ ui::icon("user-round", "small") }}<span>{{ crate::i18n::text("oe-account") }} #{{ id }}</span></p>{% if can_customers %}<button class="ui-button ui-button--small ui-button--secondary" name="action" value="guest" type="submit" formnovalidate>{{ crate::i18n::text("oe-guest") }}</button>{% endif %}</div>{% else %}<p class="ui-help">{{ crate::i18n::text("oe-guest-help") }}</p>{% endif %}
+{% if can_customers %}<div class="oe-search"><label for="oe-customer-search">{{ crate::i18n::text("oe-customer-search") }}</label><div class="oe-search-controls"><input id="oe-customer-search" class="ui-control" name="customer_search" value="{{ query.customers }}" maxlength="100"><button class="ui-button ui-button--secondary" type="submit" name="action" value="search-customers" formnovalidate>{{ ui::icon("search", "small") }}<span>{{ crate::i18n::text("oe-search") }}</span></button></div></div>
+{% if !query.customers.is_empty() %}<ul class="oe-results">{% for customer in customers %}<li><span>{{ customer.first_name }} {{ customer.last_name }}<small>{{ customer.email }}</small></span><button class="ui-button ui-button--small ui-button--secondary" name="action" value="customer:{{ customer.id }}" type="submit" formnovalidate>{{ crate::i18n::text("oe-select") }}</button></li>{% else %}<li>{{ crate::i18n::text("oe-no-results") }}</li>{% endfor %}</ul>{% endif %}{% endif %}
+<div class="oe-subsection">
+<div class="customer-fields-grid"><div class="field-stack"><label for="oe-customer-type">{{ crate::i18n::text("co-customer-type") }}</label><select id="oe-customer-type" name="customer_type" class="ui-control"><option value="private"{% if draft.data.customer.customer_type == "private" %} selected{% endif %}>{{ crate::i18n::text("co-private") }}</option><option value="business"{% if draft.data.customer.customer_type == "business" %} selected{% endif %}>{{ crate::i18n::text("co-business") }}</option></select></div><div class="field-stack"><label for="oe-locale">{{ crate::i18n::text("oe-language") }}</label><select id="oe-locale" name="locale" class="ui-control"><option value="it"{% if draft.data.locale == "it" %} selected{% endif %}>Italiano</option><option value="en"{% if draft.data.locale == "en" %} selected{% endif %}>English</option></select></div></div>
+<div class="oe-checks"><label class="ui-check-label"><input class="ui-check" name="invoice_requested" type="checkbox" value="true"{% if draft.data.customer.invoice_requested %} checked{% endif %}>{{ crate::i18n::text("oe-invoice") }}</label><label class="ui-check-label"><input class="ui-check" name="billing_same" type="checkbox" value="true"{% if draft.data.customer.billing_same %} checked{% endif %}>{{ crate::i18n::text("oe-billing-same") }}</label></div>
+<div class="oe-refresh"><p class="ui-help">{{ crate::i18n::text("oe-refresh-help") }}</p><button class="ui-button ui-button--small ui-button--secondary" name="action" value="refresh" type="submit" formnovalidate>{{ ui::icon("refresh-cw", "small") }}<span>{{ crate::i18n::text("oe-refresh") }}</span></button></div>
+</div>
+</section>
+{% for group in groups %}{% if loop.first %}{% include "order-editor-group.html" %}{% endif %}{% endfor %}
+</div>
+<div id="oe-panel-addresses" class="oe-panel">
+{% for group in groups %}{% if !loop.first %}{% include "order-editor-group.html" %}{% endif %}{% endfor %}
+</div>
+<div id="oe-panel-methods" class="oe-panel">
+<section class="editor-card"><h2>{{ crate::i18n::text("oe-methods") }}</h2>
+<div class="customer-fields-grid">
+<div class="field-stack"><label for="oe-shipping">{{ crate::i18n::text("cm-shipping") }}</label><select class="ui-control" id="oe-shipping" name="shipping_method_id"><option value="">{{ crate::i18n::text("oe-select-method") }}</option>{% for method in shipping %}<option value="{{ method.id }}"{% if draft.data.shipping_selected(method.id) %} selected{% endif %}>{{ method.name }}</option>{% endfor %}</select></div>
+<div class="field-stack"><label for="oe-shipping-price">{{ crate::i18n::text("oe-shipping-price") }}</label><input class="ui-control" id="oe-shipping-price" name="shipping_price" value="{{ draft.data.shipping_price }}" inputmode="decimal" maxlength="30" placeholder="{{ crate::i18n::text("oe-auto") }}"></div>
+<div class="field-stack"><label for="oe-payment">{{ crate::i18n::text("cm-payment") }}</label><select class="ui-control" id="oe-payment" name="payment_method_id"><option value="">{{ crate::i18n::text("oe-select-method") }}</option>{% for method in payments %}<option value="{{ method.id }}"{% if draft.data.payment_selected(method.id) %} selected{% endif %}>{{ method.name }}</option>{% endfor %}</select></div>
+<div class="field-stack"><label for="oe-payment-price">{{ crate::i18n::text("oe-payment-price") }}</label><input class="ui-control" id="oe-payment-price" name="payment_price" value="{{ draft.data.payment_price }}" inputmode="decimal" maxlength="30" placeholder="{{ crate::i18n::text("oe-auto") }}"></div>
+</div>
+<p class="ui-help oe-prices-help">{{ crate::i18n::text("oe-methods-help") }}</p>
+<div class="oe-subsection"><div class="customer-fields-grid"><div class="field-stack"><label for="oe-coupon">{{ crate::i18n::text("oe-coupon") }}</label><input class="ui-control" id="oe-coupon" name="coupon_code" value="{{ draft.data.coupon_code }}" maxlength="80"{% if draft.target_order_id.is_some() %} readonly{% endif %}>{% if draft.target_order_id.is_some() %}<p class="ui-help">{{ crate::i18n::text("oe-coupon-retained") }}</p>{% endif %}</div></div></div>
+</section>
+</div>
+</div><aside class="order-admin-aside oe-aside"><section class="editor-card field-stack"><h2>{{ crate::i18n::text("oe-confirmation") }}</h2><label for="oe-reason">{{ crate::i18n::text("oe-reason") }}</label><textarea class="ui-control" id="oe-reason" name="reason" rows="3" maxlength="1000"{% if invalid.contains(&"reason".to_owned()) %} aria-invalid="true" aria-describedby="oe-reason-error"{% endif %}>{{ draft.data.reason }}</textarea>{% if invalid.contains(&"reason".to_owned()) %}<small id="oe-reason-error" class="ui-field-error">{{ crate::i18n::text("oe-field-error") }}</small>{% endif %}
+<p class="ui-help">{{ crate::i18n::text("oe-reason-help") }}</p>
+<div class="oe-actions"><button class="ui-button" type="submit" name="action" value="preview" formnovalidate>{{ ui::icon("eye", "small") }}<span>{{ crate::i18n::text("oe-preview") }}</span></button><button class="ui-button ui-button--secondary" type="submit" name="action" value="save" formnovalidate>{{ ui::icon("save", "small") }}<span>{{ crate::i18n::text("oe-save") }}</span></button></div>
+<p class="ui-help" id="order-draft-policy">{{ crate::i18n::text("oe-draft-help") }}</p></section></aside></div>
+</form>{% endif %}</main>{% endblock %}

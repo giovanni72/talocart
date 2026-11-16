@@ -1,0 +1,12 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% import "pagination.html" as pagination %}
+{% block title %}{{ crate::i18n::text(title) }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text(title) }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main catalog-main">
+{% call ui::page_header(crate::i18n::text(title)) %}{% if can_write %}<a class="ui-button" href="{{ path }}/new">{{ ui::icon("plus") }}<span>{{ crate::i18n::text("attributes-new") }}</span></a>{% endif %}{% endcall %}
+<p class="page-actions">{% if groups %}<a class="ui-button ui-button--secondary ui-button--compact" href="/admin/catalog/attributes">{{ crate::i18n::text("attributes-title") }}</a>{% else %}<a class="ui-button ui-button--secondary ui-button--compact" href="/admin/catalog/attribute-groups">{{ crate::i18n::text("attributes-groups") }}</a>{% endif %}</p>
+{% if rows.is_empty() %}<p class="ui-empty">{{ crate::i18n::text("attributes-empty") }}</p>{% else %}<div class="catalog-list" role="list" aria-label="{{ crate::i18n::text(title) }}">{% for row in rows %}<article class="catalog-row" role="listitem"><div class="catalog-row-main"><h2><a href="{{ path }}/{{ row.id }}">{{ row.name }}</a></h2><p class="muted">{{ crate::i18n::text("attributes-order") }}: {{ row.sort_order }}</p></div><a class="ui-button ui-button--secondary ui-button--compact" href="{{ path }}/{{ row.id }}">{% if can_write %}{{ ui::icon("pencil") }}{% else %}{{ ui::icon("eye") }}{% endif %}<span>{% if can_write %}{{ crate::i18n::text("admin-manage") }}{% else %}{{ crate::i18n::text("admin-view") }}{% endif %}</span></a></article>{% endfor %}</div>{% endif %}
+{{ pagination::render(pagination) }}
+</main>{% endblock %}

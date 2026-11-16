@@ -1,0 +1,15 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% block title %}{{ crate::i18n::text("admin-administration") }} {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("admin-overview") }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main dashboard">
+  {{ ui::page_header(crate::i18n::text("admin-overview")) }}
+  {% if groups.is_empty() %}<p class="ui-empty">{{ crate::i18n::text("dash-none") }}</p>{% else %}
+  <div class="dashboard-groups">
+    {% for group in groups %}{% call ui::stats("dash-group-" ~ group.id, crate::i18n::text(group.label), group.glyph) %}{% for metric in group.metrics %}<li class="dashboard-metric" data-metric="{{ metric.label }}">{% if metric.attention %}{{ ui::stat(crate::i18n::text(metric.label), metric.value, metric.href, crate::i18n::text("dash-open"), crate::i18n::text("dash-attention")) }}{% else %}{{ ui::stat(crate::i18n::text(metric.label), metric.value, metric.href, crate::i18n::text("dash-open")) }}{% endif %}</li>{% endfor %}{% endcall %}{% endfor %}
+  </div>{% endif %}
+  {% include "admin-sales.html" %}
+  {% if show_status %}<section class="status-card settings-section" aria-labelledby="status-title"><h2 id="status-title">{{ crate::i18n::text("dash-tools") }}</h2><div id="status-result" aria-live="polite" aria-atomic="true">{% include "status.html" %}</div>{% include "status-control.html" %}</section>{% endif %}
+</main>
+{% endblock %}

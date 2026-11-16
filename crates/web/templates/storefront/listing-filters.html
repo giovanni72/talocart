@@ -1,0 +1,8 @@
+  <div class="store-filter-fields">
+    {% if list.show_category_filter %}
+    <div class="store-filter-field ui-field"><label for="store-category">{{ crate::i18n::text("store-category") }}</label><select class="ui-control" id="store-category" name="category" form="store-filters-form"><option value="">{{ crate::i18n::text("store-all-categories") }}</option>{% if !list.category.is_empty() && !list.category_present %}<option value="{{ list.category }}" selected>{{ crate::i18n::text("store-unknown-category") }}</option>{% endif %}{% for c in list.categories %}<option value="{{ c.1 }}"{% if list.category == c.1 %} selected{% endif %}>{{ c.0 }}</option>{% endfor %}</select></div>
+    {% endif %}
+    {% if !list.fixed_brand %}<div class="store-filter-field ui-field"><label for="store-brand">{{ crate::i18n::text("store-brand") }}</label><select class="ui-control" id="store-brand" name="brand" form="store-filters-form"><option value="">{{ crate::i18n::text("store-all-brands") }}</option>{% if (list.show_category_filter || !list.category.is_empty()) && !list.brand.is_empty() && !list.brand_present %}<option value="{{ list.brand }}" selected>{{ crate::i18n::text("store-unknown-brand") }}</option>{% endif %}{% for b in list.brands %}<option value="{{ b.1 }}" {% if list.brand == b.1 %}selected{% endif %}>{{ b.0 }}</option>{% endfor %}</select></div>{% endif %}
+    <label class="available-filter"><input class="ui-check" type="checkbox" name="available" value="true" form="store-filters-form" {% if list.available %}checked{% endif %}> {{ crate::i18n::text("store-available-only") }}</label>
+    <button class="ui-button" type="submit" form="store-filters-form">{{ crate::i18n::text("store-apply-filters") }}</button>
+  </div>

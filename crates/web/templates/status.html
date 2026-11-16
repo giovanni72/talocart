@@ -1,0 +1,6 @@
+<div class="status-content ui-message{% if panel.tone == "ok" %} ui-message--success{% else if panel.tone == "warning" %} ui-message--error{% else %} ui-message--info{% endif %}" data-state="{{ panel.tone }}">
+  <div class="status-heading"><span class="status-dot {{ panel.tone }}" aria-hidden="true"></span><h3>{{ crate::i18n::text(panel.label) }}</h3></div>
+  <p>{{ crate::i18n::text(panel.detail) }}</p>
+  {% if !panel.checked_at.is_empty() %}<p class="checked-at">{{ crate::i18n::text("admin-last-check") }} <time>{{ panel.checked_at }}</time></p>{% endif %}
+
+</div>

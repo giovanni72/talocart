@@ -1,0 +1,19 @@
+{% import "ui.html" as ui %}
+<p class="category-tree-help muted">{{ crate::i18n::text("admin-subcategories-follow-their-parent") }} {% if has_context %}{{ crate::i18n::text("admin-entries-marked-context-show-required-ancestors-and-are-not-counted-in-th") }}{% endif %}</p>
+<ul class="catalog-list category-tree-directory" role="list" aria-label="{{ crate::i18n::text("admin-categories-2") }}">
+  {% for row in rows %}
+  <li class="category-tree-node" role="listitem" data-category-id="{{ row.entry.id }}" data-depth="{{ row.depth }}" data-context="{{ row.context }}">
+    <article class="catalog-row taxonomy-card category-node-card{% if row.context %} category-node-card--context{% endif %}">
+      <div class="taxonomy-card-heading">
+        <div class="taxonomy-mark taxonomy-mark--category" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M4 10V7a2 2 0 0 1 2-2h7l3 4h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V10Z" stroke="currentColor" stroke-width="1.5"/><path d="M10 16h12M10 21h8" stroke="currentColor" stroke-width="1.5"/></svg></div>
+        <div class="catalog-row-main"><h2><a href="{{ path }}/{{ row.entry.id }}">{{ row.entry.name }}</a></h2><p class="category-node-level">{% if row.depth == 0 %}{{ crate::i18n::text("admin-main-category") }}{% else %}{{ crate::i18n::text("admin-level") }} {{ row.depth + 1 }}{% endif %}{% if row.context %} · <span class="category-context-label">{{ crate::i18n::text("admin-context") }}</span>{% endif %}</p></div>
+      </div>
+      <dl class="taxonomy-card-details"><div><dt>{{ crate::i18n::text("admin-slug") }}</dt><dd class="catalog-slug">{{ row.entry.slug }}</dd></div>{% if !row.parent.is_empty() %}<div><dt>{{ crate::i18n::text("admin-parent-category") }}</dt><dd>{{ row.parent }}</dd></div>{% endif %}</dl>
+      <div class="taxonomy-card-footer">
+        <div class="catalog-row-meta"><span class="catalog-status{% if !row.entry.active %} inactive{% endif %}">{% if row.entry.active %}{{ crate::i18n::text("admin-active-2") }}{% else %}{{ crate::i18n::text("admin-inactive-2") }}{% endif %}</span><span class="muted">{{ crate::i18n::text("admin-sort-order") }} {{ row.entry.sort_order }}</span></div>
+        <a class="catalog-edit{% if can_write %} ui-button--icon{% endif %} ui-button ui-button--secondary ui-button--compact" href="{{ path }}/{{ row.entry.id }}" aria-label="{% if can_write %}{{ crate::i18n::text("admin-edit") }}{% else %}{{ crate::i18n::text("admin-view") }}{% endif %} {{ row.entry.name }}" title="{% if can_write %}{{ crate::i18n::text("admin-edit") }}{% else %}{{ crate::i18n::text("admin-view") }}{% endif %} {{ row.entry.name }}"{% if can_write %} data-ui-edit{% endif %}>{% if can_write %}{{ ui::icon("pencil", "small") }}{% else %}{{ ui::icon("eye", "small") }}<span>{{ crate::i18n::text("admin-view") }}</span>{% endif %}</a>
+      </div>
+    </article>
+    {% if row.opens_children %}<ul role="list" aria-label="{{ crate::i18n::text("admin-subcategories-of") }} {{ row.entry.name }}">{% else %}</li>{% for _ in row.closes_children.clone() %}</ul></li>{% endfor %}{% endif %}
+  {% endfor %}
+</ul>

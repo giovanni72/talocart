@@ -1,0 +1,80 @@
+// Uses the disposable 30-product demo catalog in all five browser profiles.
+const assert = require('node:assert/strict');
+const path = require('node:path');
+module.exports = async ({page, origin, name, output}) => {
+  const js = !['no-js', 'mobile-no-js'].includes(name);
+  const rows = page.locator('.ui-table__link');
+  const nav = page.getByRole('navigation',{name:'Pagine prodotti',exact:true});
+  const changeSize = async size => {
+    await page.getByLabel('Prodotti per pagina',{exact:true}).selectOption(size);
+    if (!js) await page.getByRole('button',{name:'Applica',exact:true}).click();
+    await page.waitForURL(url => url.searchParams.get('per_page') === size && !url.searchParams.has('page'));
+  };
+  const summary = async (range, pageNumber, pages) => {
+    assert.equal(await nav.locator('.pagination-summary').innerText(), `Prodotti ${range} di 30\nPagina ${pageNumber} di ${pages}`);
+    const apply = page.locator('.product-page-size button[type=submit]');
+    await apply.waitFor({state:js ? 'hidden' : 'visible'});
+    assert.equal(await apply.isVisible(), !js, 'Apply is available only without JavaScript');
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Pagination fits the viewport');
+    const [controls, table] = await Promise.all([nav.boundingBox(), page.locator('.ui-table-region').boundingBox()]);
+    assert.ok(controls && table && controls.y + controls.height <= table.y, 'Page size and pagination summary must be above the table');
+  };
+  await page.goto(origin + '/admin/catalog/products');
+  await summary('1–20',1,2);
+  await require('./browser-shared-pagination.cjs')({page, output, name, context:'admin'});
+  assert.deepEqual(await page.locator('#product-page-size option').evaluateAll(options => options.map(o => o.value)),['10','20','50','100','500']);
+  await nav.getByRole('link',{name:'Successivo',exact:true}).click();
+  await summary('21–30',2,2);
+  await page.locator('.product-row-select').first().check();
+  await page.getByLabel('Prodotti per pagina',{exact:true}).focus();
+  await changeSize('10');
+  assert.equal(await rows.count(),10);
+  assert.equal(await page.locator('.product-row-select:checked').count(),0);
+  await summary('1–10',1,3);
+  const firstPage = await rows.allTextContents();
+  await nav.getByRole('link',{name:'Successivo',exact:true}).focus();
+  await page.keyboard.press('Enter');
+  await summary('11–20',2,3);
+  assert.ok((await rows.allTextContents()).every(label => !firstPage.includes(label)));
+  await nav.getByRole('link',{name:'Successivo',exact:true}).click();
+  await summary('21–30',3,3);
+  assert.equal(await nav.getByRole('link',{name:'Successivo',exact:true}).count(),0);
+  await nav.getByRole('link',{name:'Precedente',exact:true}).click();
+  assert.equal(await page.getByLabel('Prodotti per pagina',{exact:true}).inputValue(),'10');
+  await changeSize('50');
+  assert.equal(await rows.count(),30);
+  await summary('1–30',1,1);
+  await changeSize('100');
+  assert.equal(await rows.count(),30);
+  await summary('1–30',1,1);
+  await changeSize('500');
+  assert.equal(await rows.count(),30);
+  await summary('1–30',1,1);
+  await nav.screenshot({path:path.join(output,`product-pagination-${name}.png`)});
+
+  // Every current filter and sorting choice survives size changes, even on empty results.
+  await page.goto(origin + '/admin/catalog/products');
+  const category = await page.locator('#product-category option').nth(1).getAttribute('value');
+  const brand = await page.locator('#product-brand option').nth(1).getAttribute('value');
+  const criteria = {q:'no <product> & match',type:'simple',model:'MUG',category,brand,status:'published',sort:'id',dir:'desc'};
+  await page.goto(origin + '/admin/catalog/products?' + new URLSearchParams(criteria));
+  await changeSize('50');
+  for (const [key,value] of Object.entries(criteria)) assert.equal(new URL(page.url()).searchParams.get(key),value);
+  assert.equal(await nav.locator('.pagination-summary').innerText(),'Prodotti 0 di 0\nPagina 1 di 1');
+  await page.getByRole('link',{name:'Azzera filtri',exact:true}).click();
+  assert.equal(await page.getByLabel('Prodotti per pagina',{exact:true}).inputValue(),'50');
+  assert.equal(await rows.count(),30);
+  await page.getByLabel('Filtra per tipo',{exact:true}).selectOption('simple');
+  await page.getByRole('button',{name:'Filtra',exact:true}).click();
+  assert.equal(new URL(page.url()).searchParams.get('per_page'),'50');
+  await page.getByRole('link',{name:'Ordina per ID in ordine crescente',exact:true}).click();
+  assert.equal(new URL(page.url()).searchParams.get('per_page'),'50');
+  await changeSize('10');
+  await nav.getByRole('link',{name:'Successivo',exact:true}).click();
+  assert.equal(new URL(page.url()).searchParams.get('type'),'simple');
+  assert.equal(new URL(page.url()).searchParams.get('sort'),'id');
+  assert.equal(new URL(page.url()).searchParams.get('per_page'),'10');
+  // Restore this browser's default before the following demo scenarios.
+  await changeSize('20');
+  await page.goto(origin + '/admin/catalog/products');
+};

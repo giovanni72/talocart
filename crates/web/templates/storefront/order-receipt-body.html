@@ -1,0 +1,33 @@
+{% import "ui.html" as ui %}
+
+<p id="receipt-announcement" class="visually-hidden" role="status" aria-live="polite"></p>
+<div id="order-receipt" class="order-receipt" data-reference="{{ order.reference }}" data-payment-state="{{ receipt_state.code() }}" data-poll="{{ receipt_state.polling() }}" data-attempt-state="{% if let Some(state) = order.online_attempt_state %}{{ state }}{% endif %}" data-verifying-waiting="{{ crate::i18n::text("online-payment-verifying-long") }}" data-payment-status-url="{{ crate::store_language::path(format!("/checkout/orders/{}/payment-status",self.order.reference)) }}" data-status-url="{{ status_url }}" data-payment-url="{{ payment_url }}" data-confirmed="{{ crate::i18n::text("online-payment-confirmed") }}" data-checking-title="{{ crate::i18n::text("online-payment-checking") }}" data-waiting="{% if payment_pending %}{{ crate::i18n::text("online-payment-verifying-long") }}{% else %}{{ crate::i18n::text("online-payment-status-paused") }}{% endif %}" data-network="{{ crate::i18n::text("online-payment-status-network") }}">
+<header class="order-hero order-hero--{{ receipt_state.tone() }}">
+<span class="order-hero-mark">{{ ui::icon(receipt_state.icon(), "large") }}</span>
+<div class="order-hero-copy">
+<p class="order-hero-reference">{{ order.reference }}</p>
+<h1 id="receipt-title" tabindex="-1">{{ crate::i18n::text(receipt_state.title()) }}</h1>
+{% if order.is_refunded() %}{% if order.fulfillment.sent() %}{{ ui::message("order-refunded","info",crate::i18n::text("fulfillment-refunded-shipped")) }}{% else %}{{ ui::message("order-refunded","info",crate::i18n::text("online-payment-refunded-help")) }}{% endif %}
+{% else if order.payment_review_blocks_confirmation() %}{{ ui::message("online-payment-review","info",crate::i18n::text("online-payment-review-help")) }}
+{% else if order.state == "cancelled" %}{{ ui::message("order-cancelled","info",crate::i18n::text("ord-cancelled-help")) }}
+{% else if order.is_paid() %}{{ ui::message("order-paid","success",crate::i18n::text("ord-paid-help")) }}
+{% else if !order.is_online() %}{{ ui::message("order-received","success",crate::i18n::text("ord-received-help")) }}{% endif %}
+{% if order.payment_reconciliation_warning() && order.state == "open" %}{{ ui::message("online-payment-paid-review","info",crate::i18n::text("online-payment-paid-review-help")) }}{% endif %}
+</div>
+</header>
+{% if receipt_state.polling() %}
+<section class="store-panel" id="online-payment-panel">
+<div id="online-payment-verifying"{% if !payment_pending %} hidden{% endif %}>
+{% call ui::message("online-payment-wait","info") %}{{ ui::waiting(crate::i18n::text("online-payment-checking")) }}<p>{{ crate::i18n::text("online-payment-verifying-help") }}</p>{% endcall %}
+</div>
+{% if !payment_pending %}<div id="online-payment-due">{{ ui::message("online-payment-due-help","info",crate::i18n::text("online-payment-due-help")) }}
+{% if online_available %}<form method="post" action="{{ crate::store_language::path(format!("/checkout/orders/{}/pay",self.order.reference)) }}"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="revision" value="{{ order.revision }}"><button id="online-payment-complete" class="ui-button" type="submit">{% if order.online_attempt_state.is_some() %}{{ crate::i18n::text("online-payment-element-resume") }}{% else %}{{ crate::i18n::text("online-payment-complete") }}{% endif %}</button></form>{% else %}<p>{{ crate::i18n::text("online-payment-unavailable") }}</p>{% endif %}</div>{% endif %}
+<p id="online-payment-refresh-help" hidden>{{ crate::i18n::text("online-payment-status-auto") }}</p>
+<noscript><p>{{ crate::i18n::text("online-payment-status-nojs") }}</p></noscript>
+<p id="online-payment-refresh-warning" role="status" hidden></p>
+<a id="online-payment-check-status" class="ui-button ui-button--secondary" href="{{ status_url }}">{{ crate::i18n::text("online-payment-status-refresh") }}</a>
+</section>
+{% endif %}
+{% include "order-summary.html" %}
+</div>
+<p class="order-receipt-actions"><a class="ui-button" href="{{ crate::store_language::path("/catalog") }}">{{ crate::i18n::text("ord-continue") }}</a></p>

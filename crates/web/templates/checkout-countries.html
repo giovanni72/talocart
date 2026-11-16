@@ -1,0 +1,15 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% block title %}{{ crate::i18n::text("admin-purchase-countries") }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("admin-purchase-countries") }}{% endblock %}
+{% block content %}<main id="main" class="admin-main catalog-main">
+{% call ui::page_header(crate::i18n::text("admin-purchase-countries")) %}{% if nav.taxes %}<a class="ui-button ui-button--secondary" href="/admin/settings/taxes/coverage">{{ ui::icon("map", "normal") }}<span>{{ crate::i18n::text("admin-coverage") }}</span></a>{% endif %}{% endcall %}
+{% call ui::tabs(crate::i18n::text("admin-store-settings")) %}{{ ui::tab("/admin/settings", crate::i18n::text("admin-general"), false, "settings") }}{{ ui::tab("/admin/settings/appearance", crate::i18n::text("admin-logo-and-favicon"), false, "image") }}{{ ui::tab("/admin/settings/storefront", crate::i18n::text("admin-theme-and-seo"), false, "panels-top-left") }}{% if nav.taxes %}{{ ui::tab("/admin/settings/taxes", crate::i18n::text("admin-prices-and-taxes-2"), false, "percent") }}{% endif %}{{ ui::tab("/admin/settings/countries", crate::i18n::text("admin-purchase-countries"), true, "map") }}{% endcall %}
+{% if stale %}{{ ui::feedback("fiscal-stale","error",crate::i18n::text("admin-fiscal-stale")) }}<a href="/admin/settings/countries">{{ crate::i18n::text("admin-reload-fiscal") }}</a>{% endif %}
+{% if saved %}{{ ui::feedback("countries-saved","success",crate::i18n::text("admin-changes-saved")) }}{% endif %}
+{% if error %}{{ ui::feedback("countries-error","error",crate::i18n::text("admin-purchase-countries-invalid")) }}{% endif %}
+{% if enabled_count == 0 %}{{ ui::message("countries-empty","info",crate::i18n::text("admin-purchase-countries-empty")) }}{% endif %}
+<section class="editor-card"><h2>{{ crate::i18n::text("admin-purchase-destinations") }}</h2><p class="muted">{{ crate::i18n::text("admin-purchase-country-tax-separation") }}</p><form class="field-stack" method="post" action="/admin/settings/countries"><input type="hidden" name="revision" value="{{ revision }}"><input type="hidden" name="csrf" value="{{ csrf }}">
+<label for="checkout-countries">{{ crate::i18n::text("admin-purchase-countries-enabled") }}</label><select class="ui-control" id="checkout-countries" name="country" multiple size="12" aria-describedby="purchase-country-help{% if error %} purchase-country-error{% endif %}"{% if !can_write %} disabled{% endif %}{% if error %} aria-invalid="true"{% endif %}>{% for c in countries %}<option value="{{ c.code }}"{% if c.selected %} selected{% endif %}>{{ c.name }} ({{ c.code }})</option>{% endfor %}</select><small class="ui-help" id="purchase-country-help">{{ crate::i18n::text("admin-purchase-country-help") }}</small>{% if error %}<small class="ui-field-error" id="purchase-country-error">{{ crate::i18n::text("admin-purchase-countries-invalid") }} {{ invalid_codes }}</small>{% endif %}
+{% if can_write %}<button class="ui-button" type="submit">{{ ui::icon("save", "normal") }}<span>{{ crate::i18n::text("admin-save-purchase-countries") }}</span></button>{% endif %}</form></section>
+</main>{% endblock %}

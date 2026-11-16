@@ -1,0 +1,52 @@
+[package]
+name = "talocart-package-fixture"
+description = "Synthetic installable module used only by package update tests; never distributed."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[dependencies]
+axum.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+talocart-platform = { path = "../platform" }
+tokio = { workspace = true, features = ["io-std"] }
+
+[dev-dependencies]
+reqwest.workspace = true
+url.workspace = true
+ring.workspace = true
+rustls.workspace = true
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "fixture-v1"
+path = "src/bin/fixture-v1.rs"
+
+[[bin]]
+name = "fixture-v1-1-broken"
+path = "src/bin/fixture-v1-1-broken.rs"
+
+[[bin]]
+name = "fixture-v2"
+path = "src/bin/fixture-v2.rs"
+
+[[bin]]
+name = "fixture-v2-broken"
+path = "src/bin/fixture-v2-broken.rs"
+
+[[bin]]
+name = "fixture-v2-changed"
+path = "src/bin/fixture-v2-changed.rs"
+
+[[bin]]
+name = "fixture-v3-failing"
+path = "src/bin/fixture-v3-failing.rs"
+
+[[bin]]
+name = "fixture-v3-fixed"
+path = "src/bin/fixture-v3-fixed.rs"

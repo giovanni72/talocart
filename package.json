@@ -1,0 +1,34 @@
+{
+  "name": "talocart-browser-tests",
+  "private": true,
+  "scripts": {
+    "test:browser": "python3 scripts/test-run.py --suite browser",
+    "test:performance": "node scripts/benchmark-catalog.cjs",
+    "test:email": "node scripts/browser-email.cjs",
+    "test:checkout-details": "node scripts/browser-checkout-details.cjs",
+    "test:orders": "node scripts/browser-orders.cjs",
+    "test:settings": "node scripts/browser-settings.cjs",
+    "test:customer-groups": "node scripts/browser-customer-groups.cjs",
+    "test:attributes": "node scripts/browser-attributes.cjs",
+    "test:banners": "node scripts/browser-banners.cjs",
+    "test:performance:sales": "node scripts/verify-sales-history.cjs --benchmark",
+    "test:performance:dashboard": "node scripts/benchmark-dashboard.cjs",
+    "test:performance:site": "node scripts/benchmark-site.cjs",
+    "test:performance:commerce": "TALOCART_COMMERCE_BENCH=1 node scripts/benchmark-site.cjs",
+    "test:performance:concurrency": "TALOCART_COMMERCE_BENCH=1 TALOCART_CONCURRENCY_BENCH=1 node scripts/benchmark-site.cjs",
+    "test:customer-fields": "node scripts/browser-customer-fields.cjs",
+    "test:customer-admin": "node scripts/browser-customer-admin.cjs",
+    "test:browser:resume": "python3 scripts/test-run.py --suite browser --resume",
+    "test:list": "python3 scripts/test-run.py --list",
+    "test:performance:checkout": "TALOCART_CHECKOUT_BENCH=1 node scripts/benchmark-site.cjs",
+    "build:editor": "node scripts/build-editor.cjs"
+  },
+  "devDependencies": {
+    "@tiptap/core": "3.32.0",
+    "@tiptap/pm": "3.32.0",
+    "@tiptap/starter-kit": "3.32.0",
+    "esbuild": "0.25.12",
+    "pg": "8.16.3",
+    "playwright": "1.62.1"
+  }
+}

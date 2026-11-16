@@ -1,0 +1,216 @@
+{# Small structural components. Callers own labels, IDs, native controls and HTTP contracts. #}
+{# Shared tab menu: native links first. `panels` adds `data-ui-tabs`, so ui-tabs.js turns
+   "#id" links into ARIA tabs for the sections they point to; otherwise each tab is a page
+   link and `current` marks the open one. `variant` is "" (segmented rail) or "line".
+   With panels, `current` is the fallback section after the address hash, while `initial`
+   (a section id, e.g. after a server error) takes precedence over the hash. #}
+{# Edge buttons are a pointer aid shown by ui-tabs.js only while the track overflows; keyboard users move with Tab or the arrow keys. #}
+{% macro tabs(label, panels = false, variant = "", initial = "") %}
+<nav class="ui-tabs{% if variant == "line" %} ui-tabs--line{% endif %}" aria-label="{{ label }}"{% if panels %} data-ui-tabs{% endif %}{% if !initial.is_empty() %} data-ui-tabs-initial="{{ initial }}"{% endif %}><button class="ui-button ui-button--secondary ui-button--icon ui-button--compact ui-tabs__scroll ui-tabs__scroll--start" type="button" tabindex="-1" aria-label="{{ crate::i18n::text("ui-tabs-scroll-start") }}" title="{{ crate::i18n::text("ui-tabs-scroll-start") }}"></button><div class="ui-tabs__list">{{ caller() }}</div><button class="ui-button ui-button--secondary ui-button--icon ui-button--compact ui-tabs__scroll ui-tabs__scroll--end" type="button" tabindex="-1" aria-label="{{ crate::i18n::text("ui-tabs-scroll-end") }}" title="{{ crate::i18n::text("ui-tabs-scroll-end") }}"></button></nav>
+{% endmacro %}
+
+{# `count` is preformatted text; caller content adds status markers after the label. #}
+{% macro tab(href, label, current = false, glyph = "", count = "", id = "") %}
+<a class="ui-tabs__tab"{% if !id.is_empty() %} id="{{ id }}"{% endif %} href="{{ href }}"{% if current %} aria-current="page"{% endif %}>{% if !glyph.is_empty() %}{{ icon(glyph, "small") }}{% endif %}<span class="ui-tabs__label">{{ label }}</span>{% if !count.is_empty() %}<span class="ui-tabs__count">{{ count }}</span>{% endif %}{% if caller is defined %}{{ caller() }}{% endif %}</a>
+{% endmacro %}
+
+{# Admin page title: optional back link, the single h1 and optional caller actions.
+   Titles carry no eyebrow or subtitle; context and help belong in the page body. #}
+{% macro page_header(title, back_href = "", back_label = "") %}
+<header class="ui-page-header">{% if !back_href.is_empty() %}<a class="ui-page-header__back back-link" href="{{ back_href }}"><span aria-hidden="true">←</span> {{ back_label }}</a>{% endif %}<div class="ui-page-header__bar"><h1>{{ title }}</h1>{% if caller is defined %}<div class="ui-page-header__actions">{{ caller() }}</div>{% endif %}</div></header>
+{% endmacro %}
+
+{# Persistent guidance/state belongs beside the content, without timer or dismissal. #}
+{% macro message(id, tone, text = "", focus = false) %}
+<div id="{{ id }}"{% if focus %} tabindex="-1" autofocus{% endif %} class="ui-message{% if tone == "error" %} ui-message--error{% else if tone == "success" %} ui-message--success{% else %} ui-message--info{% endif %}"{% if tone == "error" %} role="alert"{% else if tone == "success" %} role="status"{% endif %}>{% if caller is defined %}{{ caller() }}{% else %}{{ text }}{% endif %}</div>
+{% endmacro %}
+
+{# Only action outcomes use toasts. Field feedback stays with its controls. #}
+{% macro feedback(id, tone, text, duration = 6000, hidden = false) %}
+<div class="ui-toasts" data-ui-toasts>{{ toast(id, tone, text, crate::i18n::text("ui-toast-close"), duration, hidden) }}</div>
+{% endmacro %}
+
+{% macro field_feedback(help_id, help, error_id, error) %}
+{% if !help.is_empty() %}<p id="{{ help_id }}" class="ui-help">{{ help }}</p>{% endif %}
+{% if !error.is_empty() %}<p id="{{ error_id }}" class="ui-field-error">{{ error }}</p>{% endif %}
+{% endmacro %}
+
+{% macro empty_heading(title) %}<h2>{{ title }}</h2>{% endmacro %}
+
+{% macro empty(title, description = "", public = false, eyebrow = "") %}
+<section class="ui-empty{% if public %} store-empty{% else %} catalog-empty{% endif %}">
+  {% if !eyebrow.is_empty() %}<p class="eyebrow">{{ eyebrow }}</p>{% endif %}
+  {{ empty_heading(title) }}
+  {% if !description.is_empty() %}<p>{{ description }}</p>{% endif %}
+  {% if caller is defined %}{{ caller() }}{% endif %}
+</section>
+{% endmacro %}
+
+{# Lucide 1.57.0; see assets/vendor/lucide/LICENSE. Icons are decorative.
+   Callers own the visible label or the control's localized accessible name.
+   Unknown names render nothing; size is allowlisted and never used as markup. #}
+{%- macro icon(name, size = "normal") -%}
+{%- if name == "shopping-cart" || name == "search" || name == "x" || name == "pencil" || name == "trash" || name == "plus" || name == "check" || name == "triangle-alert" || name == "layout-dashboard" || name == "package" || name == "layers" || name == "folder-tree" || name == "folder" || name == "folder-open" || name == "tag" || name == "download" || name == "image" || name == "settings" || name == "percent" || name == "map" || name == "users" || name == "shield-check" || name == "user-round" || name == "log-out" || name == "save" || name == "eye" || name == "list-filter" || name == "rotate-ccw" || name == "refresh-cw" || name == "upload" || name == "folder-plus" || name == "move" || name == "copy" || name == "arrow-up" || name == "arrow-down" || name == "external-link" || name == "book-open" || name == "contact-round" || name == "key-round" || name == "user-cog" || name == "file-text" || name == "panels-top-left" || name == "clipboard-list" || name == "sliders-horizontal" || name == "ticket-percent" || name == "list-checks" || name == "truck" || name == "credit-card" || name == "mail" || name == "tags" || name == "blocks" || name == "bold" || name == "italic" || name == "underline" || name == "strikethrough" || name == "pilcrow" || name == "heading-2" || name == "heading-3" || name == "list" || name == "list-ordered" || name == "text-quote" || name == "link" || name == "undo-2" || name == "redo-2" || name == "remove-formatting" || name == "code-xml" -%}
+<svg class="ui-icon{% if size == "small" %} ui-icon--small{% else if size == "large" %} ui-icon--large{% endif %}" data-ui-icon="{{ name }}" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+{%- if name == "shopping-cart" -%}{%- include "icon-lucide-shopping-cart.html" -%}
+{%- else if name == "search" -%}{%- include "icon-lucide-search.html" -%}
+{%- else if name == "x" -%}{%- include "icon-lucide-x.html" -%}
+{%- else if name == "pencil" -%}{%- include "icon-lucide-pencil.html" -%}
+{%- else if name == "trash" -%}{%- include "icon-lucide-trash.html" -%}
+{%- else if name == "plus" -%}{%- include "icon-lucide-plus.html" -%}
+{%- else if name == "check" -%}{%- include "icon-lucide-check.html" -%}
+{%- else if name == "triangle-alert" -%}{%- include "icon-lucide-triangle-alert.html" -%}
+{%- else if name == "layout-dashboard" -%}{%- include "icon-lucide-layout-dashboard.html" -%}
+{%- else if name == "package" -%}{%- include "icon-lucide-package.html" -%}
+{%- else if name == "layers" -%}{%- include "icon-lucide-layers.html" -%}
+{%- else if name == "folder" -%}{%- include "icon-lucide-folder.html" -%}
+{%- else if name == "folder-open" -%}{%- include "icon-lucide-folder-open.html" -%}
+{%- else if name == "folder-tree" -%}{%- include "icon-lucide-folder-tree.html" -%}
+{%- else if name == "tag" -%}{%- include "icon-lucide-tag.html" -%}
+{%- else if name == "download" -%}{%- include "icon-lucide-download.html" -%}
+{%- else if name == "image" -%}{%- include "icon-lucide-image.html" -%}
+{%- else if name == "settings" -%}{%- include "icon-lucide-settings.html" -%}
+{%- else if name == "percent" -%}{%- include "icon-lucide-percent.html" -%}
+{%- else if name == "map" -%}{%- include "icon-lucide-map.html" -%}
+{%- else if name == "users" -%}{%- include "icon-lucide-users.html" -%}
+{%- else if name == "shield-check" -%}{%- include "icon-lucide-shield-check.html" -%}
+{%- else if name == "user-round" -%}{%- include "icon-lucide-user-round.html" -%}
+{%- else if name == "log-out" -%}{%- include "icon-lucide-log-out.html" -%}
+{%- else if name == "save" -%}{%- include "icon-lucide-save.html" -%}
+{%- else if name == "eye" -%}{%- include "icon-lucide-eye.html" -%}
+{%- else if name == "list-filter" -%}{%- include "icon-lucide-list-filter.html" -%}
+{%- else if name == "rotate-ccw" -%}{%- include "icon-lucide-rotate-ccw.html" -%}
+{%- else if name == "refresh-cw" -%}{%- include "icon-lucide-refresh-cw.html" -%}
+{%- else if name == "upload" -%}{%- include "icon-lucide-upload.html" -%}
+{%- else if name == "folder-plus" -%}{%- include "icon-lucide-folder-plus.html" -%}
+{%- else if name == "move" -%}{%- include "icon-lucide-move.html" -%}
+{%- else if name == "copy" -%}{%- include "icon-lucide-copy.html" -%}
+{%- else if name == "arrow-up" -%}{%- include "icon-lucide-arrow-up.html" -%}
+{%- else if name == "arrow-down" -%}{%- include "icon-lucide-arrow-down.html" -%}
+{%- else if name == "external-link" -%}{%- include "icon-lucide-external-link.html" -%}
+{%- else if name == "book-open" -%}{%- include "icon-lucide-book-open.html" -%}
+{%- else if name == "contact-round" -%}{%- include "icon-lucide-contact-round.html" -%}
+{%- else if name == "key-round" -%}{%- include "icon-lucide-key-round.html" -%}
+{%- else if name == "user-cog" -%}{%- include "icon-lucide-user-cog.html" -%}
+{%- else if name == "file-text" -%}{%- include "icon-lucide-file-text.html" -%}
+{%- else if name == "panels-top-left" -%}{%- include "icon-lucide-panels-top-left.html" -%}
+{%- else if name == "clipboard-list" -%}{%- include "icon-lucide-clipboard-list.html" -%}
+{%- else if name == "sliders-horizontal" -%}{%- include "icon-lucide-sliders-horizontal.html" -%}
+{%- else if name == "ticket-percent" -%}{%- include "icon-lucide-ticket-percent.html" -%}
+{%- else if name == "list-checks" -%}{%- include "icon-lucide-list-checks.html" -%}
+{%- else if name == "truck" -%}{%- include "icon-lucide-truck.html" -%}
+{%- else if name == "credit-card" -%}{%- include "icon-lucide-credit-card.html" -%}
+{%- else if name == "mail" -%}{%- include "icon-lucide-mail.html" -%}
+{%- else if name == "tags" -%}{%- include "icon-lucide-tags.html" -%}
+{%- else if name == "blocks" -%}{%- include "icon-lucide-blocks.html" -%}
+{%- else if name == "bold" -%}{%- include "icon-lucide-bold.html" -%}
+{%- else if name == "italic" -%}{%- include "icon-lucide-italic.html" -%}
+{%- else if name == "underline" -%}{%- include "icon-lucide-underline.html" -%}
+{%- else if name == "strikethrough" -%}{%- include "icon-lucide-strikethrough.html" -%}
+{%- else if name == "pilcrow" -%}{%- include "icon-lucide-pilcrow.html" -%}
+{%- else if name == "heading-2" -%}{%- include "icon-lucide-heading-2.html" -%}
+{%- else if name == "heading-3" -%}{%- include "icon-lucide-heading-3.html" -%}
+{%- else if name == "list" -%}{%- include "icon-lucide-list.html" -%}
+{%- else if name == "list-ordered" -%}{%- include "icon-lucide-list-ordered.html" -%}
+{%- else if name == "text-quote" -%}{%- include "icon-lucide-text-quote.html" -%}
+{%- else if name == "link" -%}{%- include "icon-lucide-link.html" -%}
+{%- else if name == "undo-2" -%}{%- include "icon-lucide-undo-2.html" -%}
+{%- else if name == "redo-2" -%}{%- include "icon-lucide-redo-2.html" -%}
+{%- else if name == "remove-formatting" -%}{%- include "icon-lucide-remove-formatting.html" -%}
+{%- else if name == "code-xml" -%}{%- include "icon-lucide-code-xml.html" -%}
+{%- endif -%}</svg>
+{%- endif -%}
+{%- endmacro -%}
+
+{# Groups share a viewport per document or modal; their source owns their lifetime. Duration is milliseconds; 0 keeps a toast open. #}
+{% macro toasts() %}
+<div class="ui-toasts" data-ui-toasts>{{ caller() }}</div>
+{% endmacro %}
+
+{% macro toast(id, tone, text, close_label, duration = 6000, hidden = false) %}
+<div id="{{ id }}" class="ui-message ui-toast{% if tone == "error" %} ui-message--error{% else if tone == "success" %} ui-message--success{% else %} ui-message--info{% endif %}" data-ui-toast{% if hidden %} data-ui-toast-reusable hidden{% endif %} data-duration="{% if tone == "error" %}0{% else %}{{ duration }}{% endif %}">
+  <div class="ui-toast__text" role="{% if tone == "error" %}alert{% else %}status{% endif %}" aria-atomic="true">{% if caller is defined %}{{ caller() }}{% else %}{{ text }}{% endif %}</div>
+  <button type="button" class="ui-button ui-button--plain ui-toast__close" data-ui-toast-close aria-label="{{ close_label }}" hidden>{{ icon("x") }}</button>
+</div>
+{% endmacro %}
+
+{# Callers pass a domain-validated #RRGGBB color; the label remains escaped text. #}
+{% macro status_badge(label, color) %}<span class="ui-status-badge"><svg class="ui-status-badge__color" viewBox="0 0 4 1" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect width="4" height="1" fill="{{ color }}"/></svg><span>{{ label }}</span></span>{% endmacro %}
+
+{# Binary or blocking state of a resource as a visible word: `on`, `off` or `error`. Callers keep identifiers and data attributes on their own wrapper. #}
+{% macro state(label, tone = "off") %}<span class="ui-state ui-state--{% if tone == "on" %}on{% else if tone == "error" %}error{% else %}off{% endif %}">{{ label }}</span>{% endmacro %}
+
+{# Key figures of one area. Callers render each figure as a `<li>` holding `stat`. #}
+{% macro stats(id, title, glyph = "") %}
+<section class="ui-stats" aria-labelledby="{{ id }}"><h2 class="ui-stats__title" id="{{ id }}">{% if !glyph.is_empty() %}{{ icon(glyph, "small") }}{% endif %}<span>{{ title }}</span></h2><ul class="ui-stats__list">{{ caller() }}</ul></section>
+{% endmacro %}
+
+{# `value` is preformatted. With `href` the whole figure is one link and `action` completes its
+   accessible name; `attention` is a visible word for pending work, never colour alone. #}
+{% macro stat(label, value, href = "", action = "", attention = "") %}
+{% if href.is_empty() %}<div{% else %}<a href="{{ href }}"{% endif %} class="ui-stat{% if !attention.is_empty() %} ui-stat--attention{% endif %}"><span class="ui-stat__label">{{ label }}</span> <span class="ui-stat__figure"><span class="ui-stat__value">{{ value }}</span>{% if !attention.is_empty() %} <span class="ui-stat__marker">{{ attention }}</span>{% endif %}</span>{% if !action.is_empty() %}<span class="visually-hidden"> · {{ action }}</span>{% endif %}{% if href.is_empty() %}</div>{% else %}</a>{% endif %}
+{% endmacro %}
+
+{% macro waiting(text) %}<span class="ui-waiting"><span class="ui-spinner" aria-hidden="true"></span><span>{{ text }}</span></span>{% endmacro %}
+
+{# Destructive confirmation: native disclosure around the caller's form; `open` reveals server-side errors. #}
+{% macro confirm(label, open = false) %}
+<details class="ui-confirm"{% if open %} open{% endif %}><summary class="ui-button ui-button--secondary ui-button--icon ui-button--compact" title="{{ label }}">{{ icon("trash", "normal") }}<span class="visually-hidden">{{ label }}</span></summary><div class="ui-confirm__panel">{{ caller() }}</div></details>
+{% endmacro %}
+
+{# Native disclosure and form remain usable without scripting. Caller owns persistence. #}
+{% macro column_picker() %}
+<details class="ui-column-picker" data-product-columns>
+<summary class="ui-button ui-button--secondary ui-button--compact">{{ icon("sliders-horizontal", "small") }}<span>{{ crate::i18n::text("admin-table-columns") }}</span></summary>
+<div class="ui-column-picker__panel">{{ caller() }}</div>
+</details>
+{% endmacro %}
+
+{# Sortable header link for `.ui-table`. The caller owns the `th`, its `aria-sort` and the server-built
+   `href`; `sort` is a `SortState`. The indicator is decorative: `aria-label` announces the next order. #}
+{% macro table_sort(href, label, sort, hint = "") %}<a class="ui-table__sort" href="{{ href }}" aria-label="{{ sort.action }}"{% if !hint.is_empty() %} title="{{ hint }}"{% endif %}><span class="ui-table__sort-label">{{ label }}</span><span class="ui-table__sort-indicator" aria-hidden="true">{{ sort.indicator }}</span></a>{% endmacro %}
+
+{# Full-size image link is the no-JS fallback; JS adds a viewport-bounded tooltip. #}
+{% macro image_preview(thumbnail, preview, name) %}
+<a class="ui-image-preview" href="{{ preview }}" data-ui-image-preview aria-label="{{ crate::i18n::text("admin-image-preview") }} {{ name }}"><img class="product-row-image" src="{{ thumbnail }}" alt="" loading="lazy" data-preview-name="{{ name }}"></a>
+{% endmacro %}
+
+{# Native description disclosure; JS floats the content beyond table overflow. #}
+{% macro description_info(id, name, description) %}
+<details class="ui-info" data-ui-info><summary aria-label="{{ crate::i18n::text("admin-product-description-info") }} {{ name }}" aria-controls="product-description-{{ id }}"><span aria-hidden="true">i</span></summary><div class="ui-info__content" id="product-description-{{ id }}" role="tooltip">{% if description.is_empty() %}{{ crate::i18n::text("admin-product-description-empty") }}{% else %}{{ description }}{% endif %}</div></details>
+{% endmacro %}
+
+{# Display-only date/time; caller supplies values in the configured regional format. #}
+{% macro date_time(date, time) %}<span class="ui-date-time"><span>{{ date }}</span>{% if !time.is_empty() %}<span>{{ time }}</span>{% endif %}</span>{% endmacro %}
+
+{% macro numeric_filter(id, name, value, operator_name, operator, label, comparison_label, mode, length) %}
+<div class="ui-numeric-filter"><label class="visually-hidden" for="{{ id }}-op">{{ comparison_label }}</label><select class="ui-control ui-control--compact" id="{{ id }}-op" name="{{ operator_name }}"><option value="eq" aria-label="{{ crate::i18n::text("admin-order-total-eq") }}"{% if operator.is_empty() || operator == "eq" %} selected{% endif %}>=</option><option value="gt" aria-label="{{ crate::i18n::text("admin-order-total-gt") }}"{% if operator == "gt" %} selected{% endif %}>&gt;</option><option value="lt" aria-label="{{ crate::i18n::text("admin-order-total-lt") }}"{% if operator == "lt" %} selected{% endif %}>&lt;</option></select><label class="visually-hidden" for="{{ id }}">{{ label }}</label><input class="ui-control ui-control--compact" id="{{ id }}" name="{{ name }}" type="search" inputmode="{{ mode }}" value="{{ value }}" maxlength="{{ length }}" placeholder="{{ label }}"></div>
+{% endmacro %}
+
+{# Icon-only editor actions share localized accessible names and native tooltips. #}
+{% macro rich_tool(command, glyph, readonly) %}
+<button type="button" class="ui-button ui-button--plain ui-rich-tool" data-rich-command="{{ command }}" aria-label="{{ crate::i18n::text(format!("rich-{}", command).as_str()) }}" title="{{ crate::i18n::text(format!("rich-{}", command).as_str()) }}"{% if command != "undo" && command != "redo" && command != "clear" %} aria-pressed="false"{% endif %}{% if readonly %} disabled{% endif %}>{{ icon(glyph, "small") }}</button>
+{% endmacro %}
+
+{# Native text/HTML field progressively enhanced by the shared Tiptap component. #}
+{% macro rich_editor(id, name, value, language, maximum, readonly, invalid, describedby) %}
+<div class="ui-rich-text" data-rich-text data-label="{{ crate::i18n::text("rich-editor") }}" data-visual-label="{{ crate::i18n::text("rich-visual") }}" data-html-label="{{ crate::i18n::text("rich-html") }}" data-unsupported="{{ crate::i18n::text("rich-unsupported") }}" data-limit="{{ crate::i18n::text("rich-limit") }}" data-link-error="{{ crate::i18n::text("rich-link-error") }}">
+<div class="ui-rich-native"><label for="{{ id }}-format">{{ crate::i18n::text("rich-format") }}</label><select class="ui-control" id="{{ id }}-format" name="{{ name }}_format"{% if readonly %} disabled{% endif %}><option value="text"{% if !talocart_platform::rich_text::is_html(value) %} selected{% endif %}>{{ crate::i18n::text("rich-plain") }}</option><option value="html"{% if talocart_platform::rich_text::is_html(value) %} selected{% endif %}>HTML</option></select></div>
+<textarea class="ui-control" id="{{ id }}" name="{{ name }}" lang="{{ language }}" rows="10" maxlength="{{ maximum }}"{% if readonly %} readonly{% endif %}{% if invalid %} aria-invalid="true"{% endif %}{% if invalid && !describedby.is_empty() %} aria-describedby="{{ describedby }}"{% endif %}>{{ talocart_platform::rich_text::source(value) }}</textarea>
+<p class="ui-help ui-rich-native-help" data-rich-native-help>{{ crate::i18n::text("rich-help") }}</p>
+<div class="ui-rich-enhancement" hidden>
+<div class="ui-rich-header">
+<div class="ui-rich-history" data-rich-history role="group" aria-label="{{ crate::i18n::text("rich-formatting") }}">{{ rich_tool("undo", "undo-2", readonly) }}{{ rich_tool("redo", "redo-2", readonly) }}</div>
+<div class="ui-rich-modes" role="tablist" aria-label="{{ crate::i18n::text("rich-view") }}"><button class="ui-button ui-button--plain ui-rich-tool" type="button" role="tab" data-rich-view="visual" aria-selected="true" aria-label="{{ crate::i18n::text("rich-visual") }}" title="{{ crate::i18n::text("rich-visual") }}">{{ icon("eye", "small") }}</button><button class="ui-button ui-button--plain ui-rich-tool" type="button" role="tab" data-rich-view="html" aria-selected="false" tabindex="-1" aria-label="{{ crate::i18n::text("rich-html") }}" title="{{ crate::i18n::text("rich-html") }}">{{ icon("code-xml", "small") }}</button></div>
+</div>
+<div data-rich-panel="visual" role="tabpanel"><div class="ui-rich-toolbar" role="group" aria-label="{{ crate::i18n::text("rich-formatting") }}">
+<div class="ui-rich-toolgroup">{{ rich_tool("paragraph", "pilcrow", readonly) }}{{ rich_tool("heading2", "heading-2", readonly) }}{{ rich_tool("heading3", "heading-3", readonly) }}</div>
+<div class="ui-rich-toolgroup">{{ rich_tool("bold", "bold", readonly) }}{{ rich_tool("italic", "italic", readonly) }}{{ rich_tool("underline", "underline", readonly) }}{{ rich_tool("strike", "strikethrough", readonly) }}</div>
+<div class="ui-rich-toolgroup">{{ rich_tool("bulletList", "list", readonly) }}{{ rich_tool("orderedList", "list-ordered", readonly) }}{{ rich_tool("blockquote", "text-quote", readonly) }}<button type="button" class="ui-button ui-button--plain ui-rich-tool" data-rich-link-open aria-label="{{ crate::i18n::text("rich-link") }}" title="{{ crate::i18n::text("rich-link") }}"{% if readonly %} disabled{% endif %}>{{ icon("link", "small") }}</button></div>
+<div class="ui-rich-toolgroup">{{ rich_tool("clear", "remove-formatting", readonly) }}</div>
+</div><div data-rich-surface></div></div>
+<div data-rich-panel="html" role="tabpanel" hidden><label class="visually-hidden ui-rich-source-label">{{ crate::i18n::text("rich-html-source") }}</label></div>
+<div class="ui-rich-link" hidden><label>{{ crate::i18n::text("rich-link-address") }}<input type="text" inputmode="url" class="ui-control" data-rich-link-url placeholder="https://"{% if readonly %} disabled{% endif %}></label><div class="ui-rich-link-actions"><button type="button" class="ui-button ui-button--plain ui-rich-tool" data-rich-link-apply aria-label="{{ crate::i18n::text("rich-link-apply") }}" title="{{ crate::i18n::text("rich-link-apply") }}">{{ icon("check", "small") }}</button><button type="button" class="ui-button ui-button--plain ui-rich-tool" data-rich-link-remove aria-label="{{ crate::i18n::text("rich-link-remove") }}" title="{{ crate::i18n::text("rich-link-remove") }}">{{ icon("trash", "small") }}</button><button type="button" class="ui-button ui-button--plain ui-rich-tool" data-rich-link-close aria-label="{{ crate::i18n::text("rich-link-close") }}" title="{{ crate::i18n::text("rich-link-close") }}">{{ icon("x", "small") }}</button></div></div>
+</div><p class="ui-field-error" data-rich-error role="status" aria-live="polite"></p>
+</div>
+{% endmacro %}

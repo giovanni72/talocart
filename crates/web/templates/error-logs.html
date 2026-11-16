@@ -1,0 +1,26 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% block title %}{{ crate::i18n::text("logs-title") }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("logs-title") }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main">
+  {{ ui::page_header(crate::i18n::text("logs-title")) }}
+  {% if !journal.dates.is_empty() %}
+  <form method="get" action="/admin/error-logs" class="operations-filter">
+    <div><label for="log-date">{{ crate::i18n::text("logs-date") }}</label><select id="log-date" name="date" class="ui-control">{% for date in journal.dates %}<option value="{{ date }}"{% if journal.date == *date %} selected{% endif %}>{{ date }}</option>{% endfor %}</select></div>
+    <button type="submit" class="ui-button">{{ crate::i18n::text("logs-show") }}</button>
+    <a class="ui-button ui-button--secondary" href="/admin/error-logs">{{ crate::i18n::text("logs-latest") }}</a>
+  </form>
+  {% endif %}
+  {% if journal.skipped %}<p class="ui-message" role="status">{{ crate::i18n::text("logs-skipped") }}</p>{% endif %}
+  {% if journal.entries.is_empty() %}<div class="ui-empty">{{ crate::i18n::text("logs-empty") }}</div>{% else %}
+  <ol class="operations-list error-log-list" aria-label="{{ crate::i18n::text("logs-title") }}">
+    {% for entry in journal.entries %}<li class="operation-row error-log-entry"><div>
+      <p class="eyebrow"><time>{{ entry.timestamp }}</time> · ERROR</p>
+      <h2>{{ entry.message }}</h2><p class="muted">{{ entry.target }}</p>
+      <details><summary>{{ crate::i18n::text("logs-details") }}</summary><pre tabindex="0" aria-label="{{ crate::i18n::text("logs-details") }}">{{ entry.details }}</pre></details>
+    </div></li>{% endfor %}
+  </ol>{% endif %}
+  {% if let Some(before) = journal.before %}<a class="ui-button ui-button--secondary" rel="next" href="/admin/error-logs?date={{ journal.date }}&amp;before={{ before }}">{{ crate::i18n::text("logs-older") }}</a>{% endif %}
+</main>
+{% endblock %}

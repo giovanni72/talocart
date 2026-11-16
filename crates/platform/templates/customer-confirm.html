@@ -1,0 +1,13 @@
+{% extends "mail-layout.html" %}
+{% block content %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%">
+<tr><td class="tc-pad" style="padding:38px 40px 40px;font-family:'Avenir Next',Avenir,'Segoe UI',Helvetica,Arial,sans-serif;color:#243e32">
+<h1 class="tc-h1" style="margin:0 0 14px;font-family:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;font-size:32px;font-weight:normal;line-height:1.15;letter-spacing:-.02em;color:#243e32">{{ words.subject }}</h1>
+<p style="margin:0 0 28px;font-size:16px;line-height:1.65;color:#46524a">{{ words.intro }}</p>
+<table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:separate"><tr><td style="padding:3px;border:1px solid #243e32;border-radius:9px"><a href="{{ url }}" style="display:inline-block;padding:13px 28px;border-radius:6px;background:#243e32;color:#fffef9;font-size:16px;font-weight:600;line-height:1.2;text-decoration:none">{{ words.action }} &rarr;</a></td></tr></table>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;margin-top:30px;border-collapse:separate;border-left:3px solid #243e32;border-radius:4px;background:#f6f5ef"><tr><td style="padding:16px 20px;font-size:14px;line-height:1.6;color:#243e32">{{ words.expires }}</td></tr></table>
+<p style="margin:28px 0 6px;font-size:13px;line-height:1.6;color:#687369">{{ words.fallback }}</p>
+<p style="margin:0;font-family:'SF Mono',Menlo,Consolas,'Courier New',monospace;font-size:12px;line-height:1.6;word-break:break-all;overflow-wrap:anywhere"><a href="{{ url }}" style="color:#243e32">{{ url }}</a></p>
+</td></tr>
+</table>
+{% endblock %}

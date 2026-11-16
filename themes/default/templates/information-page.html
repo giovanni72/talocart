@@ -1,0 +1,5 @@
+{% extends "storefront/layout.html" %}
+{% block title %}{{ meta_title }} · {{ store_name }}{% endblock %}
+{% block body_attributes %} class="store-page" data-palette="{{ theme.palette }}" data-typography="{{ theme.typography }}" data-density="{{ theme.density }}"{% endblock %}
+{% block metadata %}<meta name="description" content="{{ meta_description }}"><link rel="canonical" href="{{ canonical }}">{% include "store-alternates.html" %}{% endblock %}
+{% block store_content %}<main id="main" class="information-main"><nav class="breadcrumb" aria-label="{{ crate::i18n::text("pages-breadcrumb") }}"><a href="{{ crate::store_language::path("/") }}">{{ crate::i18n::text("pages-home") }}</a><span aria-hidden="true">/</span><span aria-current="page">{{ name }}</span></nav><article class="information-article"><p class="eyebrow">{{ crate::i18n::text("pages-eyebrow") }}</p><h1>{{ name }}</h1><div class="information-body ui-rich-content">{{ body_html|safe }}</div></article></main>{% endblock %}

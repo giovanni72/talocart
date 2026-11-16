@@ -1,0 +1,5 @@
+
+<header class="checkout-head"><p class="eyebrow">{{ crate::i18n::text("store-the-store") }}</p><h1>{{ crate::i18n::text("co-open") }}</h1></header>
+{% let second_step = true %}{% include "checkout-progress.html" %}
+<div id="checkout-update-status" role="status" aria-live="polite" aria-atomic="true" data-loading="{{ crate::i18n::text("cm-updating") }}" data-done="{{ crate::i18n::text("cm-updated") }}" data-error="{{ crate::i18n::text("cm-update-error") }}"><span></span> <a href="{{ crate::store_language::path("/checkout/methods") }}" hidden>{{ crate::i18n::text("store-cart-reload") }}</a></div>
+{{ view|safe }}

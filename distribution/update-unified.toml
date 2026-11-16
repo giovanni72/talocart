@@ -1,0 +1,24 @@
+# Stage separately, root-owned 0600, for bootstrap_updater.py --config-source.
+# Requires a compatible base already running with [updates].root configured.
+feed_format = 2
+environment = "staging"
+service_user = "talocart"
+service = "talocart.service"
+release_root = "/opt/talocart/releases"
+current = "/opt/talocart/current"
+config = "/etc/talocart/talocart.toml"
+backup_root = "/var/backups/talocart"
+incoming = "/var/lib/talocart-update/incoming"
+public_origin = "https://shop.example.com"
+ready_url = "http://127.0.0.1:3000/health/ready"
+# Long-running services only. No oneshot/RemainAfterExit, startup hooks or env overrides.
+writer_units = []
+# Operator assertion: all local/remote writers have been inventoried and fenced.
+writers_fenced = false
+repository = "OWNER/REPOSITORY"
+public_key = "/etc/talocart/update-public.pem"
+token_file = ""
+updater_public_key = "/etc/talocart/updater-root-public.pem"
+probe_token_file = "/etc/talocart/update-probe-token"
+# Optional private CA, root-owned, for staging HTTPS. Public CAs need no override.
+# probe_ca_file = "/etc/talocart/staging-ca.pem"

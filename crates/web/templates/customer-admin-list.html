@@ -1,0 +1,38 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% import "pagination.html" as pagination %}
+{% block title %}{{ crate::i18n::text("cg-customers") }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("cg-customers") }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main catalog-main">
+{% call ui::page_header(crate::i18n::text("cg-customers")) %}{% if can_write %}<a class="ui-button" href="/admin/customers/new">{{ ui::icon("plus") }}<span>{{ crate::i18n::text("ca-new") }}</span></a>{% endif %}<a class="ui-button ui-button--secondary" href="/admin/customer-groups">{{ ui::icon("tag") }}<span>{{ crate::i18n::text("cg-title") }}</span></a>{% endcall %}
+{% if filter_error %}{{ ui::message("customer-filter-error", "error", crate::i18n::text("cl-filter-error"), true) }}{% endif %}
+<div class="product-pagination-toolbar">
+<form class="product-page-size" data-product-page-size method="get" action="/admin/customers">
+<input type="hidden" name="name" value="{{ filters.name }}"><input type="hidden" name="email" value="{{ filters.email }}"><input type="hidden" name="group" value="{{ filters.group }}"><input type="hidden" name="kind" value="{{ filters.kind }}"><input type="hidden" name="state" value="{{ filters.state }}"><input type="hidden" name="sort" value="{{ sort }}"><input type="hidden" name="dir" value="{{ direction }}">
+<label for="customer-page-size">{{ crate::i18n::text("cl-per-page") }}</label><select class="ui-control ui-control--compact" id="customer-page-size" name="per_page">{% for size in page_sizes %}<option value="{{ size }}"{% if *size == page_size %} selected{% endif %}>{{ size }}</option>{% endfor %}</select><button class="ui-button ui-button--small ui-button--secondary ui-button--compact" type="submit">{{ ui::icon("check", "small") }}<span>{{ crate::i18n::text("admin-apply") }}</span></button>
+</form>
+</div>
+<form class="customer-table-search" method="get" action="/admin/customers" role="search" aria-label="{{ crate::i18n::text("cl-search") }}">
+<input type="hidden" name="per_page" value="{{ page_size }}"><input type="hidden" name="sort" value="{{ sort }}"><input type="hidden" name="dir" value="{{ direction }}">
+<div class="ui-table-region" role="region" aria-label="{{ crate::i18n::text("cg-customers") }}" tabindex="0">
+<table class="ui-table ui-table--fixed customer-table">
+<caption class="visually-hidden">{{ crate::i18n::text("cg-customers") }}</caption>
+<colgroup><col class="customer-col-name"><col class="customer-col-email"><col class="customer-col-group"><col class="customer-col-kind"><col class="customer-col-state"><col class="customer-col-actions"></colgroup>
+<thead><tr>{% for header in headers %}<th scope="col" aria-sort="{{ header.sort.aria }}">{{ ui::table_sort(header.href, crate::i18n::text(header.label), header.sort) }}</th>{% endfor %}<th scope="col" class="ui-table__center">{{ crate::i18n::text("admin-actions") }}</th></tr>
+<tr class="ui-table__filters">
+<td><label class="visually-hidden" for="customer-name">{{ crate::i18n::text("cl-name") }}</label><input class="ui-control ui-control--compact" id="customer-name" name="name" type="search" maxlength="120" value="{{ filters.name }}" placeholder="{{ crate::i18n::text("cl-name") }}"></td>
+<td><label class="visually-hidden" for="customer-email">{{ crate::i18n::text("cl-email") }}</label><input class="ui-control ui-control--compact" id="customer-email" name="email" type="search" maxlength="120" value="{{ filters.email }}" placeholder="{{ crate::i18n::text("cl-email") }}"></td>
+<td><label class="visually-hidden" for="customer-group">{{ crate::i18n::text("cg-group") }}</label><select class="ui-control ui-control--compact" id="customer-group" name="group"><option value="">{{ crate::i18n::text("admin-all") }}</option>{% for group in groups %}<option value="{{ group.id }}"{% if filters.group == group.id.to_string() %} selected{% endif %}>{{ group.name(crate::i18n::locale()) }}</option>{% endfor %}</select></td>
+<td><label class="visually-hidden" for="customer-kind">{{ crate::i18n::text("cl-kind") }}</label><select class="ui-control ui-control--compact" id="customer-kind" name="kind"><option value="">{{ crate::i18n::text("admin-all") }}</option><option value="private"{% if filters.kind == "private" %} selected{% endif %}>{{ crate::i18n::text("co-private") }}</option><option value="business"{% if filters.kind == "business" %} selected{% endif %}>{{ crate::i18n::text("cl-business") }}</option></select></td>
+<td><label class="visually-hidden" for="customer-state">{{ crate::i18n::text("cl-state") }}</label><select class="ui-control ui-control--compact" id="customer-state" name="state"><option value="">{{ crate::i18n::text("admin-all") }}</option><option value="active"{% if filters.state == "active" %} selected{% endif %}>{{ crate::i18n::text("cl-active") }}</option><option value="inactive"{% if filters.state == "inactive" %} selected{% endif %}>{{ crate::i18n::text("cl-inactive") }}</option></select></td>
+<td><div class="product-filter-actions"><button class="ui-button ui-button--small ui-button--compact" type="submit">{{ ui::icon("list-filter", "small") }}<span>{{ crate::i18n::text("admin-filter") }}</span></button><a class="ui-button ui-button--small product-filter-reset ui-button--secondary ui-button--compact" href="/admin/customers{% if page_size != 20 %}?per_page={{ page_size }}{% endif %}" aria-label="{{ crate::i18n::text("admin-reset-filters") }}" title="{{ crate::i18n::text("admin-reset-filters") }}">{{ ui::icon("x", "small") }}</a></div></td>
+</tr></thead>
+<tbody>{% if filter_error %}<tr><td colspan="6">{{ crate::i18n::text("cl-correct-filters") }}</td></tr>{% else if entries.is_empty() %}<tr><td colspan="6">{% if filtered %}{{ ui::empty(crate::i18n::text("admin-no-results"), crate::i18n::text("admin-try-another-value-or-reset-the-filters")) }}{% else %}{{ ui::empty(crate::i18n::text("cg-customers"),crate::i18n::text("cg-customers-empty")) }}{% endif %}</td></tr>
+{% else %}{% for entry in entries %}<tr>
+<th scope="row"><a class="ui-table__link" href="/admin/customers/{{ entry.id }}">{% if entry.first_name.is_empty() && entry.last_name.is_empty() %}{{ entry.email }}{% else %}{{ entry.first_name }} {{ entry.last_name }}{% endif %}</a></th>
+<td>{{ entry.email }}</td><td>{{ entry.group_name(crate::i18n::locale()) }}</td><td>{% if entry.customer_type == "business" %}{{ crate::i18n::text("cl-business") }}{% else %}{{ crate::i18n::text("co-private") }}{% endif %}</td><td>{% if entry.active %}{{ crate::i18n::text("cl-active") }}{% else %}{{ crate::i18n::text("cl-inactive") }}{% endif %}</td>
+<td class="ui-table__center"><a class="ui-button ui-button--secondary ui-button--small ui-button--compact" href="/admin/customers/{{ entry.id }}" aria-label="{{ crate::i18n::text("admin-view") }} {{ entry.email }}">{{ ui::icon("eye","small") }}<span>{{ crate::i18n::text("admin-view") }}</span></a></td>
+</tr>{% endfor %}{% endif %}</tbody></table></div></form>
+{% if !filter_error %}{{ pagination::render(pagination) }}{% endif %}
+</main><script src="/assets/product-pagination.js" defer></script>{% endblock %}

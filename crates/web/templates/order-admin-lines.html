@@ -1,0 +1,33 @@
+<section class="editor-card" id="order-lines" aria-labelledby="order-lines-title">
+  <h2 id="order-lines-title">{{ crate::i18n::text("admin-order-lines") }}</h2>
+  <div class="ui-table-region order-lines-region" role="region" aria-labelledby="order-lines-title" tabindex="0">
+    <table class="ui-table order-lines" role="table">
+      <caption class="visually-hidden">{{ crate::i18n::text("admin-order-lines") }} · {{ order.reference }}</caption>
+      <thead role="rowgroup"><tr role="row">
+        <th scope="col" role="columnheader">{{ crate::i18n::text("admin-order-product") }}</th>
+        <th scope="col" class="ui-table__num" role="columnheader">{{ crate::i18n::text("admin-order-unit-price") }}</th>
+        <th scope="col" class="ui-table__num" role="columnheader">{{ crate::i18n::text("admin-order-quantity") }}</th>
+        <th scope="col" class="ui-table__num" role="columnheader">{{ crate::i18n::text("admin-order-vat") }}</th>
+        <th scope="col" class="ui-table__num" role="columnheader">{{ crate::i18n::text("admin-order-line-total") }}</th>
+      </tr></thead>
+      <tbody role="rowgroup">
+      {% for line in order.lines %}<tr role="row">
+        <th scope="row" role="rowheader"><span class="order-line-name">{{ line.name }}</span>{% if !line.label.is_empty() %}<small>{{ line.label }}</small>{% endif %}{% if !line.code.is_empty() %}<small class="order-line-code">{{ crate::i18n::text("admin-order-code") }} {{ line.code }}</small>{% endif %}</th>
+        <td class="ui-table__num" role="cell" data-label="{{ crate::i18n::text("admin-order-unit-price") }}">{{ crate::i18n::decimal(order.money(line.unit_cents)) }} {{ order.currency }}<small>{% if line.price_mode == "exclusive" %}{{ crate::i18n::text("store-cart-unit-net") }}{% else %}{{ crate::i18n::text("store-vat-included") }}{% endif %}</small></td>
+        <td class="ui-table__num" role="cell" data-label="{{ crate::i18n::text("admin-order-quantity") }}">{{ line.quantity }}</td>
+        <td class="ui-table__num" role="cell" data-label="{{ crate::i18n::text("admin-order-vat") }}">{{ line.basis_points / 100 }}{% if line.basis_points % 100 != 0 %}{{ crate::i18n::decimal(format!(",{:02}", line.basis_points % 100)) }}{% endif %}%{% if !line.tax_name.is_empty() %}<small>{{ line.tax_name }}</small>{% endif %}</td>
+        <td class="ui-table__num order-line-total" role="cell" data-label="{{ crate::i18n::text("admin-order-line-total") }}">{% if let Some(coupon) = order.frozen.coupon %}{% if let Some(discount) = coupon.line(loop.index0) %}<del>{{ crate::i18n::decimal(order.money(discount.original_cents)) }} {{ order.currency }}</del>{% endif %}{% endif %}<strong>{{ crate::i18n::decimal(order.money(line.gross_cents)) }} {{ order.currency }}</strong>{% if let Some(coupon) = order.frozen.coupon %}{% if let Some(discount) = coupon.line(loop.index0) %}<small>{{ crate::i18n::text("coupon-discount") }} −{{ crate::i18n::decimal(order.money(discount.discount_cents)) }} {{ order.currency }}</small>{% endif %}{% endif %}</td>
+      </tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <dl class="order-totals">
+    {% if let Some(coupon) = order.frozen.coupon %}<div><dt>{{ crate::i18n::text("coupon-original") }}</dt><dd>{{ crate::i18n::decimal(order.money(coupon.original_cents)) }} {{ order.currency }}</dd></div>
+    <div><dt>{{ crate::i18n::text("coupon-discount") }} · {{ coupon.code }}</dt><dd>−{{ crate::i18n::decimal(order.money(coupon.discount_cents)) }} {{ order.currency }}</dd></div>{% endif %}
+    <div><dt>{{ crate::i18n::text("cm-goods") }}</dt><dd>{{ crate::i18n::decimal(order.money(order.merchandise_cents)) }} {{ order.currency }}</dd></div>
+    <div><dt>{{ crate::i18n::text("admin-order-shipping-cost") }} · {{ order.frozen.shipping.name(crate::i18n::locale()) }}</dt><dd>{{ crate::i18n::decimal(order.money(order.shipping_cents)) }} {{ order.currency }}</dd></div>
+    <div><dt>{{ crate::i18n::text("cm-fee") }} · {{ order.frozen.payment.name(crate::i18n::locale()) }}</dt><dd>{{ crate::i18n::decimal(order.money(order.fee_cents)) }} {{ order.currency }}</dd></div>
+    <div class="order-totals-grand"><dt>{{ crate::i18n::text("cm-total") }}</dt><dd>{{ crate::i18n::decimal(order.money(order.total_cents)) }} {{ order.currency }}</dd></div>
+    <div class="order-totals-tax"><dt>{{ crate::i18n::text("admin-order-tax-included") }}</dt><dd>{{ crate::i18n::decimal(order.money(order.tax_cents)) }} {{ order.currency }}</dd></div>
+  </dl>
+</section>

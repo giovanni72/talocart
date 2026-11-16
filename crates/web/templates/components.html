@@ -1,0 +1,198 @@
+{% extends "admin-base.html" %}
+{% block styles %}{{ super() }}<script src="/assets/rich-text.js" defer></script>{% endblock %}
+{% import "ui.html" as ui %}
+{% block title %}{{ crate::i18n::text("admin-components") }} {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("admin-components-2") }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main ui-reference">
+  {{ ui::page_header(crate::i18n::text("admin-components-2"), "/admin", crate::i18n::text("admin-overview-2")) }}
+
+  <section id="rich-text" class="ui-reference-section" aria-labelledby="rich-title"><h2 id="rich-title">{{ crate::i18n::text("rich-editor") }}</h2><label for="example-rich">{{ crate::i18n::text("admin-description") }}</label>{{ ui::rich_editor("example-rich", "example_rich", "", "en", 4000, false, false, "") }}</section>
+
+  <section class="ui-reference-section" aria-labelledby="buttons-title">
+    <h2 id="buttons-title">{{ crate::i18n::text("admin-buttons") }}</h2>
+    <p class="muted">{{ crate::i18n::text("admin-a-primary-action-a-secondary-action-and-a-variant-for-destructive-action") }}</p>
+    <div class="ui-example-actions">
+      <a class="ui-button" href="#fields">{{ crate::i18n::text("admin-primary") }}</a>
+      <a class="ui-button ui-button--secondary" href="#fields">{{ crate::i18n::text("admin-secondary") }}</a>
+      <button class="ui-button ui-button--danger" type="reset" form="component-preview">{{ crate::i18n::text("admin-reset-fields") }}</button>
+      <a class="ui-button ui-button--small ui-button--compact" href="#messages">{{ crate::i18n::text("admin-compact") }}</a>
+      <a class="ui-button ui-button--mini" href="#messages">{{ crate::i18n::text("admin-mini") }}</a>
+      <a class="ui-button ui-button--mini ui-button--icon ui-button--secondary" href="#fields" aria-label="{{ crate::i18n::text("admin-mini-icon") }}" title="{{ crate::i18n::text("admin-mini-icon") }}">{{ ui::icon("x", "small") }}</a>
+      <button class="ui-button" type="button" disabled>{{ crate::i18n::text("admin-unavailable") }}</button>
+    </div>
+    <p class="ui-help">{{ crate::i18n::text("admin-the-red-variant-is-for-destructive-actions-here-it-only-resets-preview-f") }}</p>
+  </section>
+
+  <section class="ui-reference-section" aria-labelledby="folder-buttons-title">
+    <h2 id="folder-buttons-title">{{ crate::i18n::text("admin-folder-navigation") }}</h2>
+    <nav class="media-folder-tree" aria-label="{{ crate::i18n::text("admin-folders") }}">
+      <button class="ui-button ui-button--navigation media-folder-root" type="button" aria-current="page">{{ ui::icon("layers") }}<span>{{ crate::i18n::text("admin-all-images") }}</span></button>
+      <div class="media-tree-leaf"><button class="ui-button ui-button--navigation media-folder-link" type="button">{{ ui::icon("folder") }}<span>{{ crate::i18n::text("admin-media") }}</span></button></div>
+    </nav>
+  </section>
+
+  <section id="tabs" class="ui-reference-section" aria-labelledby="tabs-title">
+    <h2 id="tabs-title">{{ crate::i18n::text("admin-tabs-title") }}</h2>
+    <p class="ui-help">{{ crate::i18n::text("admin-tabs-help") }}</p>
+    <h3>{{ crate::i18n::text("admin-tabs-pages") }}</h3>
+    <p class="ui-help">{{ crate::i18n::text("admin-tabs-pages-help") }}</p>
+    {% call ui::tabs(crate::i18n::text("admin-settings-sections")) %}
+      {{ ui::tab("#tabs", crate::i18n::text("admin-general"), true, "settings") }}
+      {{ ui::tab("#tabs", crate::i18n::text("admin-logo-and-favicon"), false, "image") }}
+      {{ ui::tab("#tabs", crate::i18n::text("admin-theme-and-seo"), false, "panels-top-left") }}
+      {{ ui::tab("#tabs", crate::i18n::text("admin-prices-and-taxes-2"), false, "percent") }}
+      {{ ui::tab("#tabs", crate::i18n::text("admin-purchase-countries"), false, "map") }}
+    {% endcall %}
+
+    <h3>{{ crate::i18n::text("admin-tabs-panels") }}</h3>
+    <p class="ui-help">{{ crate::i18n::text("admin-tabs-panels-help") }}</p>
+    {% call ui::tabs(crate::i18n::text("ca-sections"), true) %}
+      {{ ui::tab("#example-tab-profile", crate::i18n::text("ca-profile"), false, "user-round") }}
+      {% call ui::tab("#example-tab-billing", crate::i18n::text("ca-billing"), false, "credit-card") %}<span class="ui-tabs__marker ui-tabs__marker--dirty">{{ crate::i18n::text("settings-modified") }}</span>{% endcall %}
+      {{ ui::tab("#example-tab-addresses", crate::i18n::text("customer-addresses"), false, "map", "2") }}
+      {{ ui::tab("#example-tab-orders", crate::i18n::text("ca-orders"), false, "shopping-cart", "12") }}
+      {% call ui::tab("#example-tab-access", crate::i18n::text("ca-access"), false, "key-round") %}<span class="ui-tabs__marker ui-tabs__marker--error">{{ crate::i18n::text("settings-check") }}</span>{% endcall %}
+    {% endcall %}
+    <section class="editor-card" id="example-tab-profile"><h4>{{ crate::i18n::text("ca-profile") }}</h4><p class="ui-help">{{ crate::i18n::text("ca-profile-help") }}</p></section>
+    <section class="editor-card" id="example-tab-billing"><h4>{{ crate::i18n::text("ca-billing") }}</h4><p class="ui-help">{{ crate::i18n::text("ca-billing-help") }}</p></section>
+    <section class="editor-card" id="example-tab-addresses"><h4>{{ crate::i18n::text("customer-addresses") }}</h4><p class="ui-help">{{ crate::i18n::text("admin-tabs-addresses-help") }}</p></section>
+    <section class="editor-card" id="example-tab-orders"><h4>{{ crate::i18n::text("ca-orders") }}</h4><p class="ui-help">{{ crate::i18n::text("ca-orders-help") }}</p></section>
+    <section class="editor-card" id="example-tab-access"><h4>{{ crate::i18n::text("ca-access") }}</h4><p class="ui-help">{{ crate::i18n::text("ca-access-help") }}</p></section>
+
+    <h3>{{ crate::i18n::text("admin-tabs-line") }}</h3>
+    <p class="ui-help">{{ crate::i18n::text("admin-tabs-line-help") }}</p>
+    {% call ui::tabs(crate::i18n::text("customer-navigation"), false, "line") %}
+      {{ ui::tab("#tabs", crate::i18n::text("customer-profile"), true) }}
+      {{ ui::tab("#tabs", crate::i18n::text("customer-addresses"), false, "", "2") }}
+      {{ ui::tab("#tabs", crate::i18n::text("customer-orders")) }}
+      {{ ui::tab("#tabs", crate::i18n::text("customer-change-password")) }}
+    {% endcall %}
+  </section>
+
+  <section class="ui-reference-section" aria-labelledby="table-columns-example">
+    <h2 id="table-columns-example">{{ crate::i18n::text("admin-table-columns") }}</h2>
+    {% call ui::column_picker() %}<p class="ui-help">{{ crate::i18n::text("admin-table-columns-help") }}</p><label class="ui-check-label"><input class="ui-check" type="checkbox" checked>{{ crate::i18n::text("admin-model") }}</label><label class="ui-check-label"><input class="ui-check" type="checkbox" checked>{{ crate::i18n::text("admin-status") }}</label><a class="ui-button ui-button--secondary ui-button--compact" href="/admin/catalog/products">{{ crate::i18n::text("admin-products") }}</a>{% endcall %}
+  </section>
+
+  <section id="table" class="ui-reference-section" aria-labelledby="table-title"><h2 id="table-title">{{ crate::i18n::text("admin-table-title") }}</h2><p class="ui-help">{{ crate::i18n::text("admin-table-help") }}</p>
+  <div class="ui-table-region" role="region" aria-labelledby="table-title" tabindex="0"><table class="ui-table"><caption class="visually-hidden">{{ crate::i18n::text("admin-table-title") }}</caption>
+  <thead><tr><th scope="col" aria-sort="{{ sort_name.aria }}">{{ ui::table_sort("#table", crate::i18n::text("admin-name"), sort_name) }}</th><th scope="col">{{ crate::i18n::text("admin-sku") }}</th><th scope="col" class="ui-table__num" aria-sort="{{ sort_price.aria }}">{{ ui::table_sort("#table", crate::i18n::text("admin-price"), sort_price) }}</th><th scope="col" class="ui-table__center">{{ crate::i18n::text("admin-status") }}</th></tr>
+  <tr class="ui-table__filters"><td><label class="visually-hidden" for="example-table-name">{{ crate::i18n::text("admin-name") }}</label><input class="ui-control ui-control--compact" id="example-table-name" type="search" placeholder="{{ crate::i18n::text("admin-name") }}"></td><td></td><td></td><td><label class="visually-hidden" for="example-table-status">{{ crate::i18n::text("admin-status") }}</label><select class="ui-control ui-control--compact" id="example-table-status"><option>{{ crate::i18n::text("admin-all") }}</option><option>{{ crate::i18n::text("admin-published") }}</option><option>{{ crate::i18n::text("admin-draft") }}</option></select></td></tr></thead>
+  <tbody><tr><th scope="row"><a class="ui-table__link" href="#table">Aster 01</a></th><td>AST-01-BLU</td><td class="ui-table__num">{{ crate::i18n::decimal("24,90") }} EUR<small>{{ crate::i18n::text("admin-vat") }} {{ crate::i18n::text("admin-included") }}</small></td><td class="ui-table__center"><span class="catalog-status">{{ crate::i18n::text("admin-published") }}</span></td></tr>
+  <tr><th scope="row"><a class="ui-table__link" href="#table">Brina 02</a></th><td>BRN-02-WHT</td><td class="ui-table__num">{{ crate::i18n::decimal("118,00") }} EUR<small>{{ crate::i18n::text("admin-vat") }} {{ crate::i18n::text("admin-included") }}</small></td><td class="ui-table__center"><span class="catalog-status inactive">{{ crate::i18n::text("admin-draft") }}</span></td></tr></tbody></table></div></section>
+
+  <section class="ui-reference-section"><h2>{{ crate::i18n::text("admin-product-description-info") }}</h2>{{ ui::description_info("example", crate::i18n::text("admin-products"), crate::i18n::text("admin-an-example-description")) }}</section>
+  <section class="ui-reference-section"><h2>{{ crate::i18n::text("admin-product-last-modified") }}</h2>{{ ui::date_time("24/10/2026", "12:30:00") }}</section>
+  <section class="ui-reference-section"><h2>{{ crate::i18n::text("admin-product-filter-price") }}</h2>{{ ui::numeric_filter("example-price", "example_price", "", "example_price_op", "eq", crate::i18n::text("admin-product-filter-price"), crate::i18n::text("admin-product-price-comparison"), "decimal", 24) }}</section>
+  <section id="stats" class="ui-reference-section" aria-labelledby="stats-title"><h2 id="stats-title">{{ crate::i18n::text("admin-stats-title") }}</h2><p class="ui-help">{{ crate::i18n::text("admin-stats-help") }}</p>
+  {% call ui::stats("stats-example", crate::i18n::text("dash-group-orders"), "shopping-cart") %}<li>{{ ui::stat(crate::i18n::text("admin-stats-example-total"), 128, "#stats", crate::i18n::text("dash-open")) }}</li><li>{{ ui::stat(crate::i18n::text("admin-stats-example-pending"), 3, "#stats", crate::i18n::text("dash-open"), crate::i18n::text("dash-attention")) }}</li><li>{{ ui::stat(crate::i18n::text("admin-stats-example-static"), 2) }}</li>{% endcall %}</section>
+  <section id="cards" class="ui-reference-section" aria-labelledby="cards-title"><h2 id="cards-title">{{ crate::i18n::text("admin-cards-title") }}</h2><p class="ui-help">{{ crate::i18n::text("admin-cards-help") }}</p>
+    <div class="ui-example-cards">
+      <article class="ui-card" aria-labelledby="card-example-title">
+        <div class="ui-card__head"><span class="ui-card__glyph">{{ ui::icon("package", "normal") }}</span><div class="ui-card__heading"><p class="ui-card__kind">{{ crate::i18n::text("modules-package") }}</p><h3 class="ui-card__title" id="card-example-title">{{ crate::i18n::text("admin-cards-example-title") }} <span class="ui-tag">1.2.0</span></h3></div><p class="ui-card__state">{{ ui::state(crate::i18n::text("modules-enabled"), "on") }}</p></div>
+        <div class="ui-card__body"><p>{{ crate::i18n::text("admin-cards-example-description") }}</p><ul class="ui-tags"><li class="ui-tag">{{ crate::i18n::text("modules-area-catalog") }}</li><li class="ui-tag">{{ crate::i18n::text("modules-area-media") }}</li></ul>
+          <dl class="ui-facts"><div><dt>{{ crate::i18n::text("packages-base-version") }}</dt><dd>1.0</dd></div><div><dt>{{ crate::i18n::text("packages-protocol") }}</dt><dd>1</dd></div><div><dt>{{ crate::i18n::text("packages-database-contract") }}</dt><dd>1</dd></div></dl></div>
+        <div class="ui-card__footer"><a class="ui-button ui-button--secondary ui-button--compact" href="#cards">{{ crate::i18n::text("modules-open") }}</a></div>
+      </article>
+      <article class="ui-card" data-tone="error" aria-labelledby="card-example-error-title">
+        <div class="ui-card__head"><span class="ui-card__glyph">{{ ui::icon("blocks", "normal") }}</span><div class="ui-card__heading"><p class="ui-card__kind">{{ crate::i18n::text("modules-compiled") }}</p><h3 class="ui-card__title" id="card-example-error-title">{{ crate::i18n::text("admin-cards-example-title") }}</h3></div><p class="ui-card__state">{{ ui::state(crate::i18n::text("modules-state-incompatible"), "error") }}</p></div>
+        <div class="ui-card__body"><p>{{ crate::i18n::text("admin-cards-example-description") }}</p></div>
+        <div class="ui-card__footer"><p class="ui-help">{{ ui::state(crate::i18n::text("modules-disabled")) }}</p></div>
+      </article>
+    </div>
+  </section>
+  <section id="icons" class="ui-reference-section" aria-labelledby="icons-title">
+    <h2 id="icons-title">{{ crate::i18n::text("admin-icons-title") }}</h2>
+    <p class="ui-help">{{ crate::i18n::text("admin-icons-help") }}</p>
+    <ul class="ui-icon-catalog">
+      {% for icon in crate::ui::ICONS %}<li class="ui-with-icon">{{ ui::icon(icon.0) }}<span>{{ crate::i18n::text(icon.1) }}</span></li>{% endfor %}
+    </ul>
+    <div class="ui-example-actions">
+      <a class="ui-button" href="#fields">{{ ui::icon("pencil") }}<span>{{ crate::i18n::text("admin-icons-edit-example") }}</span></a>
+      <a class="ui-button ui-button--compact ui-button--secondary" href="#messages">{{ ui::icon("triangle-alert", "small") }}<span>{{ crate::i18n::text("admin-icons-view-messages") }}</span></a>
+      <a class="ui-button ui-button--icon ui-button--secondary" href="#fields" aria-label="{{ crate::i18n::text("admin-icons-go-fields") }}">{{ ui::icon("pencil") }}</a>
+    </div>
+    <p class="ui-help">{{ crate::i18n::text("admin-icons-accessibility") }}</p>
+  </section>
+
+  <section class="ui-reference-section" aria-labelledby="status-badge-title"><h2 id="status-badge-title">{{ crate::i18n::text("order-status-title") }}</h2><p class="ui-help">{{ crate::i18n::text("order-status-badge-help") }}</p><div class="ui-example-actions">{{ ui::status_badge(crate::i18n::text("order-status-example-waiting"),"#b7791f") }}{{ ui::status_badge(crate::i18n::text("order-status-example-paid"),"#16803c") }}{{ ui::status_badge(crate::i18n::text("order-status-example-shipped"),"#7c3aed") }}</div></section>
+  <section id="fields" class="ui-reference-section" aria-labelledby="fields-title">
+    <h2 id="fields-title">{{ crate::i18n::text("admin-inputs-and-selects") }}</h2>
+    {% if preview %}{% if label_error.is_empty() && status_error.is_empty() %}{{ ui::feedback("preview-result", "success", crate::i18n::text("admin-preview-updated")) }}{% else %}{{ ui::feedback("preview-result", "error", crate::i18n::text("admin-check-the-indicated-fields-and-try-again")) }}{% endif %}{% endif %}
+    <form id="component-preview" class="editor-card" method="get" action="/admin/components#fields">
+      <input type="hidden" name="preview" value="1">
+      <div class="ui-example-fields">
+        <div class="ui-field">
+          <label for="example-label">{{ crate::i18n::text("admin-example-name") }}</label>
+          <input class="ui-control" id="example-label" name="label" value="{{ label }}" required maxlength="80" aria-describedby="example-label-help{% if !label_error.is_empty() %} example-label-error{% endif %}"{% if !label_error.is_empty() %} aria-invalid="true"{% endif %}>
+          {{ ui::field_feedback("example-label-help", crate::i18n::text("admin-from-1-to-80-characters-no-products-are-changed"), "example-label-error", crate::i18n::text(label_error)) }}
+        </div>
+        <div class="ui-field">
+          <label for="example-status">{{ crate::i18n::text("admin-example-status") }}</label>
+          <select class="ui-control" id="example-status" name="status" aria-describedby="example-status-help{% if !status_error.is_empty() %} example-status-error{% endif %}"{% if !status_error.is_empty() %} aria-invalid="true"{% endif %}>
+            {% if !status_error.is_empty() %}<option value="" selected>{{ crate::i18n::text("admin-select-a-status") }}</option>{% endif %}
+            <option value="active"{% if status == "active" %} selected{% endif %}>{{ crate::i18n::text("admin-active-2") }}</option>
+            <option value="inactive"{% if status == "inactive" %} selected{% endif %}>{{ crate::i18n::text("admin-inactive-2") }}</option>
+          </select>
+          {{ ui::field_feedback("example-status-help", crate::i18n::text("admin-a-native-selection-usable-without-javascript"), "example-status-error", crate::i18n::text(status_error)) }}
+        </div>
+        <div class="ui-field"><label for="example-readonly">{{ crate::i18n::text("admin-read-only") }}</label><input class="ui-control" id="example-readonly" value="SKU-001" readonly></div>
+        <div class="ui-field"><label for="example-disabled">{{ crate::i18n::text("admin-unavailable-field") }}</label><select class="ui-control" id="example-disabled" disabled><option>{{ crate::i18n::text("admin-unavailable") }}</option></select></div>
+        <div class="ui-field"><label for="example-invalid">{{ crate::i18n::text("admin-field-with-an-error") }}</label><input class="ui-control" id="example-invalid" value="" aria-invalid="true" aria-describedby="example-invalid-error">{{ ui::field_feedback("", "", "example-invalid-error", crate::i18n::text("admin-enter-a-value-to-continue")) }}</div>
+        <div class="ui-field"><label for="example-compact">{{ crate::i18n::text("admin-compact-field") }}</label><input class="ui-control ui-control--compact" id="example-compact" value="Filtro tabellare"></div>
+        <div class="ui-field"><label for="example-notes">{{ crate::i18n::text("admin-multiline-text") }}</label><textarea class="ui-control" id="example-notes" rows="3">{{ crate::i18n::text("admin-an-example-description") }}</textarea></div>
+        <div class="ui-field"><label for="example-file">{{ crate::i18n::text("admin-file-upload") }}</label><input class="ui-control ui-control--file" id="example-file" type="file" aria-describedby="example-file-help"><p class="ui-help" id="example-file-help">{{ crate::i18n::text("admin-no-files-are-uploaded-in-this-preview") }}</p></div>
+        <fieldset class="ui-example-choices"><legend>{{ crate::i18n::text("admin-native-choices") }}</legend><label class="ui-check-label" for="example-check"><input class="ui-check" id="example-check" type="checkbox"> {{ crate::i18n::text("admin-i-confirm-the-selection") }}</label><label class="ui-check-label" for="example-radio-one"><input class="ui-check" id="example-radio-one" type="radio" name="example-choice" value="one" checked> {{ crate::i18n::text("admin-first-option") }}</label><label class="ui-check-label" for="example-radio-two"><input class="ui-check" id="example-radio-two" type="radio" name="example-choice" value="two"> {{ crate::i18n::text("admin-second-option") }}</label></fieldset>
+      </div>
+      <div class="ui-example-actions"><button class="ui-button" type="submit">{{ crate::i18n::text("admin-refresh-preview") }}</button><a class="ui-button ui-button--secondary" href="/admin/components#fields">{{ crate::i18n::text("admin-reset-examples") }}</a></div>
+    </form>
+  </section>
+
+  <section id="messages" class="ui-reference-section" aria-labelledby="messages-title">
+    <h2 id="messages-title">{{ crate::i18n::text("admin-messages") }}</h2>
+    <p class="ui-help">{{ crate::i18n::text("admin-platform-messages-help") }}</p>
+    {{ ui::waiting(crate::i18n::text("admin-waiting-example")) }}
+    {{ ui::message("message-info", "info", crate::i18n::text("admin-your-access-is-read-only-you-can-view-the-data")) }}
+  </section>
+
+  <section id="toasts" class="ui-reference-section" aria-labelledby="toasts-title">
+    <h2 id="toasts-title">{{ crate::i18n::text("admin-toasts-title") }}</h2>
+    <p>{{ crate::i18n::text("admin-toasts-help") }}</p>
+    <form action="/admin/components#toasts" method="get"><button class="ui-button ui-button--secondary" type="submit">{{ crate::i18n::text("admin-toasts-replay") }}</button></form>
+    {% call ui::toasts() %}
+      {{ ui::toast("toast-success", "success", crate::i18n::text("admin-changes-saved-this-is-an-example-confirmation"), crate::i18n::text("admin-toasts-close")) }}
+      {{ ui::toast("toast-info", "info", crate::i18n::text("admin-toasts-info"), crate::i18n::text("admin-toasts-close")) }}
+      {{ ui::toast("toast-error", "error", crate::i18n::text("admin-the-operation-could-not-be-completed-check-the-indicated-fields"), crate::i18n::text("admin-toasts-close")) }}
+    {% endcall %}
+  </section>
+
+  <section class="ui-reference-section" aria-labelledby="field-matrix-title"><h2 id="field-matrix-title">{{ crate::i18n::text("cf-title") }}</h2>
+  <div class="ui-field-matrix"><h3 class="ui-field-matrix-section">{{ crate::i18n::text("cf-heading-fiscal") }}</h3><div class="ui-field-matrix-heading" aria-hidden="true"><span>{{ crate::i18n::text("cf-field") }}</span><span>{{ crate::i18n::text("co-private") }}</span><span>{{ crate::i18n::text("co-business") }}</span></div><div class="ui-field-matrix-row"><strong>{{ crate::i18n::text("co-field-pec") }}</strong><div class="field-stack"><label for="example-policy-private">{{ crate::i18n::text("co-private") }}</label><select class="ui-control" id="example-policy-private"><option>{{ crate::i18n::text("cf-mode-hidden") }}</option></select></div><div class="field-stack"><label for="example-policy-business">{{ crate::i18n::text("co-business") }}</label><select class="ui-control" id="example-policy-business"><option>{{ crate::i18n::text("cf-mode-optional") }}</option></select></div></div></div></section>
+
+  <section id="edit-list" class="ui-reference-section" aria-labelledby="edit-list-title"><h2 id="edit-list-title">{{ crate::i18n::text("admin-edit-list-title") }}</h2><p class="ui-help">{{ crate::i18n::text("admin-edit-list-help") }}</p>
+  <div class="ui-edit-list"><div class="ui-edit-list__head" aria-hidden="true"><span class="ui-edit-list__cell ui-edit-list__cell--narrow">{{ crate::i18n::text("options-sort-order") }}</span><span class="ui-edit-list__cell">Italiano · {{ crate::i18n::text("admin-content-primary") }}</span><span class="ui-edit-list__cell">English</span><span class="ui-edit-list__actions"></span></div>
+  <form class="ui-edit-list__row ui-edit-list__row--new" action="#edit-list"><div class="ui-edit-list__cell ui-edit-list__cell--narrow"><label class="ui-edit-list__label" for="example-new-order">{{ crate::i18n::text("options-sort-order") }}</label><input class="ui-control" id="example-new-order" type="number" min="0" max="9999" value="0"></div><div class="ui-edit-list__cell"><label class="ui-edit-list__label" for="example-new-value">{{ crate::i18n::text("admin-new-value") }}</label><input class="ui-control" lang="it" id="example-new-value" placeholder="{{ crate::i18n::text("admin-new-value") }}"></div><div class="ui-edit-list__cell"><label class="ui-edit-list__label" for="example-new-value-en">{{ crate::i18n::text("admin-new-value") }} · English</label><input class="ui-control" lang="en" id="example-new-value-en"></div><div class="ui-edit-list__actions"><button class="ui-button ui-button--icon ui-button--compact" type="button" title="{{ crate::i18n::text("admin-add-value") }}">{{ ui::icon("plus", "normal") }}<span class="visually-hidden">{{ crate::i18n::text("admin-add-value") }}</span></button></div></form>
+  <div class="ui-edit-list__row"><form class="ui-edit-list__form" action="#edit-list"><div class="ui-edit-list__cell ui-edit-list__cell--narrow"><label class="ui-edit-list__label" for="example-order">{{ crate::i18n::text("options-sort-order") }}</label><input class="ui-control" id="example-order" type="number" min="0" max="9999" value="10"></div><div class="ui-edit-list__cell"><label class="ui-edit-list__label" for="example-value">{{ crate::i18n::text("admin-value") }}</label><input class="ui-control" lang="it" id="example-value" value="Rosso"></div><div class="ui-edit-list__cell"><label class="ui-edit-list__label" for="example-value-en">{{ crate::i18n::text("admin-value") }} · English</label><input class="ui-control" lang="en" id="example-value-en" value="Red"></div><button class="ui-button ui-button--secondary ui-button--icon ui-button--compact" type="button" title="{{ crate::i18n::text("admin-save-value") }}">{{ ui::icon("save", "normal") }}<span class="visually-hidden">{{ crate::i18n::text("admin-save-value") }}</span></button></form>{% call ui::confirm(crate::i18n::text("admin-delete-value")) %}<form action="#edit-list"><label class="ui-check-label"><input class="ui-check" type="checkbox" required> {{ crate::i18n::text("admin-i-confirm-removal") }}</label><button class="ui-button ui-button--small ui-button--compact ui-button--danger" type="submit">{{ ui::icon("trash", "normal") }}<span>{{ crate::i18n::text("admin-delete-value") }}</span></button></form>{% endcall %}</div></div>
+  <p class="ui-help">{{ crate::i18n::text("admin-confirm-help") }}</p></section>
+
+  <section id="admin-lists" class="ui-reference-section" aria-labelledby="admin-lists-title">
+    <h2 id="admin-lists-title">{{ crate::i18n::text("admin-lists-title") }}</h2>
+    <p class="ui-help">{{ crate::i18n::text("admin-lists-help") }}</p>
+    <div class="catalog-list" role="list" aria-label="{{ crate::i18n::text("admin-lists-title") }}">
+      <article class="catalog-row" role="listitem"><div class="catalog-row-main"><strong>{{ crate::i18n::text("admin-lists-first") }}</strong></div><a class="ui-button ui-button--secondary ui-button--compact" href="#fields">{{ crate::i18n::text("admin-view") }}</a></article>
+      <article class="catalog-row" role="listitem"><div class="catalog-row-main"><strong>{{ crate::i18n::text("admin-lists-second") }}</strong></div><a class="ui-button ui-button--secondary ui-button--compact" href="#fields">{{ crate::i18n::text("admin-view") }}</a></article>
+    </div>
+  </section>
+
+  <section class="ui-reference-section" aria-labelledby="empty-title">
+    <h2 id="empty-title">{{ crate::i18n::text("admin-empty-states") }}</h2>
+    {% call ui::empty("Il catalogo si prepara.") %}<p>{{ crate::i18n::text("admin-products-will-be-available-here-once-published") }}</p>{% endcall %}
+    {% call ui::empty("Nessun risultato.") %}<p>{{ crate::i18n::text("admin-try-another-name-or-remove-the-filters") }}</p><a class="ui-button ui-button--secondary" href="/admin/components">{{ crate::i18n::text("admin-reset-filters") }}</a>{% endcall %}
+  </section>
+  <section class="ui-reference-section" aria-labelledby="dialog-example-title">
+    <h2 id="dialog-example-title">{{ crate::i18n::text("admin-dialog-example") }}</h2>
+    <dialog open class="ui-dialog ui-dialog--example" aria-label="{{ crate::i18n::text("admin-dialog-example") }}"><p>{{ crate::i18n::text("admin-dialog-example-help") }}</p></dialog>
+  </section>
+</main>
+{% endblock %}

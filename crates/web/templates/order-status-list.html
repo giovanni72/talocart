@@ -1,0 +1,15 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% import "pagination.html" as pagination %}
+{% block title %}{{ crate::i18n::text("order-status-title") }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("order-status-title") }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main catalog-main">
+{% call ui::page_header(crate::i18n::text("order-status-title")) %}{% if can_write %}<a class="ui-button" href="/admin/settings/order-statuses/new">{{ ui::icon("plus") }}<span>{{ crate::i18n::text("order-status-new") }}</span></a>{% endif %}{% endcall %}
+<p><a href="/admin/settings/payments">{{ crate::i18n::text("payment-title") }}</a></p>
+{% if entries.is_empty() %}{{ ui::empty(crate::i18n::text("order-status-title"),crate::i18n::text("order-status-empty")) }}{% else %}
+<div class="catalog-list" role="list" aria-label="{{ crate::i18n::text("order-status-title") }}">{% for entry in entries %}
+<article class="catalog-row" role="listitem"><div class="catalog-row-main"><h2><a href="/admin/settings/order-statuses/{{ entry.id }}">{{ entry.name(crate::i18n::locale()) }}</a></h2><p class="muted">{{ crate::i18n::text("order-status-sort_order") }}: {{ entry.sort_order }} · {{ entry.color }} · {{ crate::i18n::text(entry.role_key()) }}</p></div><div class="catalog-row-meta">{{ ui::status_badge(entry.name(crate::i18n::locale()),entry.color) }}</div><a class="ui-button ui-button--secondary ui-button--compact{% if can_write %} ui-button--icon{% endif %}" href="/admin/settings/order-statuses/{{ entry.id }}" aria-label="{% if can_write %}{{ crate::i18n::text("admin-edit") }}{% else %}{{ crate::i18n::text("admin-view") }}{% endif %} {{ entry.name(crate::i18n::locale()) }}" title="{{ entry.name(crate::i18n::locale()) }}">{% if can_write %}{{ ui::icon("pencil","small") }}{% else %}{{ ui::icon("eye","small") }}<span>{{ crate::i18n::text("admin-view") }}</span>{% endif %}</a></article>
+{% endfor %}</div>{% endif %}
+{{ pagination::render(pagination) }}
+</main>{% endblock %}

@@ -1,0 +1,505 @@
+package = "catalog-demo"
+version = 5
+
+[[categories]]
+key = "clothing"
+name = "Abbigliamento"
+slug = "abbigliamento"
+active = true
+[[categories]]
+key = "accessories"
+name = "Accessori"
+slug = "accessori"
+active = true
+[[categories]]
+key = "stationery"
+name = "Cancelleria"
+slug = "cancelleria"
+parent = "accessories"
+active = true
+[[categories]]
+key = "archive"
+name = "Archivio inattivo"
+slug = "archivio"
+active = false
+
+[[brands]]
+key = "atelier"
+name = "Talocart Atelier"
+slug = "talocart-atelier"
+[[brands]]
+key = "paper"
+name = "Carta e forme"
+slug = "carta-e-forme"
+
+[[rates]]
+key = "standard"
+name = "Aliquota 22%"
+basis_points = 2200
+[[rates]]
+key = "reduced"
+name = "Aliquota 10%"
+basis_points = 1000
+[[rates]]
+key = "zero"
+name = "Aliquota 0%"
+basis_points = 0
+[[classes]]
+key = "standard"
+name = "Classe standard"
+rate = "standard"
+[[classes]]
+key = "reduced"
+name = "Classe ridotta"
+rate = "reduced"
+[[classes]]
+key = "zero"
+name = "Classe zero"
+rate = "zero"
+
+[[options]]
+key = "color"
+name = "Colore"
+values = [{ key = "red", name = "Rosso" }, { key = "blue", name = "Blu" }, { key = "sage", name = "Salvia" }]
+[[options]]
+key = "size"
+name = "Taglia"
+values = [{ key = "s", name = "S" }, { key = "m", name = "M" }, { key = "l", name = "L" }]
+
+[[products]]
+key = "mug"
+name = "Tazza Atelier"
+model = "MUG"
+slug = "tazza-atelier"
+description = "Tazza illustrata per provare immagini, prezzi e disponibilità. Dato sintetico di sviluppo."
+price = "14.90"
+stock = 24
+status = "published"
+category = "accessories"
+brand = "atelier"
+tax_class = "standard"
+image = "mug"
+[[products]]
+key = "tote"
+name = "Borsa in tela"
+model = "TOTE"
+slug = "borsa-tela"
+description = "Borsa illustrata con scorte disponibili. Dato sintetico di sviluppo."
+price = "19.90"
+stock = 12
+status = "published"
+category = "accessories"
+brand = "atelier"
+tax_class = "standard"
+image = "tote"
+[[products]]
+key = "notebook"
+name = "Quaderno esaurito"
+model = "NOTEBOOK"
+slug = "quaderno-esaurito"
+description = "Prodotto pubblicato con quantità zero: resta consultabile come non disponibile."
+price = "8.50"
+stock = 0
+status = "published"
+category = "stationery"
+brand = "paper"
+tax_class = "reduced"
+image = "notebook"
+[[products]]
+key = "shirt"
+name = "T-shirt Atelier"
+model = "SHIRT"
+slug = "tshirt-atelier"
+description = "Scegli colore e taglia. Rosso S e Blu M disponibili, Salvia L esaurita, Rosso L inattiva; le altre combinazioni sono assenti."
+price = "24.90"
+stock = 0
+status = "published"
+category = "clothing"
+brand = "atelier"
+tax_class = "standard"
+image = "shirt-sage"
+options = ["color", "size"]
+[[products]]
+key = "draft"
+name = "Prodotto in bozza"
+model = "DRAFT"
+slug = "prodotto-bozza"
+description = "Bozza presente soltanto nel pannello."
+price = "12.00"
+stock = 5
+status = "draft"
+category = "accessories"
+tax_class = "zero"
+[[products]]
+key = "hidden"
+name = "Categoria disattivata"
+model = "HIDDEN"
+slug = "categoria-disattivata"
+description = "Pubblicato, ma nascosto perché la categoria assegnata è inattiva."
+price = "10.00"
+stock = 8
+status = "published"
+category = "archive"
+tax_class = "standard"
+[[products]]
+key = "empty"
+name = "Varianti da completare"
+model = "EMPTY"
+slug = "varianti-da-completare"
+description = "Opzione assegnata senza varianti attive: non compare nel negozio."
+price = "15.00"
+stock = 0
+status = "published"
+category = "clothing"
+tax_class = "standard"
+options = ["size"]
+[[products]]
+key = "no-photo"
+name = "Articolo senza foto"
+model = "NO-PHOTO"
+slug = "articolo-senza-foto"
+description = "Prova il fallback della scheda senza un’immagine configurata."
+price = "4.00"
+stock = 3
+status = "published"
+category = "stationery"
+tax_class = "zero"
+
+[[products]]
+key = "breakfast-mug"
+name = "Tazza da colazione"
+model = "BREAKFAST-MUG"
+slug = "tazza-colazione"
+description = "Tazza da colazione: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "16.90"
+stock = 18
+status = "published"
+category = "accessories"
+brand = "atelier"
+tax_class = "standard"
+image = "mug"
+
+[[products]]
+key = "large-mug"
+name = "Tazza grande"
+model = "LARGE-MUG"
+slug = "tazza-grande"
+description = "Tazza grande: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "18.90"
+stock = 9
+status = "published"
+category = "accessories"
+brand = "atelier"
+tax_class = "standard"
+image = "mug"
+
+[[products]]
+key = "herbal-mug"
+name = "Tazza per tisane"
+model = "HERBAL-MUG"
+slug = "tazza-tisane"
+description = "Tazza per tisane: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "15.50"
+stock = 0
+status = "published"
+category = "accessories"
+brand = "atelier"
+tax_class = "standard"
+image = "mug"
+
+[[products]]
+key = "office-mug"
+name = "Tazza da ufficio"
+model = "OFFICE-MUG"
+slug = "tazza-ufficio"
+description = "Tazza da ufficio: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "12.90"
+stock = 32
+status = "published"
+category = "accessories"
+brand = "atelier"
+tax_class = "standard"
+image = "mug"
+
+[[products]]
+key = "gift-mug"
+name = "Tazza regalo"
+model = "GIFT-MUG"
+slug = "tazza-regalo"
+description = "Tazza regalo: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "21.00"
+stock = 7
+status = "published"
+category = "accessories"
+brand = "atelier"
+tax_class = "standard"
+image = "mug"
+
+[[products]]
+key = "shopping-tote"
+name = "Borsa per la spesa"
+model = "SHOPPING-TOTE"
+slug = "borsa-spesa"
+description = "Borsa per la spesa: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "17.90"
+stock = 20
+status = "published"
+category = "accessories"
+brand = "atelier"
+tax_class = "standard"
+image = "tote"
+
+[[products]]
+key = "small-tote"
+name = "Borsa formato piccolo"
+model = "SMALL-TOTE"
+slug = "borsa-piccola"
+description = "Borsa formato piccolo: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "12.50"
+stock = 15
+status = "published"
+category = "accessories"
+brand = "atelier"
+tax_class = "standard"
+image = "tote"
+
+[[products]]
+key = "large-tote"
+name = "Borsa capiente"
+model = "LARGE-TOTE"
+slug = "borsa-capiente"
+description = "Borsa capiente: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "24.90"
+stock = 6
+status = "published"
+category = "accessories"
+brand = "atelier"
+tax_class = "standard"
+image = "tote"
+
+[[products]]
+key = "walking-tote"
+name = "Borsa da passeggio"
+model = "WALKING-TOTE"
+slug = "borsa-passeggio"
+description = "Borsa da passeggio: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "18.00"
+stock = 11
+status = "published"
+category = "accessories"
+brand = "atelier"
+tax_class = "standard"
+image = "tote"
+
+[[products]]
+key = "gift-tote"
+name = "Borsa regalo"
+model = "GIFT-TOTE"
+slug = "borsa-regalo"
+description = "Borsa regalo: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "22.90"
+stock = 0
+status = "published"
+category = "accessories"
+brand = "atelier"
+tax_class = "standard"
+image = "tote"
+
+[[products]]
+key = "lined-notebook"
+name = "Quaderno a righe"
+model = "LINED-NOTEBOOK"
+slug = "quaderno-righe"
+description = "Quaderno a righe: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "6.90"
+stock = 40
+status = "published"
+category = "stationery"
+brand = "paper"
+tax_class = "reduced"
+image = "notebook"
+
+[[products]]
+key = "squared-notebook"
+name = "Quaderno a quadretti"
+model = "SQUARED-NOTEBOOK"
+slug = "quaderno-quadretti"
+description = "Quaderno a quadretti: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "6.90"
+stock = 35
+status = "published"
+category = "stationery"
+brand = "paper"
+tax_class = "reduced"
+image = "notebook"
+
+[[products]]
+key = "dotted-notebook"
+name = "Quaderno puntinato"
+model = "DOTTED-NOTEBOOK"
+slug = "quaderno-puntinato"
+description = "Quaderno puntinato: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "9.50"
+stock = 16
+status = "published"
+category = "stationery"
+brand = "paper"
+tax_class = "reduced"
+image = "notebook"
+
+[[products]]
+key = "pocket-notebook"
+name = "Quaderno tascabile"
+model = "POCKET-NOTEBOOK"
+slug = "quaderno-tascabile"
+description = "Quaderno tascabile: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "4.90"
+stock = 28
+status = "published"
+category = "stationery"
+brand = "paper"
+tax_class = "reduced"
+image = "notebook"
+
+[[products]]
+key = "notes-notebook"
+name = "Quaderno per appunti"
+model = "NOTES-NOTEBOOK"
+slug = "quaderno-appunti"
+description = "Quaderno per appunti: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "7.90"
+stock = 22
+status = "published"
+category = "stationery"
+brand = "paper"
+tax_class = "reduced"
+image = "notebook"
+
+[[products]]
+key = "drawing-notebook"
+name = "Quaderno da disegno"
+model = "DRAWING-NOTEBOOK"
+slug = "quaderno-disegno"
+description = "Quaderno da disegno: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "11.90"
+stock = 10
+status = "published"
+category = "stationery"
+brand = "paper"
+tax_class = "reduced"
+image = "notebook"
+
+[[products]]
+key = "hardcover-notebook"
+name = "Quaderno copertina rigida"
+model = "HARDCOVER-NOTEBOOK"
+slug = "quaderno-rigido"
+description = "Quaderno copertina rigida: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "14.50"
+stock = 8
+status = "published"
+category = "stationery"
+brand = "paper"
+tax_class = "reduced"
+image = "notebook"
+
+[[products]]
+key = "red-shirt"
+name = "T-shirt rossa"
+model = "RED-SHIRT"
+slug = "tshirt-rossa"
+description = "T-shirt rossa: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "24.90"
+stock = 14
+status = "published"
+category = "clothing"
+brand = "atelier"
+tax_class = "standard"
+image = "shirt-red"
+
+[[products]]
+key = "blue-shirt"
+name = "T-shirt blu"
+model = "BLUE-SHIRT"
+slug = "tshirt-blu"
+description = "T-shirt blu: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "26.90"
+stock = 12
+status = "published"
+category = "clothing"
+brand = "atelier"
+tax_class = "standard"
+image = "shirt-blue"
+
+[[products]]
+key = "sage-shirt"
+name = "T-shirt salvia"
+model = "SAGE-SHIRT"
+slug = "tshirt-salvia"
+description = "T-shirt salvia: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "28.90"
+stock = 5
+status = "published"
+category = "clothing"
+brand = "atelier"
+tax_class = "standard"
+image = "shirt-sage"
+
+[[products]]
+key = "crewneck-shirt"
+name = "T-shirt girocollo"
+model = "CREWNECK-SHIRT"
+slug = "tshirt-girocollo"
+description = "T-shirt girocollo: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "22.90"
+stock = 19
+status = "published"
+category = "clothing"
+brand = "atelier"
+tax_class = "standard"
+image = "shirt-sage"
+
+[[products]]
+key = "essential-shirt"
+name = "T-shirt essenziale"
+model = "ESSENTIAL-SHIRT"
+slug = "tshirt-essenziale"
+description = "T-shirt essenziale: articolo sintetico per provare ricerca, categorie, prezzi e paginazione. Illustrazione della famiglia di prodotto."
+price = "19.90"
+stock = 25
+status = "published"
+category = "clothing"
+brand = "atelier"
+tax_class = "standard"
+image = "shirt-blue"
+
+[[variants]]
+product = "shirt"
+values = ["color.red", "size.s"]
+sku = "SHIRT-RED-S"
+price = "24.90"
+stock = 10
+active = true
+image = "shirt-red"
+[[variants]]
+product = "shirt"
+values = ["color.blue", "size.m"]
+sku = "SHIRT-BLUE-M"
+price = "26.90"
+stock = 4
+active = true
+image = "shirt-blue"
+[[variants]]
+product = "shirt"
+values = ["color.sage", "size.l"]
+sku = "SHIRT-SAGE-L"
+price = "28.90"
+stock = 0
+active = true
+[[variants]]
+product = "shirt"
+values = ["color.red", "size.l"]
+sku = "SHIRT-RED-L"
+price = "29.90"
+stock = 7
+active = false

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="{{ crate::i18n::locale() }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="htmx-config" content='{"allowEval":false,"allowScriptTags":false,"includeIndicatorStyles":false,"attributesToSettle":["class","width","height"],"selfRequestsOnly":true}'>
+  <title>{% block title %}{{ store_name }}{% endblock %}</title>
+  <link rel="icon" href="/branding/favicon">
+  <link rel="stylesheet" href="/assets/base.css">
+  {% block theme_styles %}{% endblock %}
+  {% block metadata %}{% endblock %}
+  {% block styles %}{% endblock %}
+  <link rel="stylesheet" href="/assets/ui.css">
+  <script src="/assets/ui-toasts.js" defer></script>
+  <script src="/assets/ui-tabs.js" defer></script>
+  <script src="/assets/htmx-2.0.11.min.js" defer></script>
+</head>
+<body{% block theme_attributes %}{% endblock %}{% block body_attributes %}{% endblock %}>
+  <a class="skip-link" href="#main">{{ crate::i18n::text("admin-skip-to-content") }}</a>
+  {% block body %}{% endblock %}
+</body>
+</html>

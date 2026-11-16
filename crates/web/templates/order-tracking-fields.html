@@ -1,0 +1,3 @@
+{% for field in fulfillment_form.tracking_fields %}
+<div class="field-stack"><label for="fulfillment-{{ field.name }}">{{ field.label }}</label><input class="ui-control" id="fulfillment-{{ field.name }}" name="{{ field.name }}" value="{{ field.value }}" maxlength="{{ field.max }}"{% if field.required %} required{% endif %}{% if field.invalid %} aria-invalid="true" aria-describedby="fulfillment-{{ field.name }}-error"{% endif %}>{% if field.invalid %}<p class="ui-field-error" id="fulfillment-{{ field.name }}-error">{{ field.error }}</p>{% endif %}</div>
+{% endfor %}

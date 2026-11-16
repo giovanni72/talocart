@@ -1,0 +1,12 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% import "pagination.html" as pagination %}
+{% block title %}{{ crate::i18n::text("admin-roles-and-permissions-2") }} {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("admin-roles-and-permissions") }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main">{% call ui::page_header(crate::i18n::text("admin-roles-and-permissions")) %}{% if can_write %}<a class="ui-button" href="/admin/roles/new">{{ ui::icon("plus", "normal") }}<span>{{ crate::i18n::text("admin-new-role") }}</span></a>{% endif %}{% endcall %}
+{% if saved %}{{ ui::feedback("roles-message-1", "success", crate::i18n::text("admin-role-saved")) }}{% endif %}{% if deleted %}{{ ui::feedback("roles-message-2", "success", crate::i18n::text("admin-role-deleted")) }}{% endif %}
+<section class="users-list" aria-label="{{ crate::i18n::text("admin-role-list") }}">{% for role in roles %}<article class="role-row user-row"><div><h2>{{ role.name }}</h2><p>{% if role.protected() %}{{ crate::i18n::text("admin-protected-full-access") }}{% else %}{{ crate::i18n::text("admin-configurable-permissions") }}{% endif %}</p></div><a class="ui-button ui-button--small ui-button--secondary" href="/admin/roles/{{ role.key }}" aria-label="{{ crate::i18n::text("admin-open-role") }} {{ role.name }}">{{ ui::icon("shield-check", "normal") }}<span>{{ crate::i18n::text("admin-open-role") }}</span></a></article>{% endfor %}{% if roles.is_empty() %}<p class="ui-empty">{{ crate::i18n::text("admin-no-roles-on-this-page") }}</p>{% endif %}</section>
+{{ pagination::render(pagination) }}
+<section class="settings-section"><h2>{{ crate::i18n::text("admin-full-access-always") }}</h2><p class="muted">{{ crate::i18n::text("admin-the-owner-role-is-managed-by-the-system-it-has-all-permissions-and-canno") }}</p></section>
+</main>{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% block title %}{{ crate::i18n::text("admin-logo-and-favicon-2") }} {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("admin-settings-logo-and-favicon") }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main">
+  {{ ui::page_header(crate::i18n::text("admin-logo-and-favicon")) }}
+  {% call ui::tabs(crate::i18n::text("admin-settings-sections")) %}{{ ui::tab("/admin/settings", crate::i18n::text("admin-general"), false, "settings") }}{{ ui::tab("/admin/settings/appearance", crate::i18n::text("admin-logo-and-favicon"), true, "image") }}{{ ui::tab("/admin/settings/storefront", crate::i18n::text("admin-theme-and-seo"), false, "panels-top-left") }}{% if nav.taxes %}{{ ui::tab("/admin/settings/taxes", crate::i18n::text("admin-prices-and-taxes-2"), false, "percent") }}{% endif %}{{ ui::tab("/admin/settings/countries", crate::i18n::text("admin-purchase-countries"), false, "map") }}{% endcall %}
+  {% if saved %}{{ ui::feedback("branding-message-1", "success", crate::i18n::text("admin-image-updated")) }}{% endif %}
+  {% if !error.is_empty() %}{{ ui::feedback("branding-message-2", "error", error) }}{% endif %}
+  {% if !owner %}<p class="settings-note">{{ crate::i18n::text("admin-your-access-is-read-only-editing-images-requires-write-permission") }}</p>{% endif %}
+  <div class="branding-images">
+  {% for image in images %}
+  <section class="settings-group branding-group" aria-labelledby="title-{{ image.key }}">
+    <div class="settings-group-intro"><span class="settings-number" aria-hidden="true">0{{ loop.index }}</span><h2 id="title-{{ image.key }}">{{ crate::i18n::text(image.title) }}</h2><p>{{ crate::i18n::text(image.description) }}</p></div>
+    <div class="branding-editor">
+      <div class="branding-preview branding-preview-{{ image.key }}"><img src="/branding/{{ image.key }}?variant=card&amp;v={{ image.version }}" alt="{{ crate::i18n::text("admin-preview") }} {{ crate::i18n::text(image.title) }}"></div>
+      <p class="branding-status">{% if image.present %}{{ crate::i18n::text("admin-custom-image") }}{% else %}{{ crate::i18n::text("admin-default-image") }}{% endif %}</p>
+      {% if owner %}
+      {% if nav.media %}<a class="ui-button media-picker-link" href="/admin/media?target={{ image.key }}"{% if !image.error.is_empty() %} aria-invalid="true" aria-describedby="error-{{ image.key }}"{% endif %}>{{ ui::icon("check", "normal") }}<span>{{ crate::i18n::text("admin-select") }} {% if image.key == "logo" %}{{ crate::i18n::text("admin-logo") }}{% else %}{{ crate::i18n::text("admin-favicon") }}{% endif %}</span></a>{% else %}{{ ui::message(format!("branding-message-3-{}", image.key), "info", crate::i18n::text("admin-selecting-images-requires-media-read-permission")) }}{% endif %}<small class="ui-help">{{ crate::i18n::text("admin-select-an-existing-image-or-upload-it-to-the-media-library") }}</small>{% if !image.error.is_empty() %}<small class="field-error ui-field-error" id="error-{{ image.key }}">{{ image.error }}</small>{% endif %}
+      {% if image.present %}<form method="post" action="/admin/settings/branding/{{ image.key }}/delete" class="branding-remove"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="ui-button ui-button--small ui-button--danger" type="submit">{{ ui::icon("x", "normal") }}<span>{{ crate::i18n::text("admin-remove") }} {{ image.key }}</span></button><small class="muted ui-help">{{ crate::i18n::text("admin-restore-the-default-image") }}</small></form>{% endif %}
+      {% endif %}
+    </div>
+  </section>
+  {% endfor %}
+  </div>
+</main>
+{% endblock %}

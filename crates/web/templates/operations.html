@@ -1,0 +1,19 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% import "pagination.html" as pager %}
+{% block title %}{{ crate::i18n::text("ops-title") }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("ops-title") }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main">
+  {{ ui::page_header(crate::i18n::text("ops-title")) }}
+  <form method="get" action="/admin/operations" class="operations-filter">
+    <div><label for="operations-area">{{ crate::i18n::text("ops-area") }}</label><select id="operations-area" name="area" class="ui-control"><option value="">{{ crate::i18n::text("ops-all") }}</option>{% for a in areas %}<option value="{{ a.key }}"{% if area == a.key %} selected{% endif %}>{{ a.label }}</option>{% endfor %}</select></div>
+    <button type="submit" class="ui-button">{{ crate::i18n::text("ops-filter") }}</button>
+  </form>
+  {% if rows.is_empty() %}<div class="ui-empty">{{ crate::i18n::text("ops-empty") }}</div>{% else %}
+  <ol class="operations-list" aria-label="{{ crate::i18n::text("ops-title") }}">
+    {% for row in rows %}<li class="operation-row"><div><span class="eyebrow">#{{ row.id }} · {{ row.date }}</span><h2>{{ row.action }} · {{ row.resource }} #{{ row.key }}</h2><p class="muted">{{ row.actor }}</p></div></li>{% endfor %}
+  </ol>{% endif %}
+  {{ pager::render(pagination) }}
+</main>
+{% endblock %}

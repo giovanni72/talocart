@@ -1,0 +1,1 @@
+{% match logo %}{% when Some with (image) %}<img class="brand-logo" src="/branding/logo?variant=card" width="{{ image.width }}" height="{{ image.height }}" alt="" aria-hidden="true">{% when None %}{{ store_name }}{% endmatch %}

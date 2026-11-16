@@ -1,0 +1,37 @@
+{% import "ui.html" as ui %}
+{% if let Some(sales) = sales %}
+<section id="dashboard-sales" class="dashboard-sales" aria-labelledby="sales-title" hx-history="false" hx-sync="this:replace">
+  <header class="sales-heading"><div><p class="eyebrow">{{ crate::i18n::text("sales-eyebrow") }}</p><h2 id="sales-title">{{ crate::i18n::text("sales-title") }}</h2></div><p class="sales-updated">{{ crate::i18n::text("sales-updated") }}</p></header>
+  <form action="/admin#sales-title" method="get" class="sales-filters" hx-get="/admin#sales-title" hx-target="#dashboard-sales" hx-swap="outerHTML" hx-push-url="true">
+    <input type="hidden" name="filtered" value="1">
+    <div class="ui-field"><label for="sales-metric">{{ crate::i18n::text("sales-metric") }}</label><select id="sales-metric" name="metric" class="ui-control"><option value="amount"{% if sales.metric == "amount" %} selected{% endif %}>{{ crate::i18n::text("sales-amount") }}</option><option value="orders"{% if sales.metric == "orders" %} selected{% endif %}>{{ crate::i18n::text("sales-count") }}</option></select></div>
+    <div class="ui-field"><label for="sales-period">{{ crate::i18n::text("sales-period") }}</label><select id="sales-period" name="period" class="ui-control"><option value="7d"{% if sales.period == "7d" %} selected{% endif %}>{{ crate::i18n::text("sales-7d") }}</option><option value="30d"{% if sales.period == "30d" %} selected{% endif %}>{{ crate::i18n::text("sales-30d") }}</option><option value="90d"{% if sales.period == "90d" %} selected{% endif %}>{{ crate::i18n::text("sales-90d") }}</option><option value="12m"{% if sales.period == "12m" %} selected{% endif %}>{{ crate::i18n::text("sales-12m") }}</option></select></div>
+    <fieldset class="sales-status-filter"><legend>{{ crate::i18n::text("sales-statuses") }}</legend><details><summary class="ui-control"><span>{{ crate::i18n::text("sales-select-statuses") }}</span><span class="sales-status-count">{{ sales.selected_count }}/{{ sales.statuses.len() }}</span></summary><div class="sales-status-list">{% for status in sales.statuses %}<label class="ui-check-label"><input class="ui-check" type="checkbox" name="status" value="{{ status.id }}"{% if status.selected %} checked{% endif %}><span>{{ status.name }}</span></label>{% endfor %}</div></details></fieldset>
+    <div class="sales-actions"><button id="sales-apply" class="ui-button" type="submit">{{ ui::icon("list-filter", "small") }}<span>{{ crate::i18n::text("sales-apply") }}</span></button><a id="sales-reset" class="ui-button ui-button--secondary" href="/admin#sales-title" hx-get="/admin#sales-title" hx-params="none" hx-target="#dashboard-sales" hx-swap="outerHTML" hx-push-url="true">{{ ui::icon("rotate-ccw", "small") }}<span>{{ crate::i18n::text("sales-reset") }}</span></a></div>
+  </form>
+  {% if sales.empty %}<p class="ui-empty" role="status">{{ crate::i18n::text("sales-empty") }}</p>{% endif %}
+  {% for chart in sales.charts %}
+  <figure class="sales-chart" aria-describedby="sales-help">
+    <figcaption class="sales-summary">
+      <span class="sales-summary__label">{% if sales.metric == "amount" %}{{ crate::i18n::text("sales-amount") }}{% else %}{{ crate::i18n::text("sales-count") }}{% endif %} · {% if sales.period == "7d" %}{{ crate::i18n::text("sales-7d") }}{% else if sales.period == "90d" %}{{ crate::i18n::text("sales-90d") }}{% else if sales.period == "12m" %}{{ crate::i18n::text("sales-12m") }}{% else %}{{ crate::i18n::text("sales-30d") }}{% endif %}</span>
+      <strong class="sales-total" data-sales-total="{{ chart.total }}" data-currency="{{ chart.currency }}">{{ chart.total }}{% if !chart.currency.is_empty() %} <small>{{ chart.currency }}</small>{% endif %}</strong>
+    </figcaption>
+    <div class="sales-plot-frame">
+      <div class="sales-axis" data-max="{{ chart.maximum }}" aria-hidden="true"><span>{{ chart.maximum }}</span><span>{{ chart.middle }}</span><span>0</span></div>
+      <svg class="sales-plot{% if chart.points.len() > 31 %} sales-plot--dense{% endif %}" viewBox="0 0 1000 260" preserveAspectRatio="none" role="img" aria-label="{{ crate::i18n::text("sales-title") }}{% if !chart.currency.is_empty() %} · {{ chart.currency }}{% endif %}">
+        <title>{{ crate::i18n::text("sales-title") }}{% if !chart.currency.is_empty() %} · {{ chart.currency }}{% endif %}</title>
+        <defs><linearGradient id="sales-fill-{{ loop.index }}" x1="0" y1="0" x2="0" y2="1"><stop class="sales-fill-start" offset="0"/><stop class="sales-fill-end" offset="1"/></linearGradient></defs>
+        <path class="sales-grid" d="M20,20 H980 M20,130 H980"/>
+        <path class="sales-baseline" d="M20,240 H980"/>
+        <path class="sales-area" d="{{ chart.area }}" fill="url(#sales-fill-{{ loop.index }})"/>
+        <path class="sales-line" d="{{ chart.path }}"/>
+        {% for point in chart.points %}<path class="sales-dot" d="M{{ point.x }},{{ point.y }} h0"><title>{{ point.date }}: {{ point.value }}{% if !chart.currency.is_empty() %} {{ chart.currency }}{% endif %}</title></path>{% endfor %}
+      </svg>
+      <div class="sales-dates" aria-hidden="true">{% if let Some(first) = chart.points.first() %}<span>{{ first.date }}</span>{% endif %}{% if chart.points.len() > 2 %}{% if let Some(middle) = chart.points.get((chart.points.len() - 1) / 2) %}<span>{{ middle.date }}</span>{% endif %}{% endif %}{% if chart.points.len() > 1 %}{% if let Some(last) = chart.points.last() %}<span>{{ last.date }}</span>{% endif %}{% endif %}</div>
+    </div>
+    <details class="sales-data"><summary>{{ crate::i18n::text("sales-data") }}</summary><div class="ui-table-region" role="region" tabindex="0" aria-label="{{ crate::i18n::text("sales-data") }}"><table class="ui-table"><caption class="visually-hidden">{{ crate::i18n::text("sales-title") }}{% if !chart.currency.is_empty() %} · {{ chart.currency }}{% endif %}</caption><thead><tr><th scope="col">{{ crate::i18n::text("sales-date") }}</th><th scope="col" class="ui-table__num">{% if sales.metric == "amount" %}{{ crate::i18n::text("sales-amount") }} {{ chart.currency }}{% else %}{{ crate::i18n::text("sales-count") }}{% endif %}</th></tr></thead><tbody>{% for point in chart.points %}<tr><th scope="row">{{ point.date }}</th><td class="ui-table__num">{{ point.value }}</td></tr>{% endfor %}</tbody></table></div></details>
+  </figure>
+  {% endfor %}
+  <p class="sales-help" id="sales-help">{{ crate::i18n::text("sales-help") }}</p>
+</section>
+{% endif %}

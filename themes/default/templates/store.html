@@ -1,0 +1,15 @@
+{% extends "storefront/layout.html" %}
+{% import "storefront/product-card.html" as product_card %}
+{% block body_attributes %}  class="store-page" data-palette="{{ theme.palette }}" data-typography="{{ theme.typography }}" data-density="{{ theme.density }}"{% endblock %}
+{% block title %}{{ meta_title }}{% endblock %}
+{% block metadata %}<meta name="description" content="{{ meta_description }}"><link rel="canonical" href="{{ canonical }}">{% include "store-alternates.html" %}{% endblock %}
+{% block styles %}<script src="/assets/banners.js" defer></script>{% endblock %}
+{% block store_content %}<main id="main">
+    <h1 class="visually-hidden">{{ theme.heading }}</h1>
+    {% include "storefront/banners.html" %}
+    {% if theme.show_featured %}<section class="home-featured" aria-labelledby="featured-title"><p class="eyebrow">{{ crate::i18n::text("store-from-catalog") }}</p><h2 id="featured-title">{{ crate::i18n::text("store-discover") }}</h2>{% if featured.is_empty() %}<p class="ui-empty">{{ crate::i18n::text("store-products-coming") }}</p>{% else %}<div class="store-products" role="list" aria-label="{{ crate::i18n::text("store-home-products") }}">{% for product in featured %}{{ product_card::render(product, true, theme.density == "compact") }}{% endfor %}</div>{% endif %}<a class="ui-button" href="{{ crate::store_language::path("/catalog") }}">{{ crate::i18n::text("store-all-products") }}</a></section>{% endif %}
+    {% if show_status %}<section class="foundation-section" aria-labelledby="foundation-title">
+      <div class="section-intro"><p class="eyebrow">{{ crate::i18n::text("store-starting-point") }}</p><h2 id="foundation-title">{{ crate::i18n::text("store-simple") }}</h2><p>{{ crate::i18n::text("store-takes-shape") }}<br>{{ crate::i18n::text("store-explore-published") }}</p></div>
+      <div class="status-card"><p class="eyebrow">{{ crate::i18n::text("store-application-status") }}</p><div id="status-result" aria-live="polite" aria-atomic="true">{% include "status.html" %}</div>{% include "status-control.html" %}</div>
+    </section>{% endif %}
+  </main>{% endblock %}

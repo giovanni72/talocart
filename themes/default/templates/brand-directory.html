@@ -1,0 +1,12 @@
+{% extends "storefront/layout.html" %}
+{% import "pagination.html" as pagination %}
+{% block body_attributes %}  class="store-page" data-palette="{{ theme.palette }}" data-typography="{{ theme.typography }}" data-density="{{ theme.density }}"{% endblock %}
+{% block title %}{{ crate::i18n::text("store-brands") }} · {{ store_name }}{% endblock %}
+{% block metadata %}<meta name="description" content="{{ crate::i18n::text("store-brands-description") }}"><link rel="canonical" href="{{ canonical }}">{% include "store-alternates.html" %}{% endblock %}
+{% block store_content %}<main id="main" class="store-catalog brand-directory">
+  <p class="eyebrow">{{ crate::i18n::text("store-the-store") }}</p><h1>{{ crate::i18n::text("store-brands") }}</h1><p class="muted">{{ crate::i18n::text("store-brands-introduction") }}</p>
+  {% if rows.is_empty() %}<section class="store-empty ui-empty"><h2>{{ crate::i18n::text("store-brands-empty") }}</h2><p class="muted">{{ crate::i18n::text("store-brands-coming") }}</p></section>{% else %}<ul class="brand-directory-list" aria-label="{{ crate::i18n::text("store-brands") }}">{% for brand in rows %}
+    <li><a class="brand-card" href="{{ brand.href }}"><span class="brand-card-media">{% if !brand.logo_url.is_empty() %}<img class="brand-link-logo" src="{{ brand.logo_url }}" width="160" height="80" alt="" loading="lazy" decoding="async">{% else %}<span class="brand-initial" aria-hidden="true">{{ brand.initial }}</span>{% endif %}</span><span class="brand-link-name">{{ brand.name }}</span></a></li>{% endfor %}
+  </ul>{% endif %}
+  {{ pagination::render(pagination) }}
+</main>{% endblock %}

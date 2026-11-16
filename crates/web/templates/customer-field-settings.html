@@ -1,0 +1,48 @@
+{% extends "admin-base.html" %}
+{% import "ui.html" as ui %}
+{% block title %}{{ crate::i18n::text("cf-title") }} · {{ store_name }}{% endblock %}
+{% block breadcrumb %}{{ crate::i18n::text("cf-title") }}{% endblock %}
+{% block content %}
+<main id="main" class="admin-main catalog-main field-policy-editor">
+{{ ui::page_header(crate::i18n::text("cf-title"), "/admin/settings", crate::i18n::text("cf-back")) }}
+{% if saved %}{{ ui::feedback("cf-saved","success",crate::i18n::text("admin-settings-saved")) }}{% endif %}
+{% if !error.is_empty() %}<div id="cf-error" tabindex="-1">{{ ui::feedback("cf-error-message","error",error) }}</div>{% endif %}
+<section class="editor-card" id="customer-registration" aria-labelledby="customer-registration-title">
+<h2 id="customer-registration-title">{{ crate::i18n::text("registration-title") }}</h2>
+<form id="customer-registration-settings" method="post" action="/admin/settings/customer-registration" class="field-stack">
+<input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="revision" value="{{ registration.revision }}">
+<label for="registration-guest-checkout">{{ crate::i18n::text("registration-guest-checkout") }}</label>
+<select class="ui-control" id="registration-guest-checkout" name="allow_guest_checkout" aria-describedby="registration-guest-help"{% if !can_write %} disabled{% endif %}>
+<option value="true"{% if registration.allow_guest_checkout %} selected{% endif %}>{{ crate::i18n::text("registration-guests-allowed") }}</option>
+<option value="false"{% if !registration.allow_guest_checkout %} selected{% endif %}>{{ crate::i18n::text("registration-account-required") }}</option>
+</select><p id="registration-guest-help" class="ui-help">{{ crate::i18n::text("registration-guest-help") }}</p>
+<label for="registration-activation">{{ crate::i18n::text("registration-activation") }}</label>
+<select class="ui-control" id="registration-activation" name="activation" aria-describedby="registration-help"{% if !can_write %} disabled{% endif %}>
+<option value="immediate"{% if !registration.require_email_confirmation %} selected{% endif %}>{{ crate::i18n::text("registration-immediate") }}</option>
+<option value="email"{% if registration.require_email_confirmation %} selected{% endif %}>{{ crate::i18n::text("registration-email") }}</option>
+</select><p id="registration-help" class="ui-help">{{ crate::i18n::text("registration-help") }}</p>
+{% if can_write %}<button class="ui-button" type="submit">{{ crate::i18n::text("admin-save-settings") }}</button>{% endif %}
+<a href="/admin/settings/email">{{ crate::i18n::text("registration-email-settings") }}</a>
+</form></section>
+{{ ui::message("cf-help","info",crate::i18n::text("cf-help")) }}
+<p class="ui-help">{{ crate::i18n::text("cf-hidden-help") }}</p>
+{% call ui::tabs(crate::i18n::text("cf-sections")) %}{% for part in sections %}{% let glyph %}{% if part.key == "customer" %}user-round{% else if part.key == "billing" %}credit-card{% else %}truck{% endif %}{% endlet %}{{ ui::tab(format!("#cf-{}", part.key), part.title, false, glyph) }}{% endfor %}{% endcall %}
+<form id="customer-field-settings" action="/admin/settings/customer-fields" method="post">
+<input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="revision" value="{{ revision }}">
+{% if can_write %}<div class="checkout-actions"><button class="ui-button" type="submit" name="action" value="save"{% if stale %} disabled{% endif %}>{{ crate::i18n::text("admin-save-settings") }}</button></div>{% endif %}
+<p class="ui-help">{{ crate::i18n::text("cf-reset-help") }}</p>
+{% for part in sections %}<section class="editor-card" id="cf-{{ part.key }}" aria-labelledby="cf-title-{{ part.key }}">
+<h2 id="cf-title-{{ part.key }}">{{ part.title }}</h2>
+{% if part.key == "customer" %}<p class="ui-help">{{ crate::i18n::text("cf-customer-help") }}</p>{% else if part.key == "billing" %}<p class="ui-help">{{ crate::i18n::text("cf-billing-help") }}</p>{% else %}<p class="ui-help">{{ crate::i18n::text("cf-shipping-help") }}</p>{% endif %}
+<div class="ui-field-matrix" role="group" aria-label="{{ part.title }}">
+<div class="ui-field-matrix-heading" aria-hidden="true"><span>{{ crate::i18n::text("cf-field") }}</span><span>{{ crate::i18n::text("co-private") }}</span><span>{{ crate::i18n::text("co-business") }}</span></div>
+{% for row in part.rows %}{% if !row.heading.is_empty() %}<h3 class="ui-field-matrix-section">{{ row.heading }}</h3>{% endif %}<div class="ui-field-matrix-row"><div><strong>{{ row.label }}</strong>{% if !row.hint.is_empty() %}<small class="ui-help">{{ row.hint }}</small>{% endif %}{% if row.locked %}<small class="ui-help">{{ crate::i18n::text("cf-protected") }}</small>{% endif %}</div>
+{% for column in row.columns %}<div class="field-stack">{% if row.locked %}<span class="ui-field-matrix-label">{{ column.label }}</span>{% else %}<label class="ui-field-matrix-label" for="cf-{{ column.kind }}-{{ row.name }}">{{ column.label }}</label>{% endif %}
+{% if row.locked %}<input type="hidden" name="{{ column.kind }}.{{ row.name }}" value="required"><span>{{ crate::i18n::text("cf-fixed-required") }}</span>{% else %}
+<select class="ui-control ui-control--compact" id="cf-{{ column.kind }}-{{ row.name }}"{% if !row.locked %} name="{{ column.kind }}.{{ row.name }}"{% endif %} aria-label="{{ row.label }} · {{ column.label }}"{% if row.locked || !can_write %} disabled{% endif %}>
+{% for option in column.options %}<option value="{{ option.key }}"{% if option.selected %} selected{% endif %}>{{ option.label }}</option>{% endfor %}
+</select>{% if column.modified %}<small class="ui-help">{{ crate::i18n::text("cf-modified") }}</small>{% endif %}{% endif %}</div>{% endfor %}</div>{% endfor %}</div>{% if can_write %}<button class="ui-button ui-button--secondary" type="submit" name="reset" value="{{ part.key }}"{% if stale %} disabled{% endif %}>{{ crate::i18n::text("cf-reset") }} · {{ part.title }}</button>{% endif %}</section>{% endfor %}
+{% if stale %}<a class="ui-button ui-button--secondary" href="/admin/settings/customer-fields">{{ crate::i18n::text("payment-reload") }}</a>{% endif %}
+{% if can_write %}<div class="checkout-actions"><button class="ui-button" type="submit" name="action" value="save-bottom"{% if stale %} disabled{% endif %}>{{ ui::icon("save") }}{{ crate::i18n::text("admin-save-settings") }}</button></div>{% endif %}
+</form></main>
+{% endblock %}

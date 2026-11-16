@@ -1,0 +1,60 @@
+<div class="order-detail">
+  <dl class="order-facts">
+    <div><dt>{{ crate::i18n::text("ord-number") }}</dt><dd class="order-facts-reference">{{ order.reference }}</dd></div>
+    <div><dt>{{ crate::i18n::text("ord-date") }}</dt><dd>{{ order.created_at }}</dd></div>
+    {% if show_initial_status %}<div data-order-status-role="{{ order.current_status.role }}"><dt>{{ crate::i18n::text("ord-state") }}</dt><dd>{{ ui::status_badge(order.status(crate::i18n::locale()),order.current_status.color) }}</dd></div>{% endif %}
+    <div><dt>{{ crate::i18n::text("ord-payment-label") }}</dt><dd id="order-payment-state">{% if order.is_refunded() %}<strong>{{ crate::i18n::text("online-payment-state-refunded") }}</strong>{% else if order.is_paid() %}<strong>{{ crate::i18n::text("ord-paid") }}</strong>{% if let Some(payment) = order.manual_payment %} · {{ payment.recorded_at }}{% endif %}{% else if payment_pending %}{{ crate::i18n::text("online-payment-checking") }}{% else %}{{ crate::i18n::text("ord-unpaid-short") }}{% endif %}</dd></div>
+    <div class="order-facts-total"><dt>{{ crate::i18n::text("cm-total") }}</dt><dd>{{ crate::i18n::decimal(order.money(order.total_cents)) }} {{ order.currency }}</dd></div>
+  </dl>
+  {% if order.fulfillment.sent() %}<section class="store-panel order-shipment" id="order-fulfillment" aria-labelledby="fulfillment-title">
+    <span class="store-panel-mark">{{ ui::icon("truck") }}</span>
+    <div class="order-shipment-copy"><h2 id="fulfillment-title">{{ crate::i18n::text("status-shipping-details") }}</h2><p class="checkout-instructions">{{ crate::i18n::text("fulfillment-carrier") }}: {{ order.fulfillment.carrier }}{% if !order.fulfillment.tracking_number.is_empty() %}<br>{{ crate::i18n::text("fulfillment-tracking-label") }}: {{ order.fulfillment.tracking_number }}{% endif %}</p></div>
+    {% if !order.fulfillment.tracking_url.is_empty() %}<a class="ui-button ui-button--secondary ui-button--compact" data-order-tracking href="{{ order.fulfillment.tracking_url }}" rel="noopener noreferrer">{{ crate::i18n::text("fulfillment-track") }}</a>{% endif %}
+  </section>{% endif %}
+  <div class="order-detail-layout">
+    <div class="order-detail-main">
+      <section class="store-panel" aria-labelledby="order-items-title">
+        <h2 id="order-items-title">{{ crate::i18n::text("ord-items") }}</h2>
+        <ul class="order-items">
+          {% for line in order.lines %}<li class="order-item">
+            <div class="order-item-copy">
+              <h3>{{ line.name }}</h3>
+              {% if !line.label.is_empty() %}<p>{{ line.label }}</p>{% endif %}
+              {% if !line.code.is_empty() %}<p class="order-item-code">{{ line.code }}</p>{% endif %}
+            </div>
+            <p class="order-item-quantity">{{ crate::i18n::text("ord-quantity") }} {{ line.quantity }} · {{ crate::i18n::decimal(order.money(line.unit_cents)) }} {{ order.currency }} {{ crate::i18n::text("ord-each") }}<small>{% if line.price_mode == "exclusive" %}{{ crate::i18n::text("store-cart-unit-net") }}{% else %}{{ crate::i18n::text("store-vat-included") }}{% endif %}</small></p>
+            <p class="order-item-total">{% if let Some(coupon) = order.frozen.coupon %}{% if let Some(discount) = coupon.line(loop.index0) %}<del>{{ crate::i18n::decimal(order.money(discount.original_cents)) }} {{ order.currency }}</del>{% endif %}{% endif %}<strong>{{ crate::i18n::decimal(order.money(line.gross_cents)) }} {{ order.currency }}</strong>{% if let Some(coupon) = order.frozen.coupon %}{% if let Some(discount) = coupon.line(loop.index0) %}<small>{{ crate::i18n::text("coupon-discount") }} −{{ crate::i18n::decimal(order.money(discount.discount_cents)) }} {{ order.currency }}</small>{% endif %}{% endif %}</p>
+          </li>{% endfor %}
+        </ul>
+      </section>
+      <section class="store-panel" aria-labelledby="order-details-title">
+        <h2 id="order-details-title">{{ crate::i18n::text("ord-details") }}</h2>
+        <div class="order-addresses">
+          <section><h3>{{ crate::i18n::text("co-group-contact") }}</h3><p>{{ order.frozen.customer.first_name }} {{ order.frozen.customer.last_name }}<br>{{ order.frozen.customer.email }}<br>{{ order.frozen.customer.phone }}</p></section>
+          <section><h3>{{ crate::i18n::text("co-group-shipping") }}</h3><p>{% include "order-shipping-address.html" %}</p>{% if !order.frozen.customer.delivery_notes.is_empty() %}<p class="checkout-instructions order-note">{{ order.frozen.customer.delivery_notes }}</p>{% endif %}</section>
+          {% if order.frozen.customer.invoice_requested %}<section><h3>{{ crate::i18n::text("ord-invoice") }}</h3><p>{% include "order-billing-address.html" %}</p><p>{{ crate::i18n::text("co-field-vat-id") }}: {{ order.frozen.customer.vat_id }}<br>{{ crate::i18n::text("co-field-tax-id") }}: {{ order.frozen.customer.tax_id }}<br>{{ crate::i18n::text("co-field-recipient-code") }}: {{ order.frozen.customer.recipient_code }}<br>PEC: {{ order.frozen.customer.pec }}</p></section>{% endif %}
+        </div>
+      </section>
+    </div>
+    <div class="order-detail-aside">
+      {% if order.state == "open" %}<section class="store-panel order-payment" aria-labelledby="order-payment-title">
+        <p class="store-panel-eyebrow">{% if order.payment_due() && !payment_pending %}{{ crate::i18n::text("ord-how-to-pay") }}{% else %}{{ crate::i18n::text("ord-payment-label") }}{% endif %}</p>
+        <h2 id="order-payment-title" class="ui-with-icon">{{ ui::icon("credit-card") }}<span>{{ order.frozen.payment.name(crate::i18n::locale()) }}</span></h2>
+        {% if order.payment_due() && !payment_pending %}<div data-payment-instructions><p class="checkout-instructions">{{ order.frozen.payment.instructions(crate::i18n::locale()) }}</p><p class="order-payment-reference">{{ crate::i18n::text("ord-payment-reference") }} <strong>{{ order.reference }}</strong></p></div>{% endif %}
+        {% if !order.frozen.shipping.instructions(crate::i18n::locale()).is_empty() %}<h3>{{ crate::i18n::text("cm-shipping") }}</h3><p class="checkout-instructions">{{ order.frozen.shipping.instructions(crate::i18n::locale()) }}</p>{% endif %}
+      </section>{% endif %}
+      <section class="store-panel store-sum" aria-labelledby="order-totals-title">
+        <h2 id="order-totals-title">{{ crate::i18n::text("store-cart-summary") }}</h2>
+        <dl>
+          {% if let Some(coupon) = order.frozen.coupon %}<div><dt>{{ crate::i18n::text("coupon-original") }}</dt><dd>{{ crate::i18n::decimal(order.money(coupon.original_cents)) }} {{ order.currency }}</dd></div>
+          <div class="store-sum-discount"><dt>{{ crate::i18n::text("coupon-discount") }} · {{ coupon.code }}</dt><dd>−{{ crate::i18n::decimal(order.money(coupon.discount_cents)) }} {{ order.currency }}</dd></div>{% endif %}
+          <div><dt>{{ crate::i18n::text("cm-goods") }}</dt><dd>{{ crate::i18n::decimal(order.money(order.merchandise_cents)) }} {{ order.currency }}</dd></div>
+          <div><dt>{{ crate::i18n::text("cm-shipping") }}<small>{{ order.frozen.shipping.name(crate::i18n::locale()) }}</small></dt><dd>{{ crate::i18n::decimal(order.money(order.shipping_cents)) }} {{ order.currency }}</dd></div>
+          {% if order.fee_cents != 0 %}<div><dt>{{ crate::i18n::text("cm-fee") }}<small>{{ order.frozen.payment.name(crate::i18n::locale()) }}</small></dt><dd>{{ crate::i18n::decimal(order.money(order.fee_cents)) }} {{ order.currency }}</dd></div>{% endif %}
+          <div class="store-sum-grand"><dt>{{ crate::i18n::text("cm-total") }}</dt><dd>{{ crate::i18n::decimal(order.money(order.total_cents)) }} {{ order.currency }}</dd></div>
+          <div class="store-sum-tax"><dt>{{ crate::i18n::text("cm-tax").trim_end_matches(':') }}</dt><dd>{{ crate::i18n::decimal(order.money(order.tax_cents)) }} {{ order.currency }}</dd></div>
+        </dl>
+      </section>
+    </div>
+  </div>
+</div>

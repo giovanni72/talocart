@@ -1,0 +1,80 @@
+name: Release candidate packages
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Optional version assertion (must match workspace Cargo version)
+        required: false
+permissions:
+  contents: read
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+          - runner: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+    runs-on: ${{ matrix.runner }}
+    container:
+      image: rust:1.95.0-bookworm@sha256:6258907abe69656e41cd992e0b705cdcfabcbbe3db374f92ed2d47121282d4a1
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: talocart
+          POSTGRES_PASSWORD: ci_release_only
+          POSTGRES_DB: talocart_release_test
+        options: >-
+          --health-cmd "pg_isready -U talocart -d talocart_release_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    timeout-minutes: 90
+    env:
+      REQUESTED_VERSION: ${{ inputs.version }}
+      RELEASE_TARGET: ${{ matrix.target }}
+      CARGO_BUILD_JOBS: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Packaging and validation runtime
+        run: apt-get update && apt-get install -y --no-install-recommends python3 postgresql-client nginx-light systemd
+      - name: Shared application version
+        run: |
+          version=$(python3 scripts/release/version.py check)
+          test -z "$REQUESTED_VERSION" || test "$REQUESTED_VERSION" = "$version"
+          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
+      - run: cargo build --release --locked -p talocart
+      - name: Independent clean rebuild of the executable
+        run: |
+          cargo build --release --locked -p talocart --target-dir /tmp/reproduce-target
+          cmp target/release/talocart /tmp/reproduce-target/release/talocart
+      - name: Dependency notices
+        run: cargo metadata --locked --filter-platform "$RELEASE_TARGET" --format-version 1 > /tmp/metadata.json
+      - run: python3 -m unittest discover -s tests/release -v
+      - name: Package twice and compare
+        run: |
+          python3 scripts/release/package.py --binary target/release/talocart --target "$RELEASE_TARGET" --version "$RELEASE_VERSION" --metadata /tmp/metadata.json --output /tmp/package-a
+          python3 scripts/release/package.py --binary target/release/talocart --target "$RELEASE_TARGET" --version "$RELEASE_VERSION" --metadata /tmp/metadata.json --output /tmp/package-b
+          cmp "/tmp/package-a/talocart-$RELEASE_VERSION-$RELEASE_TARGET.tar.gz" "/tmp/package-b/talocart-$RELEASE_VERSION-$RELEASE_TARGET.tar.gz"
+          cd /tmp/package-a
+          sha256sum -c "talocart-$RELEASE_VERSION-$RELEASE_TARGET.tar.gz.sha256"
+          mkdir /tmp/extracted
+          tar -xzf "talocart-$RELEASE_VERSION-$RELEASE_TARGET.tar.gz" -C /tmp/extracted
+          "/tmp/extracted/talocart-$RELEASE_VERSION-$RELEASE_TARGET/bin/talocart" --version
+          "/tmp/extracted/talocart-$RELEASE_VERSION-$RELEASE_TARGET/bin/talocart" --help
+      - name: Service and reverse proxy examples
+        run: sh scripts/release/validate-service.sh --disposable-linux-container "/tmp/extracted/talocart-$RELEASE_VERSION-$RELEASE_TARGET"
+      - name: Extracted Linux clean install
+        env:
+          TALOCART_TEST_DATABASE_URL: postgres://talocart:ci_release_only@postgres:5432/talocart_release_test
+          PGPASSWORD: ci_release_only
+        run: |
+          python3 scripts/release/linux-smoke.py --binary "/tmp/extracted/talocart-$RELEASE_VERSION-$RELEASE_TARGET/bin/talocart" --output /tmp/smoke --ui-sha256 "$(sha256sum assets/ui.css | cut -d' ' -f1)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: talocart-${{ matrix.target }}
+          path: /tmp/package-a/*
+          if-no-files-found: error

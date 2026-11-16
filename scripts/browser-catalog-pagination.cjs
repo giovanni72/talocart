@@ -1,0 +1,88 @@
+const assert = require('node:assert/strict');
+const path = require('node:path');
+module.exports = async ({ page, origin, js, output, name }) => {
+  const select = page.getByLabel('Prodotti per pagina', { exact: true });
+  const apply = page.locator('[data-catalog-page-apply]');
+  const cards = page.locator('.catalog-results .store-product');
+  const nav = page.getByRole('navigation', { name: 'Pagine catalogo', exact: true });
+  const check = async size => {
+    assert.equal(await select.inputValue(), size);
+    await apply.waitFor({ state: js ? 'hidden' : 'visible' });
+    const gridLocator = page.locator('.store-products');
+    const [toolbar, grid] = await Promise.all([page.locator('.catalog-toolbar').boundingBox(), await gridLocator.count() ? gridLocator.boundingBox() : null]);
+    if (grid) assert.ok(toolbar.y + toolbar.height <= grid.y, 'Page size is above the product grid');
+    assert.ok(await select.evaluate(e => !!e.closest('.catalog-title-row')), 'Selector belongs to the title row');
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    assert.ok(await select.evaluate(e => e.form.id === 'store-filters-form' && e.getBoundingClientRect().height >= 44));
+  };
+  const changeSize = async size => {
+    await select.selectOption(size);
+    if (!js) { await apply.focus(); await page.keyboard.press('Enter'); }
+    await page.waitForURL(u => u.searchParams.get('per_page') === size && !u.searchParams.has('page'));
+    await check(size);
+  };
+  await page.context().clearCookies({ name: 'talocart_catalog_page_size' });
+  await page.goto(origin + '/catalog');
+  await check('21');
+  assert.deepEqual(await select.locator('option').evaluateAll(options => options.map(o => o.value)), ['21', '42', '63', '84']);
+  assert.equal(await cards.count(), 21);
+  assert.equal(await nav.locator('.pagination-summary').innerText(), 'Prodotti 1–21 di 27\nPagina 1 di 2');
+  await require('./browser-shared-pagination.cjs')({page, output, name, context:'catalog'});
+  const first = await cards.locator('.store-product-title').allTextContents();
+  await nav.getByRole('link', { name: 'Successivo', exact: true }).click();
+  await page.waitForURL(u => u.searchParams.get('page') === '2');
+  await check('21');
+  assert.equal(new URL(page.url()).searchParams.get('per_page'), '21');
+  assert.equal(await cards.count(), 6);
+  assert.equal(await nav.locator('.pagination-summary').innerText(), 'Prodotti 22–27 di 27\nPagina 2 di 2');
+  assert.ok((await cards.locator('.store-product-title').allTextContents()).every(title => !first.includes(title)), 'Pages do not overlap');
+  await changeSize('42');
+  assert.equal(await cards.count(), 27);
+  assert.equal(await nav.getByRole('link', { name: 'Successivo', exact: true }).count(), 0);
+  for (const size of ['63', '84']) { await changeSize(size); assert.equal(await cards.count(), 27); }
+  await page.goto(origin + '/search/Quaderno?category=cancelleria&brand=carta-e-forme&available=true&page=2&per_page=21');
+  await changeSize('42');
+  const params = new URL(page.url()).searchParams;
+  for (const [key, value] of [['category', 'cancelleria'], ['brand', 'carta-e-forme'], ['available', 'true']]) assert.equal(params.get(key), value);
+  assert.ok(await cards.count() > 0);
+  await page.getByRole('button', { name: 'Applica filtri', exact: true }).click();
+  await page.waitForURL(u => u.searchParams.get('per_page') === '42' && u.searchParams.get('available') === 'true');
+  assert.equal(await select.inputValue(), '42');
+  await page.getByLabel('Cerca un prodotto', { exact: true }).fill('Quaderno');
+  await page.getByRole('button', { name: 'Cerca', exact: true }).click();
+  await page.waitForURL(u => u.pathname === '/search/Quaderno' && u.searchParams.get('per_page') === '42');
+  await page.getByRole('link', { name: 'Rimuovi filtri', exact: true }).click();
+  await page.waitForURL(origin + '/search/Quaderno?per_page=42');
+  await page.goto(origin + '/catalog?per_page=42');
+  await check('42');
+  assert.equal(await cards.count(), 27);
+  await select.focus();
+  await page.keyboard.press('Tab');
+  assert.ok(await page.locator(js ? '#store-brand' : '[data-catalog-page-apply]').first().evaluate(e => e === document.activeElement));
+  await page.goto(origin + '/search/koala-page-size-empty?per_page=84');
+  await check('84');
+  assert.equal(await cards.count(), 0);
+  assert.ok(await page.getByRole('heading', { name: 'Nessun prodotto trovato.', exact: true }).isVisible());
+  for (const route of ['/catalog', '/catalog/cancelleria', '/brands/carta-e-forme', '/search/Quaderno']) {
+    await page.goto(origin + route);
+    await check('84');
+  }
+  const saved = (await page.context().cookies()).find(c => c.name === 'talocart_catalog_page_size');
+  assert.ok(saved.httpOnly && saved.sameSite === 'Lax' && saved.expires > Date.now() / 1000 + 179 * 86400);
+  const fresh = await page.context().browser().newContext({ javaScriptEnabled: js, storageState: await page.context().storageState() });
+  const reopened = await fresh.newPage();
+  await reopened.goto(origin + '/catalog');
+  assert.equal(await reopened.getByLabel('Prodotti per pagina', { exact: true }).inputValue(), '84');
+  await fresh.close();
+  await page.goto(origin + '/');
+  await page.getByLabel('Cerca un prodotto', { exact: true }).fill('Quaderno');
+  await page.getByRole('button', { name: 'Cerca', exact: true }).click();
+  await page.waitForURL(u => u.pathname === '/search/Quaderno');
+  await check('84');
+  await page.goto(origin + '/catalog?per_page=21');
+  await check('21');
+  await page.goto(origin + '/catalog');
+  await check('21');
+  await page.screenshot({ path: path.join(output, `catalog-page-size-${name}.png`) });
+  for (const value of ['20', '0', '100', 'all']) assert.equal((await page.context().request.get(origin + '/catalog?per_page=' + value)).status(), 422);
+};

@@ -1,0 +1,15 @@
+/target/
+/talocart.toml
+/.env
+/.local/
+.DS_Store
+
+/node_modules/
+
+/storage/
+
+__pycache__/
+*.pyc
+
+# Compiled module binaries and installable packages, grouped by release.
+/compiled-modules/
