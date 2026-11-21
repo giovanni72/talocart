@@ -4,6 +4,9 @@ Talocart is an open-source, self-hosted e-commerce application written in Rust.
 It includes an online storefront and an admin dashboard for product catalogs,
 shopping carts, checkout, customers, inventory and order management.
 
+[Try the Docker demo](https://github.com/giovanni72/talocart/releases/tag/demo-24.10.0-amd64.1)
+on Linux amd64 with Docker Compose. The demo is precompiled, so you don't need to compile Rust.
+
 The modular monolith uses PostgreSQL, Axum, Askama and HTMX for server-side
 rendering and progressive enhancement. The interface supports English and
 Italian, two compiled themes and native HTML forms. Templates, assets and
